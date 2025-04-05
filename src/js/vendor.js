@@ -7,12 +7,59 @@ let hasMoreData = true;
 let selectedCardIndex = -1;
 let cardData = []; // 카드 데이터를 저장할 배열
 let isCalling = false; // 통화 상태를 추적하는 변수
+let callStartTime = null;
+let currentBrandData = null;
+let callDurationTimer = null; // 통화 시간 타이머
 
-async function handleCall(phoneNumber) {
+function updateCallDuration() {
+    if (!callStartTime || !isCalling) return;
+    
+    const now = new Date();
+    const duration = Math.floor((now - callStartTime) / 1000);
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    
+    const durationElement = document.querySelector('.call-duration');
+    if (durationElement) {
+        durationElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+}
+
+async function endCall() {
     try {
         if (isCalling) {
             await phone.endCall();
             isCalling = false;
+            
+            // 타이머 중지
+            if (callDurationTimer) {
+                clearInterval(callDurationTimer);
+                callDurationTimer = null;
+            }
+            
+            // 통화 종료 시간 기록
+            const endTime = new Date();
+            const duration = Math.floor((endTime - callStartTime) / 1000); // 초 단위로 변환
+            
+            // 통화 상태 폼의 저장 버튼 활성화
+            const endCallButton = document.querySelector('.end-call-button');
+            const saveButton = document.querySelector('.save-button');
+            if (endCallButton) endCallButton.style.display = 'none';
+            if (saveButton) saveButton.style.display = 'inline-block';
+            
+            return duration;
+        }
+    } catch (error) {
+        console.error('통화 종료 중 오류:', error);
+        alert('통화 종료 중 오류가 발생했습니다.');
+    }
+}
+
+async function handleCall(phoneNumber) {
+    try {
+        if (isCalling) {
+            await endCall();
         } else {
             // 모달창 표시
             const modal = document.getElementById('call-confirm-modal');
@@ -28,10 +75,146 @@ async function handleCall(phoneNumber) {
                 const cancelButton = modal.querySelector('.modal-button.cancel');
                 
                 const handleConfirm = async () => {
-                    await phone.call(phoneNumber);
-                    isCalling = true;
                     modal.style.display = 'none';
-                    resolve(true);
+                    
+                    try {
+                        await phone.call(phoneNumber);
+                        isCalling = true;
+                        callStartTime = new Date(); // 통화 시작 시간 기록
+                        
+                        // 통화 상태 폼 표시
+                        const callForm = document.createElement('div');
+                        callForm.className = 'call-status-form';
+                        callForm.innerHTML = `
+                            <div class="call-info">
+                                <h3>통화 기록</h3>
+                                <p>브랜드: <span class="brand-name">${currentBrandData.brand_name}</span></p>
+                                <p>통화 시간: <span class="call-duration">00:00:00</span></p>
+                            </div>
+                            <div class="call-form">
+                                <div class="form-group">
+                                    <label for="call-status">통화 상태</label>
+                                    <select id="call-status">
+                                        <option value="">선택하세요</option>
+                                        <option value="연결됨">연결됨</option>
+                                        <option value="부재중">부재중</option>
+                                        <option value="기타오류">기타오류</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="next-step">다음 단계</label>
+                                    <select id="next-step">
+                                        <option value="">선택하세요</option>
+                                        <option value="제안서 요청">제안서 요청</option>
+                                        <option value="재시도 예정">재시도 예정</option>
+                                        <option value="진행거절">진행거절</option>
+                                        <option value="번호오류">번호오류</option>
+                                        <option value="콜백대기">콜백대기</option>
+                                        <option value="기타">기타</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="call-notes">메모</label>
+                                    <textarea id="call-notes" rows="3" placeholder="메모를 입력하세요"></textarea>
+                                </div>
+                                <div class="form-buttons">
+                                    <button class="end-call-button">통화 종료</button>
+                                    <button class="save-button" style="display: none;">저장</button>
+                                    <button class="cancel-button" style="display: none;">취소</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // 추가 정보 영역에 통화 상태 폼 추가
+                        const extraContent = document.querySelector('.extra-content');
+                        extraContent.innerHTML = ''; // 기존 내용 제거
+                        extraContent.appendChild(callForm);
+                        
+                        // 통화 시간 타이머 시작
+                        if (callDurationTimer) clearInterval(callDurationTimer);
+                        callDurationTimer = setInterval(updateCallDuration, 1000);
+                        
+                        // 통화 종료 버튼 이벤트 리스너
+                        const endCallButton = callForm.querySelector('.end-call-button');
+                        endCallButton.onclick = async () => {
+                            const duration = await endCall();
+                            if (duration) {
+                                // 버튼 상태 업데이트
+                                const callButton = document.querySelector('.call-button');
+                                if (callButton) {
+                                    callButton.textContent = '통화하기';
+                                    callButton.classList.remove('end-call');
+                                }
+                                // 저장과 취소 버튼 표시
+                                const saveButton = callForm.querySelector('.save-button');
+                                const cancelButton = callForm.querySelector('.cancel-button');
+                                if (saveButton) saveButton.style.display = 'inline-block';
+                                if (cancelButton) cancelButton.style.display = 'inline-block';
+                            }
+                        };
+                        
+                        // 저장 버튼 이벤트 리스너
+                        const saveButton = callForm.querySelector('.save-button');
+                        saveButton.onclick = async () => {
+                            const callStatus = document.getElementById('call-status').value;
+                            const nextStep = document.getElementById('next-step').value;
+                            const notes = document.getElementById('call-notes').value;
+                            
+                            // 필수 값 검증
+                            if (!callStatus || !nextStep) {
+                                alert('통화 상태와 다음 단계를 선택해주세요.');
+                                return;
+                            }
+                            
+                            const endTime = new Date();
+                            const duration = Math.floor((endTime - callStartTime) / 1000);
+                            
+                            const callRecord = {
+                                brand_name: currentBrandData.brand_name,
+                                customer_service_number: currentBrandData.customer_service_number,
+                                contact_person: {
+                                    name: "고야앤드미디어",
+                                    phone: "01021456993"
+                                },
+                                call_date: callStartTime.toISOString(),
+                                call_duration_sec: duration,
+                                call_status: callStatus,
+                                nextstep: nextStep,
+                                notes: notes
+                            };
+                            
+                            try {
+                                await mongo.saveCallRecord(callRecord);
+                                console.log('통화 기록이 저장되었습니다.');
+                                // 통화 상태 폼 제거 및 추가 정보 영역 초기화
+                                const extraContent = document.querySelector('.extra-content');
+                                extraContent.innerHTML = `
+                                    <h3>추가 정보</h3>
+                                    <p>여기에 추가 정보가 표시됩니다.</p>
+                                `;
+                            } catch (error) {
+                                console.error('통화 기록 저장 중 오류:', error);
+                                alert('통화 기록 저장 중 오류가 발생했습니다.');
+                            }
+                        };
+                        
+                        // 취소 버튼 이벤트 리스너
+                        const cancelButton = callForm.querySelector('.cancel-button');
+                        cancelButton.onclick = () => {
+                            // 추가 정보 영역 초기화
+                            const extraContent = document.querySelector('.extra-content');
+                            extraContent.innerHTML = `
+                                <h3>추가 정보</h3>
+                                <p>여기에 추가 정보가 표시됩니다.</p>
+                            `;
+                        };
+                        
+                        resolve(true);
+                    } catch (error) {
+                        console.error('전화 연결 중 오류:', error);
+                        alert('전화 연결 중 오류가 발생했습니다.');
+                        resolve(false);
+                    }
                 };
                 
                 const handleCancel = () => {
@@ -49,6 +232,68 @@ async function handleCall(phoneNumber) {
     }
 }
 
+async function updateCallHistory(brandName) {
+    try {
+        const extraContent = document.querySelector('.extra-content');
+        extraContent.innerHTML = '<h3>통화 기록</h3><p>기록을 불러오는 중...</p>';
+
+        const records = await mongo.getCallRecords(brandName);
+
+        if (!records || records.length === 0) {
+            extraContent.innerHTML = `
+                <h3>통화 기록</h3>
+                <p>이전 통화 기록이 없습니다.</p>
+            `;
+            return;
+        }
+
+        let html = '<h3>통화 기록</h3>';
+        html += '<div class="call-history">';
+        
+        records.forEach(record => {
+            const callDate = new Date(record.call_date);
+            const duration = record.call_duration_sec;
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+
+            html += `
+                <div class="call-record">
+                    <div class="call-record-header">
+                        <span class="call-date">${callDate.toLocaleString()}</span>
+                        <span class="call-duration">${minutes}분 ${seconds}초</span>
+                    </div>
+                    <div class="call-record-details">
+                        <div class="record-item">
+                            <label>통화 상태:</label>
+                            <span>${record.call_status}</span>
+                        </div>
+                        <div class="record-item">
+                            <label>다음 단계:</label>
+                            <span>${record.nextstep}</span>
+                        </div>
+                        ${record.notes ? `
+                            <div class="record-item">
+                                <label>메모:</label>
+                                <span class="notes">${record.notes}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        extraContent.innerHTML = html;
+    } catch (error) {
+        console.error('통화 기록 로드 중 오류:', error);
+        const extraContent = document.querySelector('.extra-content');
+        extraContent.innerHTML = `
+            <h3>통화 기록</h3>
+            <p>통화 기록을 불러오는 중 오류가 발생했습니다.</p>
+        `;
+    }
+}
+
 async function updateRightPanel(item) {
     const rightPanel = document.querySelector('.vendor-right');
     if (!item) {
@@ -62,6 +307,9 @@ async function updateRightPanel(item) {
     try {
         const brandName = item.brand;
         const brandPhoneData = await mongo.getBrandPhoneData(brandName);
+        
+        // 현재 브랜드 데이터 저장
+        currentBrandData = brandPhoneData;
 
         if (!brandPhoneData) {
             rightPanel.innerHTML = `
@@ -193,6 +441,9 @@ async function updateRightPanel(item) {
             });
         }
 
+        // 통화 기록 업데이트
+        await updateCallHistory(brandPhoneData.brand_name);
+
     } catch (error) {
         console.error('브랜드 정보 로드 중 오류:', error);
         rightPanel.innerHTML = '<p>브랜드 정보를 불러오는 중 오류가 발생했습니다.</p>';
@@ -222,8 +473,8 @@ document.addEventListener('keydown', async (event) => {
         return;
     }
     
-    // 스페이스바로 통화하기
-    if (event.key === ' ' && selectedCardIndex !== -1) {
+    // Ctrl + 스페이스바로 통화하기
+    if (event.key === ' ' && event.ctrlKey && selectedCardIndex !== -1) {
         // 스페이스바의 기본 동작(스크롤) 방지
         event.preventDefault();
         

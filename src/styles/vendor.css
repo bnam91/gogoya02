@@ -26,10 +26,12 @@
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    height: 100%;
 }
 
 .extra-content {
     padding: 20px;
+    height: 100%;
 }
 
 .extra-content h3 {
@@ -38,6 +40,23 @@
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid #f0f0f0;
+}
+
+.extra-content .call-status-form {
+    margin-top: 0;
+    padding: 0;
+    background-color: transparent;
+}
+
+.extra-content .call-status-form .call-info {
+    margin-top: 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.extra-content .call-status-form .form-buttons {
+    margin-top: 20px;
 }
 
 /* 카드 컨테이너 스타일 */
@@ -317,4 +336,246 @@
 
 .modal-button.cancel:hover {
     background-color: #d32f2f;
+}
+
+.modal-button.end-call {
+    background-color: #f44336;
+    color: white;
+    margin-right: auto;
+}
+
+.modal-button.end-call:hover {
+    background-color: #d32f2f;
+}
+
+/* 통화 상태 기록 모달 스타일 */
+.call-info {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.call-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.call-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 14px;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group select {
+    background-color: white;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* 통화 상태 폼 스타일 */
+.call-status-form {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.call-status-form .call-info {
+    margin-bottom: 20px;
+}
+
+.call-status-form h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.call-status-form .call-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.call-status-form .call-form {
+    margin-bottom: 20px;
+}
+
+.call-status-form .form-group {
+    margin-bottom: 15px;
+}
+
+.call-status-form .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+    font-size: 14px;
+}
+
+.call-status-form .form-group select,
+.call-status-form .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.call-status-form .form-group select {
+    background-color: white;
+}
+
+.call-status-form .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: white;
+}
+
+.call-status-form .form-group textarea::placeholder {
+    color: #999;
+}
+
+.call-status-form .form-group textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.call-status-form .form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.call-status-form .end-call-button,
+.call-status-form .save-button,
+.call-status-form .cancel-button {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 100px;
+    font-weight: 500;
+}
+
+.call-status-form .end-call-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.call-status-form .end-call-button:hover {
+    background-color: #d32f2f;
+}
+
+.call-status-form .save-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.call-status-form .save-button:hover {
+    background-color: #45a049;
+}
+
+.call-status-form .cancel-button {
+    background-color: #9e9e9e;
+    color: white;
+}
+
+.call-status-form .cancel-button:hover {
+    background-color: #757575;
+}
+
+.call-history {
+    margin-top: 20px;
+}
+
+.call-record {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 0.9em;
+}
+
+.call-record-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.call-date {
+    color: #495057;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.call-duration {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.call-record-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.record-item {
+    display: flex;
+    gap: 8px;
+    line-height: 1.3;
+}
+
+.record-item label {
+    color: #495057;
+    font-weight: 500;
+    min-width: 70px;
+    font-size: 0.9em;
+}
+
+.record-item span {
+    font-size: 0.9em;
+}
+
+.record-item .notes {
+    white-space: pre-wrap;
+    color: #495057;
+    font-size: 0.9em;
+    line-height: 1.3;
 } 
