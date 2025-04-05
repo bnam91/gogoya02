@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
+const ReleaseUpdater = require('./release_updater');
 
 // 개발 모드에서 자동 리로드 활성화
 try {
@@ -15,6 +16,10 @@ let mainWindow;
 // 자동 업데이트 설정
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+
+// 환경 변수에서 GitHub 정보 가져오기
+const owner = process.env.GITHUB_OWNER || 'bnam91';
+const repo = process.env.GITHUB_REPO || 'gogoya02';
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -72,11 +77,41 @@ autoUpdater.on('update-downloaded', (info) => {
     autoUpdater.quitAndInstall();
 });
 
-app.whenReady().then(() => {
+// 개발 모드에서 Git 업데이트 확인
+async function checkGitUpdate() {
+    const updater = new ReleaseUpdater(owner, repo);
+    const updateResult = await updater.updateToLatest();
+    
+    if (updateResult) {
+        const currentVersion = updater.getCurrentVersion();
+        const latestRelease = await updater.getLatestRelease();
+        
+        if (currentVersion !== latestRelease.tag_name) {
+            const result = await dialog.showMessageBox(mainWindow, {
+                type: 'info',
+                title: '업데이트 완료',
+                message: '새로운 버전이 설치되었습니다. 앱을 재시작하시겠습니까?',
+                buttons: ['예', '아니오']
+            });
+            
+            if (result.response === 0) {
+                app.relaunch();
+                app.quit();
+            }
+        }
+    }
+}
+
+app.whenReady().then(async () => {
     createWindow();
     
-    // 업데이트 확인
-    autoUpdater.checkForUpdates();
+    // 개발 모드인 경우 Git 업데이트 확인
+    if (process.env.NODE_ENV === 'development') {
+        await checkGitUpdate();
+    } else {
+        // 프로덕션 모드에서는 electron-updater 사용
+        autoUpdater.checkForUpdates();
+    }
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
