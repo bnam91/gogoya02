@@ -199,4 +199,21 @@ h2 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+.logo-container {
+    padding: 20px;
+    text-align: center;
+    
+}
+
+.logo {
+    width: 120px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.logo:hover {
+    opacity: 0.8;
 } 
