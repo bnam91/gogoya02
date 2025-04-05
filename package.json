@@ -4,8 +4,8 @@
   "description": "일렉트론 앱",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "cross-env NODE_ENV=development electron .",
+    "start": "chcp 65001 && electron .",
+    "dev": "chcp 65001 && cross-env NODE_ENV=development electron .",
     "build": "electron-builder build --win --publish never",
     "deploy": "electron-builder build --win --publish always"
   },
