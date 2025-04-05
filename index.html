@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>gogoya v0.1.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/vendor.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <ul class="menu-list">
+                <li class="menu-item" data-page="home">
+                    <div class="menu-header">
+                        <span>홈</span>
+                    </div>
+                </li>
+                <li class="menu-item">
+                    <div class="menu-header">
+                        <span>벤더</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <ul class="submenu">
+                        <li data-page="vendor/brandcontact">브랜드 컨택</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="content" id="content">
+            <div id="home-content" class="content-section active">
+                대기중입니다
+            </div>
+            <div id="vendor-content" class="content-section">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">브랜드 컨택</span>
+                </div>
+                <div class="vendor-container">
+                    <div class="vendor-left">
+                        <div id="vendor-data-list" class="card-container">
+                            <p>데이터를 불러오는 중...</p>
+                        </div>
+                    </div>
+                    <div class="vendor-right">
+                        <p>상세 정보가 여기에 표시됩니다.</p>
+                    </div>
+                    <div class="vendor-extra">
+                        <div class="extra-content">
+                            <h3>추가 정보</h3>
+                            <p>여기에 추가 정보가 표시됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const mongo = require('./src/js/mongo');
+        const phone = require('./src/js/phone');
+        const vendor = require('./src/js/vendor');
+
+        // 메뉴 토글 기능
+        document.querySelectorAll('.menu-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const menuItem = this.parentElement;
+                const submenu = menuItem.querySelector('.submenu');
+                const toggleIcon = menuItem.querySelector('.toggle-icon');
+                
+                if (submenu) {
+                    const isExpanded = submenu.classList.contains('expanded');
+                    
+                    // 모든 서브메뉴 닫기
+                    document.querySelectorAll('.submenu').forEach(menu => {
+                        menu.classList.remove('expanded');
+                        const icon = menu.parentElement.querySelector('.toggle-icon');
+                        if (icon) icon.classList.remove('active');
+                    });
+
+                    if (!isExpanded) {
+                        submenu.classList.add('expanded');
+                        if (toggleIcon) toggleIcon.classList.add('active');
+                    }
+                }
+            });
+        });
+
+        // 페이지 전환 기능
+        document.querySelectorAll('[data-page]').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
+                if (page === 'home') {
+                    showContent('home');
+                } else if (page === 'vendor/brandcontact') {
+                    showContent('vendor');
+                }
+            });
+        });
+
+        function showContent(content) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(content + '-content').classList.add('active');
+            
+            if (content === 'vendor') {
+                vendor.initVendor();
+            }
+        }
+    </script>
+</body>
+</html> 
