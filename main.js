@@ -3,6 +3,10 @@ const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const ReleaseUpdater = require('./release_updater');
 
+// 인코딩 설정
+process.env.CHARSET = 'UTF-8';
+process.env.LANG = 'ko_KR.UTF-8';
+
 // 개발 모드에서 자동 리로드 활성화
 try {
     require('electron-reloader')(module, {

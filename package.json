@@ -4,10 +4,12 @@
   "description": "일렉트론 앱",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "cross-env NODE_ENV=development electron .",
+    "start": "chcp 65001 && cross-env NODE_ENV=production CHARSET=UTF-8 LANG=ko_KR.UTF-8 electron .",
+    "dev": "chcp 65001 && cross-env NODE_ENV=development CHARSET=UTF-8 LANG=ko_KR.UTF-8 electron .",
     "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always"
+    "deploy": "electron-builder build --win --publish always",
+    "fix-encoding": "node -e \"require('fs').writeFileSync('VERSION.txt', require('fs').readFileSync('VERSION.txt', 'utf8'), 'utf8')\"",
+    "prestart": "chcp 65001 && node -e \"process.env.CHARSET='UTF-8'; process.env.LANG='ko_KR.UTF-8'\""
   },
   "build": {
     "appId": "com.gogoya02.app",
@@ -28,7 +30,8 @@
     "axios": "^1.8.4",
     "electron": "^28.0.0",
     "electron-updater": "^6.6.2",
-    "mongodb": "^6.15.0"
+    "mongodb": "^6.15.0",
+    "iconv-lite": "^0.6.3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
