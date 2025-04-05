@@ -21,6 +21,10 @@ autoUpdater.autoInstallOnAppQuit = true;
 const owner = process.env.GITHUB_OWNER || 'bnam91';
 const repo = process.env.GITHUB_REPO || 'gogoya02';
 
+// 개발 모드 확인
+const isDev = process.env.NODE_ENV === 'development';
+console.log('현재 모드:', isDev ? '개발 모드' : '프로덕션 모드');
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -79,37 +83,55 @@ autoUpdater.on('update-downloaded', (info) => {
 
 // 개발 모드에서 Git 업데이트 확인
 async function checkGitUpdate() {
+    console.log('Git 업데이트 확인 시작...');
     const updater = new ReleaseUpdater(owner, repo);
-    const updateResult = await updater.updateToLatest();
     
-    if (updateResult) {
+    try {
+        console.log('현재 버전 확인 중...');
         const currentVersion = updater.getCurrentVersion();
-        const latestRelease = await updater.getLatestRelease();
+        console.log('현재 버전:', currentVersion);
         
-        if (currentVersion !== latestRelease.tag_name) {
-            const result = await dialog.showMessageBox(mainWindow, {
-                type: 'info',
-                title: '업데이트 완료',
-                message: '새로운 버전이 설치되었습니다. 앱을 재시작하시겠습니까?',
-                buttons: ['예', '아니오']
-            });
+        console.log('최신 릴리즈 확인 중...');
+        const latestRelease = await updater.getLatestRelease();
+        console.log('최신 릴리즈:', latestRelease);
+        
+        const updateResult = await updater.updateToLatest();
+        console.log('업데이트 결과:', updateResult);
+        
+        if (updateResult) {
+            const newVersion = updater.getCurrentVersion();
+            console.log('업데이트 후 버전:', newVersion);
             
-            if (result.response === 0) {
-                app.relaunch();
-                app.quit();
+            if (currentVersion !== newVersion) {
+                console.log('새로운 버전이 설치되었습니다.');
+                const result = await dialog.showMessageBox(mainWindow, {
+                    type: 'info',
+                    title: '업데이트 완료',
+                    message: '새로운 버전이 설치되었습니다. 앱을 재시작하시겠습니까?',
+                    buttons: ['예', '아니오']
+                });
+                
+                if (result.response === 0) {
+                    app.relaunch();
+                    app.quit();
+                }
             }
         }
+    } catch (error) {
+        console.error('Git 업데이트 중 오류 발생:', error);
     }
 }
 
 app.whenReady().then(async () => {
+    console.log('앱 시작...');
     createWindow();
     
     // 개발 모드인 경우 Git 업데이트 확인
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
+        console.log('개발 모드에서 Git 업데이트 확인 시작');
         await checkGitUpdate();
     } else {
-        // 프로덕션 모드에서는 electron-updater 사용
+        console.log('프로덕션 모드에서 electron-updater 시작');
         autoUpdater.checkForUpdates();
     }
 
