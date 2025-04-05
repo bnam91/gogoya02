@@ -26,7 +26,27 @@ function makeCall(phoneNumber) {
     });
 }
 
+function endCall() {
+    return new Promise((resolve, reject) => {
+        const command = `"${ADB_PATH}" shell input keyevent KEYCODE_ENDCALL`;
+        
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`통화 종료 오류: ${error}`);
+                reject(error);
+                return;
+            }
+            console.log(`통화 종료 성공: ${stdout}`);
+            if (stderr) {
+                console.warn(`경고: ${stderr}`);
+            }
+            resolve(stdout);
+        });
+    });
+}
+
 module.exports = {
     makeCall,
-    call: makeCall  // call 이름으로도 export
+    call: makeCall,
+    endCall
 }; 

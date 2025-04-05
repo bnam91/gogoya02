@@ -6,10 +6,43 @@ let currentSkip = 0;
 let hasMoreData = true;
 let selectedCardIndex = -1;
 let cardData = []; // 카드 데이터를 저장할 배열
+let isCalling = false; // 통화 상태를 추적하는 변수
 
 async function handleCall(phoneNumber) {
     try {
-        await phone.call(phoneNumber);
+        if (isCalling) {
+            await phone.endCall();
+            isCalling = false;
+        } else {
+            // 모달창 표시
+            const modal = document.getElementById('call-confirm-modal');
+            const phoneNumberElement = modal.querySelector('.phone-number');
+            phoneNumberElement.textContent = phoneNumber;
+            
+            // 모달창 표시
+            modal.style.display = 'block';
+            
+            // 모달창 버튼 이벤트 리스너
+            return new Promise((resolve) => {
+                const confirmButton = modal.querySelector('.modal-button.confirm');
+                const cancelButton = modal.querySelector('.modal-button.cancel');
+                
+                const handleConfirm = async () => {
+                    await phone.call(phoneNumber);
+                    isCalling = true;
+                    modal.style.display = 'none';
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    modal.style.display = 'none';
+                    resolve(false);
+                };
+                
+                confirmButton.onclick = handleConfirm;
+                cancelButton.onclick = handleCancel;
+            });
+        }
     } catch (error) {
         console.error('전화 연결 중 오류:', error);
         alert('전화 연결 중 오류가 발생했습니다.');
@@ -83,8 +116,8 @@ async function updateRightPanel(item) {
                                 <div class="phone-info">
                                     <span class="phone-number">${brandPhoneData.customer_service_number || '-'}</span>
                                     ${brandPhoneData.customer_service_number ? `
-                                        <button class="call-button" data-phone="${brandPhoneData.customer_service_number}">
-                                            📞 통화하기
+                                        <button class="call-button ${isCalling ? 'end-call' : ''}" data-phone="${brandPhoneData.customer_service_number}">
+                                            ${isCalling ? '통화종료' : '통화하기'}
                                         </button>
                                     ` : ''}
                                 </div>
@@ -149,6 +182,13 @@ async function updateRightPanel(item) {
                 const phoneNumber = callButton.dataset.phone;
                 if (phoneNumber) {
                     await handleCall(phoneNumber);
+                    // 버튼 텍스트와 스타일 업데이트
+                    callButton.textContent = isCalling ? '통화종료' : '통화하기';
+                    if (isCalling) {
+                        callButton.classList.add('end-call');
+                    } else {
+                        callButton.classList.remove('end-call');
+                    }
                 }
             });
         }
@@ -171,6 +211,51 @@ async function selectCard(index) {
         await updateRightPanel(cardData[index]);
     }
 }
+
+// 키보드 이벤트 핸들러 추가
+document.addEventListener('keydown', async (event) => {
+    const modal = document.getElementById('call-confirm-modal');
+    
+    // ESC 키로 모달창 닫기
+    if (event.key === 'Escape' && modal.style.display === 'block') {
+        modal.style.display = 'none';
+        return;
+    }
+    
+    // 스페이스바로 통화하기
+    if (event.key === ' ' && selectedCardIndex !== -1) {
+        // 스페이스바의 기본 동작(스크롤) 방지
+        event.preventDefault();
+        
+        const callButton = document.querySelector('.call-button');
+        if (callButton) {
+            const phoneNumber = callButton.dataset.phone;
+            if (phoneNumber) {
+                if (isCalling) {
+                    await handleCall(phoneNumber);
+                    // 버튼 텍스트와 스타일 업데이트
+                    callButton.textContent = isCalling ? '통화종료' : '통화하기';
+                    if (isCalling) {
+                        callButton.classList.add('end-call');
+                    } else {
+                        callButton.classList.remove('end-call');
+                    }
+                } else {
+                    const result = await handleCall(phoneNumber);
+                    if (result) {
+                        // 버튼 텍스트와 스타일 업데이트
+                        callButton.textContent = isCalling ? '통화종료' : '통화하기';
+                        if (isCalling) {
+                            callButton.classList.add('end-call');
+                        } else {
+                            callButton.classList.remove('end-call');
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
 
 async function handleKeyDown(e) {
     if (!document.getElementById('vendor-content').classList.contains('active')) {
