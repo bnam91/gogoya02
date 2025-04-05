@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 
 // 개발 모드에서 자동 리로드 활성화
 try {
@@ -10,6 +11,10 @@ try {
 } catch (_) { console.log('Error'); }
 
 let mainWindow;
+
+// 자동 업데이트 설정
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -40,8 +45,38 @@ function createWindow() {
     });
 }
 
+// 업데이트 이벤트 핸들러
+autoUpdater.on('checking-for-update', () => {
+    console.log('업데이트 확인 중...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    console.log('새로운 업데이트가 있습니다:', info.version);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    console.log('이미 최신 버전입니다.');
+});
+
+autoUpdater.on('error', (err) => {
+    console.log('업데이트 중 오류 발생:', err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+    console.log('다운로드 진행률:', progressObj.percent);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    console.log('업데이트 다운로드 완료');
+    // 업데이트 설치 및 앱 재시작
+    autoUpdater.quitAndInstall();
+});
+
 app.whenReady().then(() => {
     createWindow();
+    
+    // 업데이트 확인
+    autoUpdater.checkForUpdates();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {

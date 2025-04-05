@@ -5,13 +5,32 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "set NODE_ENV=development && electron ."
+    "dev": "set NODE_ENV=development && electron .",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always"
+  },
+  "build": {
+    "appId": "com.gogoya02.app",
+    "productName": "Gogoya02",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "bnam91",
+      "repo": "gogoya02"
+    }
   },
   "dependencies": {
     "electron": "^28.0.0",
+    "electron-updater": "^6.6.2",
     "mongodb": "^6.15.0"
   },
   "devDependencies": {
+    "electron-builder": "^24.13.3",
     "electron-reloader": "^1.2.3"
   }
 }
