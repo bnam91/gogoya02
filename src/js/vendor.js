@@ -129,14 +129,7 @@ async function handleCall(phoneNumber) {
                             }
                             
                             try {
-                                await vendorCallManager.saveCallRecord(callStatus, nextStep, notes);
-                                console.log('통화 기록이 저장되었습니다.');
-                                // 통화 상태 폼 제거 및 추가 정보 영역 초기화
-                                const extraContent = document.querySelector('.extra-content');
-                                extraContent.innerHTML = `
-                                    <h3>추가 정보</h3>
-                                    <p>여기에 추가 정보가 표시됩니다.</p>
-                                `;
+                                await saveCallRecord();
                             } catch (error) {
                                 console.error('통화 기록 저장 중 오류:', error);
                                 alert('통화 기록 저장 중 오류가 발생했습니다.');
@@ -252,8 +245,15 @@ async function updateRightPanel(item) {
         const brandName = item.brand;
         const brandPhoneData = await mongo.getBrandPhoneData(brandName);
         
-        // 현재 브랜드 데이터 저장
-        currentBrandData = brandPhoneData;
+        // 현재 브랜드 데이터 저장 (원본 카드 데이터 포함)
+        currentBrandData = {
+            ...brandPhoneData,
+            _id: item._id,  // 원본 카드의 _id 추가
+            brand: item.brand,
+            brand_name: item.brand_name || brandPhoneData.brand_name,
+            customer_service_number: brandPhoneData.customer_service_number,
+            contact_person: brandPhoneData.contact_person
+        };
 
         if (!brandPhoneData) {
             rightPanel.innerHTML = `
@@ -480,50 +480,110 @@ async function handleKeyDown(e) {
     }
 }
 
-function createCard(item, index, startIndex) {
+async function createCard(item, index, startIndex) {
     const card = document.createElement('div');
     card.className = 'card';
     
     card.addEventListener('click', async () => await selectCard(startIndex + index));
 
+    // 카드 헤더 (브랜드명과 통화 상태)
     const header = document.createElement('div');
     header.className = 'card-header';
     
     const brandName = document.createElement('div');
     brandName.className = 'brand-name';
-    brandName.textContent = item.brand_name || item.name;
+    brandName.textContent = item.brand;
+    
+    // NEW 상태 표시
+    const newStatus = document.createElement('div');
+    newStatus.className = 'new-status';
+    if (item.NEW === "NEW") {
+        newStatus.textContent = "NEW";
+        newStatus.classList.add('active');
+    }
+    
+    // 최근 통화 상태 표시
+    const callStatus = document.createElement('div');
+    callStatus.className = 'call-status';
+    
+    try {
+        const latestCall = await mongo.getLatestCallRecordByCardId(item._id);
+        if (latestCall) {
+            const callDate = new Date(latestCall.call_date);
+            const formattedDate = callDate.toLocaleDateString('ko-KR', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            callStatus.innerHTML = `
+                <span class="status-value ${latestCall.call_status === '부재중' ? 'missed' : latestCall.call_status === '연결됨' ? 'connected' : ''}">
+                    ${latestCall.call_status} (${formattedDate})
+                </span>
+            `;
+        }
+    } catch (error) {
+        console.error('통화 상태 조회 중 오류:', error);
+    }
     
     header.appendChild(brandName);
+    header.appendChild(newStatus);
+    header.appendChild(callStatus);
     card.appendChild(header);
 
+    // 상품 정보
+    const itemSection = document.createElement('div');
+    itemSection.className = 'card-section';
+    
+    const itemContent = document.createElement('div');
+    itemContent.className = 'item-content';
+    itemContent.innerHTML = `
+        <div class="item-row">
+            <div class="item-name">${item.item}</div>
+            <div class="item-category">${item.item_category}</div>
+        </div>
+        <div class="crawl-date">크롤링: ${new Date(item.crawl_date).toLocaleDateString('ko-KR', {
+            year: '2-digit',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}</div>
+        <div class="item-feed">
+            <a href="${item.item_feed_link}" target="_blank" class="feed-link">인스타그램 포스트 보기</a>
+        </div>
+        
+        
+        
+        
+    `;
+    
+    itemSection.appendChild(itemContent);
+    card.appendChild(itemSection);
+
+    // 카테고리 정보
     const categorySection = document.createElement('div');
     categorySection.className = 'card-section';
     
-    const categoryTitle = document.createElement('div');
-    categoryTitle.className = 'section-title';
-    categoryTitle.textContent = '카테고리 정보';
-    categorySection.appendChild(categoryTitle);
-
-    Object.entries(item).forEach(([key, value]) => {
-        if (key === '_id' || key === 'brand_name' || key === 'name') return;
+    const categoryContent = document.createElement('div');
+    categoryContent.className = 'category-content';
+    categoryContent.innerHTML = `
+        <div class="category-item">
+            <span class="grade-value">등급: ${item.grade}</span>
+        </div>
+        <div class="clean-name">${item.clean_name}</div>
+        <div class="item-author">@${item.author}</div>
+        <div class="category-item">
+            <span class="category-value">${item.category}</span>
+        </div>
         
-        const fieldDiv = document.createElement('div');
-        fieldDiv.className = 'card-field';
         
-        const label = document.createElement('div');
-        label.className = 'card-field-label';
-        label.textContent = key;
-        
-        const valueDiv = document.createElement('div');
-        valueDiv.className = 'card-field-value';
-        valueDiv.textContent = value;
-        
-        fieldDiv.appendChild(label);
-        fieldDiv.appendChild(valueDiv);
-        categorySection.appendChild(fieldDiv);
-    });
+    `;
     
+    categorySection.appendChild(categoryContent);
     card.appendChild(categorySection);
+
     return card;
 }
 
@@ -549,11 +609,15 @@ async function loadVendorData(isInitialLoad = true) {
         }
 
         const startIndex = cardData.length;
-        data.forEach((item, index) => {
+        // Promise.all을 사용하여 모든 카드 생성이 완료될 때까지 기다림
+        const cardPromises = data.map(async (item, index) => {
             cardData.push(item); // 데이터 저장
-            const card = createCard(item, index, startIndex);
-            dataList.appendChild(card);
+            const card = await createCard(item, index, startIndex);
+            return card;
         });
+
+        const cards = await Promise.all(cardPromises);
+        cards.forEach(card => dataList.appendChild(card));
 
         currentSkip += data.length;
         
@@ -599,6 +663,69 @@ function initVendor() {
 }
 
 document.addEventListener('keydown', handleKeyDown);
+
+async function saveCallRecord() {
+    try {
+        const callStatus = document.getElementById('call-status').value;
+        const nextStep = document.getElementById('next-step').value;
+        const notes = document.getElementById('call-notes').value;
+        const callDuration = Math.floor((Date.now() - vendorCallManager.callStartTime) / 1000);
+
+        // 현재 선택된 카드의 데이터 확인
+        if (!currentBrandData || !currentBrandData._id) {
+            console.error('선택된 카드의 ID가 없습니다.');
+            alert('선택된 카드의 ID가 없습니다.');
+            return;
+        }
+
+        const callRecord = {
+            brand_name: currentBrandData.brand_name,
+            customer_service_number: currentBrandData.customer_service_number,
+            contact_person: currentBrandData.contact_person,
+            call_date: new Date(),
+            call_duration_sec: callDuration,
+            call_status: callStatus,
+            nextstep: nextStep,
+            notes: notes,
+            card_id: currentBrandData._id  // 선택된 카드의 ID 추가
+        };
+
+        await mongo.saveCallRecord(callRecord);
+        console.log('통화 기록 저장 완료:', callRecord);
+        
+        // 통화 기록 저장 후 모달 닫기
+        const modal = document.getElementById('call-confirm-modal');
+        modal.style.display = 'none';
+        
+        // 통화 기록 업데이트
+        await updateCallHistory(currentBrandData.brand_name);
+
+        // 선택된 카드의 통화 상태 업데이트
+        const selectedCard = document.querySelector('.card.selected');
+        if (selectedCard) {
+            const callStatusElement = selectedCard.querySelector('.call-status');
+            if (callStatusElement) {
+                const callDate = new Date(callRecord.call_date);
+                const formattedDate = callDate.toLocaleDateString('ko-KR', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                callStatusElement.innerHTML = `
+                    <span class="status-value ${callStatus === '부재중' ? 'missed' : callStatus === '연결됨' ? 'connected' : ''}">
+                        ${callStatus} (${formattedDate})
+                    </span>
+                `;
+            }
+        }
+        
+    } catch (error) {
+        console.error('통화 기록 저장 중 오류:', error);
+        alert('통화 기록 저장 중 오류가 발생했습니다.');
+    }
+}
 
 module.exports = {
     initVendor

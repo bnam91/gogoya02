@@ -30,7 +30,7 @@ async function getMongoData() {
     }
 }
 
-async function getVendorData(skip = 0) {
+async function getVendorData(skip = 0, limit = 20) {
     try {
         const client = new MongoClient(uri, {
             serverApi: {
@@ -46,24 +46,35 @@ async function getVendorData(skip = 0) {
         const db = client.db('insta09_database');
         const collection = db.collection('04_test_item_today_data');
         
-        // 전체 문서 수 가져오기
-        const totalCount = await collection.countDocuments();
-        
-        // 페이지 단위로 데이터 가져오기
-        const data = await collection.find({})
-            .skip(skip)
-            .limit(ITEMS_PER_PAGE)
-            .toArray();
+        // 필요한 필드만 프로젝션
+        const cursor = collection.find({}, {
+            projection: {
+                _id: 1,
+                NEW: 1,
+                crawl_date: 1,
+                brand: 1,
+                item_category: 1,
+                item: 1,
+                author: 1,
+                clean_name: 1,
+                grade: 1,
+                category: 1,
+                item_feed_link: 1
+            }
+        })
+        .sort({ crawl_date: -1 })  // 크롤링 날짜 기준 내림차순
+        .skip(skip)
+        .limit(limit);
             
-        await client.close();
+        const data = await cursor.toArray();
+        console.log('조회된 데이터 수:', data.length);
         
-        return {
-            data,
-            totalCount,
-            hasMore: skip + ITEMS_PER_PAGE < totalCount
-        };
+        const hasMore = data.length === limit;
+        
+        await client.close();
+        return { data, hasMore };
     } catch (error) {
-        console.error('MongoDB 연결 오류:', error);
+        console.error('벤더 데이터 조회 중 오류:', error);
         throw error;
     }
 }
@@ -146,10 +157,41 @@ async function getCallRecords(brandName) {
     }
 }
 
+async function getLatestCallRecordByCardId(cardId) {
+    try {
+        const client = new MongoClient(uri, {
+            serverApi: {
+                version: ServerApiVersion.v1,
+                strict: true,
+                deprecationErrors: true,
+            }
+        });
+
+        await client.connect();
+        await client.db("admin").command({ ping: 1 });
+
+        const db = client.db('insta09_database');
+        const collection = db.collection('gogoya_vendor_CallRecords');
+        
+        // card_id로 통화 기록 조회 (최신순으로 정렬하고 첫 번째만 가져옴)
+        const record = await collection.findOne(
+            { card_id: cardId },
+            { sort: { call_date: -1 } }
+        );
+            
+        await client.close();
+        return record;
+    } catch (error) {
+        console.error('최근 통화 기록 조회 중 오류:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     getMongoData,
     getVendorData,
     getBrandPhoneData,
     saveCallRecord,
-    getCallRecords
+    getCallRecords,
+    getLatestCallRecordByCardId
 }; 

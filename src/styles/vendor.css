@@ -67,16 +67,17 @@
 .card {
     background: white;
     border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card.selected {
@@ -84,46 +85,160 @@
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
+/* NEW 배지 스타일 */
+.new-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: 500;
+    z-index: 1;
+}
+
+/* 카드 헤더 */
 .card-header {
-    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+    padding-left: 50px; /* NEW 배지를 위한 공간 확보 */
 }
 
 .brand-name {
+    font-weight: 700;
+    color: #131314;
+    font-size: 1.2em;
+    order: 2; /* 브랜드네임을 중간으로 이동 */
+}
+
+.new-status {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
     font-weight: 500;
+}
+
+.call-status {
+    order: 3; /* 통화 상태를 오른쪽으로 이동 */
+}
+
+/* 상품 정보 */
+.item-content {
+    margin-bottom: 16px;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.item-name {
     color: #131314;
     font-size: 1.1em;
-}
-
-.card-section {
-    font-size: 0.9em;
-}
-
-.section-title {
-    color: #666;
-    margin-bottom: 8px;
-    font-size: 0.9em;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.card-field {
-    margin-bottom: 8px;
-    display: flex;
-    gap: 10px;
-}
-
-.card-field:last-child {
-    margin-bottom: 0;
-}
-
-.card-field-label {
-    color: #666;
-    min-width: 100px;
-}
-
-.card-field-value {
-    color: #131314;
+    font-weight: 500;
+    line-height: 1.4;
     flex: 1;
+}
+
+.item-category {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 12px;
+    padding: 4px 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.clean-name {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+.item-author {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* 카테고리 정보 */
+.category-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.category {
+    font-weight: 500;
+    color: #333;
+}
+
+.crawl-date {
+    color: #666;
+    font-size: 0.85em;
+}
+
+/* 등급 표시 */
+.grade-value {
+    color: #666;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* 인스타그램 링크 */
+.item-feed {
+    margin-top: 8px;
+}
+
+.feed-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s;
+}
+
+.feed-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* 통화 상태 */
+.call-status {
+    font-size: 0.85em;
+}
+
+.call-status .status-value {
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+}
+
+.call-status .status-value.missed {
+    color: #f44336;
+    background-color: #ffebee;
+}
+
+.call-status .status-value.connected {
+    color: #4CAF50;
+    background-color: #e8f5e9;
 }
 
 /* 브랜드 정보 컨테이너 */
@@ -578,4 +693,36 @@
     color: #495057;
     font-size: 0.9em;
     line-height: 1.3;
+}
+
+/* NEW 상태 표시 */
+.new-status {
+    font-size: 0.75em;
+    color: #666;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin-right: 8px;
+}
+
+.new-status.active {
+    color: #fff;
+    background-color: #4CAF50;
+}
+
+/* 인스타그램 포스트 링크 */
+.item-feed {
+    margin-top: 8px;
+}
+
+.feed-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.85em;
+    transition: color 0.3s;
+}
+
+.feed-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
 } 
