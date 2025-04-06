@@ -133,6 +133,37 @@
 
 .call-status {
     order: 3; /* 통화 상태를 오른쪽으로 이동 */
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 0.85em;
+}
+
+.call-status .status-value {
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    font-size: 0.85em;
+}
+
+.call-status .status-value.missed {
+    color: #f44336;
+    background-color: #ffebee;
+}
+
+.call-status .status-value.connected {
+    color: #4CAF50;
+    background-color: #e8f5e9;
+}
+
+.call-status .next-step-value {
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-size: 0.85em;
 }
 
 /* 상품 정보 */
@@ -217,28 +248,6 @@
 .feed-link:hover {
     color: #0056b3;
     text-decoration: underline;
-}
-
-/* 통화 상태 */
-.call-status {
-    font-size: 0.85em;
-}
-
-.call-status .status-value {
-    font-weight: 500;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-}
-
-.call-status .status-value.missed {
-    color: #f44336;
-    background-color: #ffebee;
-}
-
-.call-status .status-value.connected {
-    color: #4CAF50;
-    background-color: #e8f5e9;
 }
 
 /* 브랜드 정보 컨테이너 */
@@ -710,7 +719,7 @@
     background-color: #4CAF50;
 }
 
-/* 인스타그램 포스트 링크 */
+/* 인스타그램 피드 링크 */
 .item-feed {
     margin-top: 8px;
 }
@@ -725,4 +734,159 @@
 .feed-link:hover {
     color: #0056b3;
     text-decoration: underline;
+}
+
+/* 필터 컨테이너 스타일 */
+.filter-container {
+    background: white;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.filter-group {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.filter-search {
+    position: relative;
+    flex: 1;
+}
+
+.filter-search .search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.filter-search .search-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.filter-search .search-input::placeholder {
+    color: #999;
+}
+
+.filter-reset-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-reset-button:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.reset-icon {
+    font-size: 1.1em;
+    transition: transform 0.3s ease;
+}
+
+.filter-reset-button.rotate .reset-icon {
+    transform: rotate(360deg);
+}
+
+.filter-dropdown {
+    position: relative;
+    flex: 1;
+}
+
+.filter-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.filter-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.selected-items,
+.selected-grades {
+    flex: 1;
+    color: #333;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+    color: #666;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.filter-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 4px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-options.show {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-option:hover {
+    background-color: #f5f5f5;
+}
+
+.filter-option input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.filter-option label {
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #333;
+    flex: 1;
 } 

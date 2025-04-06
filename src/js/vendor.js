@@ -1,5 +1,6 @@
 const mongo = require('./mongo');
 const vendorCallManager = require('./vendorCallManager');
+const vendorFilter = require('./vendorFilter');
 
 let isLoading = false;
 let currentSkip = 0;
@@ -395,15 +396,26 @@ async function updateRightPanel(item) {
 }
 
 async function selectCard(index) {
+    // 통화 상태 폼이 표시되어 있고 저장되지 않은 경우 카드 선택 방지
+    const callForm = document.querySelector('.call-status-form');
+    if (callForm && callForm.querySelector('.save-button').style.display === 'inline-block') {
+        alert('통화 기록을 먼저 저장해주세요.');
+        return;
+    }
+
+    // 기존 카드 선택 해제
     const cards = document.querySelectorAll('.card');
-    if (index >= 0 && index < cards.length) {
-        cards.forEach(c => c.classList.remove('selected'));
-        cards[index].classList.add('selected');
-        cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    cards.forEach(card => card.classList.remove('selected'));
+    
+    // 새 카드 선택
+    if (index >= 0 && index < cardData.length) {
+        const selectedCard = cards[index];
+        selectedCard.classList.add('selected');
         selectedCardIndex = index;
+        currentBrandData = cardData[index];
         
-        // 선택된 카드의 데이터로 우측 패널 업데이트
-        await updateRightPanel(cardData[index]);
+        // 우측 패널 업데이트
+        await updateRightPanel(currentBrandData);
     }
 }
 
@@ -457,24 +469,65 @@ async function handleKeyDown(e) {
         return;
     }
 
-    const cards = document.querySelectorAll('.card');
-    if (cards.length === 0) return;
+    // 필터링된 카드만 가져오기
+    const visibleCards = Array.from(document.querySelectorAll('.card')).filter(card => 
+        card.style.display !== 'none'
+    );
+    
+    if (visibleCards.length === 0) return;
 
     switch (e.key) {
         case 'ArrowUp':
             e.preventDefault();
             if (selectedCardIndex === -1) {
-                await selectCard(0);
+                // 첫 번째 보이는 카드의 인덱스 찾기
+                const firstVisibleIndex = Array.from(document.querySelectorAll('.card')).indexOf(visibleCards[0]);
+                await selectCard(firstVisibleIndex);
             } else {
-                await selectCard(Math.max(0, selectedCardIndex - 1));
+                // 현재 선택된 카드의 인덱스 찾기
+                const currentCard = document.querySelector('.card.selected');
+                const currentIndex = Array.from(document.querySelectorAll('.card')).indexOf(currentCard);
+                
+                // 이전 보이는 카드 찾기
+                let prevVisibleIndex = -1;
+                for (let i = currentIndex - 1; i >= 0; i--) {
+                    const card = document.querySelectorAll('.card')[i];
+                    if (card.style.display !== 'none') {
+                        prevVisibleIndex = i;
+                        break;
+                    }
+                }
+                
+                if (prevVisibleIndex !== -1) {
+                    await selectCard(prevVisibleIndex);
+                }
             }
             break;
+            
         case 'ArrowDown':
             e.preventDefault();
             if (selectedCardIndex === -1) {
-                await selectCard(0);
+                // 첫 번째 보이는 카드의 인덱스 찾기
+                const firstVisibleIndex = Array.from(document.querySelectorAll('.card')).indexOf(visibleCards[0]);
+                await selectCard(firstVisibleIndex);
             } else {
-                await selectCard(Math.min(cards.length - 1, selectedCardIndex + 1));
+                // 현재 선택된 카드의 인덱스 찾기
+                const currentCard = document.querySelector('.card.selected');
+                const currentIndex = Array.from(document.querySelectorAll('.card')).indexOf(currentCard);
+                
+                // 다음 보이는 카드 찾기
+                let nextVisibleIndex = -1;
+                for (let i = currentIndex + 1; i < document.querySelectorAll('.card').length; i++) {
+                    const card = document.querySelectorAll('.card')[i];
+                    if (card.style.display !== 'none') {
+                        nextVisibleIndex = i;
+                        break;
+                    }
+                }
+                
+                if (nextVisibleIndex !== -1) {
+                    await selectCard(nextVisibleIndex);
+                }
             }
             break;
     }
@@ -483,6 +536,16 @@ async function handleKeyDown(e) {
 async function createCard(item, index, startIndex) {
     const card = document.createElement('div');
     card.className = 'card';
+    
+    // 브랜드 정보 유무 확인
+    try {
+        const brandPhoneData = await mongo.getBrandPhoneData(item.brand);
+        const hasBrandInfo = brandPhoneData && brandPhoneData.brand_name ? 'true' : 'false';
+        card.dataset.hasBrandInfo = hasBrandInfo;
+    } catch (error) {
+        console.error('브랜드 정보 조회 중 오류:', error);
+        card.dataset.hasBrandInfo = 'false';
+    }
     
     card.addEventListener('click', async () => await selectCard(startIndex + index));
 
@@ -521,6 +584,7 @@ async function createCard(item, index, startIndex) {
                 <span class="status-value ${latestCall.call_status === '부재중' ? 'missed' : latestCall.call_status === '연결됨' ? 'connected' : ''}">
                     ${latestCall.call_status} (${formattedDate})
                 </span>
+                ${latestCall.nextstep ? `<span class="next-step-value">${latestCall.nextstep}</span>` : ''}
             `;
         }
     } catch (error) {
@@ -551,7 +615,7 @@ async function createCard(item, index, startIndex) {
             minute: '2-digit'
         })}</div>
         <div class="item-feed">
-            <a href="${item.item_feed_link}" target="_blank" class="feed-link">인스타그램 포스트 보기</a>
+            <a href="${item.item_feed_link}" target="_blank" class="feed-link">인스타그램 피드 보기</a>
         </div>
         
         
@@ -660,6 +724,9 @@ function initVendor() {
     // 우측 패널 초기화
     const rightPanel = document.querySelector('.vendor-right');
     rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
+
+    // 필터 초기화
+    vendorFilter.init();
 }
 
 document.addEventListener('keydown', handleKeyDown);
@@ -717,6 +784,7 @@ async function saveCallRecord() {
                     <span class="status-value ${callStatus === '부재중' ? 'missed' : callStatus === '연결됨' ? 'connected' : ''}">
                         ${callStatus} (${formattedDate})
                     </span>
+                    ${nextStep ? `<span class="next-step-value">${nextStep}</span>` : ''}
                 `;
             }
         }
