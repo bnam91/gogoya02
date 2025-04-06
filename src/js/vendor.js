@@ -246,16 +246,19 @@ async function updateRightPanel(item) {
         const brandName = item.brand;
         const brandPhoneData = await mongo.getBrandPhoneData(brandName);
         
-        // 현재 브랜드 데이터 저장 (원본 카드 데이터 포함)
+        // 현재 브랜드 데이터 저장
         currentBrandData = {
             ...brandPhoneData,
-            _id: item._id,  // 원본 카드의 _id 추가
+            _id: item._id,
             brand: item.brand,
             brand_name: item.brand_name || brandPhoneData.brand_name,
             customer_service_number: brandPhoneData.customer_service_number,
             contact_person: brandPhoneData.contact_person
         };
 
+        // vendorInfoEditor에 현재 브랜드 데이터 설정
+        vendorInfoEditor.setCurrentBrandData(currentBrandData);
+        
         if (!brandPhoneData) {
             rightPanel.innerHTML = `
                 <div class="brand-info-header">
@@ -307,7 +310,9 @@ async function updateRightPanel(item) {
                             <div class="info-item">
                                 <label>고객센터</label>
                                 <div class="phone-info">
-                                    <span class="phone-number">${brandPhoneData.customer_service_number || '-'}</span>
+                                    <span class="phone-number editable" data-field="customer_service_number">
+                                        ${brandPhoneData.customer_service_number || '-'}
+                                    </span>
                                     ${brandPhoneData.customer_service_number ? `
                                         <button class="call-button ${vendorCallManager.isCalling ? 'end-call' : ''}" data-phone="${brandPhoneData.customer_service_number}">
                                             ${vendorCallManager.isCalling ? '통화종료' : '통화하기'}
@@ -317,11 +322,11 @@ async function updateRightPanel(item) {
                             </div>
                             <div class="info-item">
                                 <label>이메일</label>
-                                <span>${brandPhoneData.email || '-'}</span>
+                                <span class="editable" data-field="email">${brandPhoneData.email || '-'}</span>
                             </div>
                             <div class="info-item full-width">
                                 <label>사업장 주소</label>
-                                <span>${brandPhoneData.business_address || '-'}</span>
+                                <span class="editable" data-field="business_address">${brandPhoneData.business_address || '-'}</span>
                             </div>
                         </div>
                     </div>
@@ -331,13 +336,13 @@ async function updateRightPanel(item) {
                         <div class="info-group">
                             <div class="info-item">
                                 <label>공식 웹사이트</label>
-                                <a href="${brandPhoneData.official_website_url}" target="_blank" class="link">
+                                <a href="${brandPhoneData.official_website_url}" class="link">
                                     ${brandPhoneData.official_website_url || '-'}
                                 </a>
                             </div>
                             <div class="info-item">
                                 <label>실제 도메인</label>
-                                <a href="${brandPhoneData.actual_domain_url}" target="_blank" class="link">
+                                <a href="${brandPhoneData.actual_domain_url}" class="link">
                                     ${brandPhoneData.actual_domain_url || '-'}
                                 </a>
                             </div>
@@ -476,6 +481,10 @@ async function handleKeyDown(e) {
     
     if (visibleCards.length === 0) return;
 
+    const vendorLeft = document.querySelector('.vendor-left');
+    const cardHeight = visibleCards[0].offsetHeight;
+    const containerHeight = vendorLeft.clientHeight;
+
     switch (e.key) {
         case 'ArrowUp':
             e.preventDefault();
@@ -500,6 +509,12 @@ async function handleKeyDown(e) {
                 
                 if (prevVisibleIndex !== -1) {
                     await selectCard(prevVisibleIndex);
+                    // 선택된 카드가 화면 상단에 오도록 스크롤 조정
+                    const selectedCard = document.querySelector('.card.selected');
+                    const cardTop = selectedCard.offsetTop;
+                    if (cardTop < vendorLeft.scrollTop) {
+                        vendorLeft.scrollTop = cardTop;
+                    }
                 }
             }
             break;
@@ -527,6 +542,12 @@ async function handleKeyDown(e) {
                 
                 if (nextVisibleIndex !== -1) {
                     await selectCard(nextVisibleIndex);
+                    // 선택된 카드가 화면 하단에 오도록 스크롤 조정
+                    const selectedCard = document.querySelector('.card.selected');
+                    const cardBottom = selectedCard.offsetTop + selectedCard.offsetHeight;
+                    if (cardBottom > vendorLeft.scrollTop + containerHeight) {
+                        vendorLeft.scrollTop = cardBottom - containerHeight;
+                    }
                 }
             }
             break;

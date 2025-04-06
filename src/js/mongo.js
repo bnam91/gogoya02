@@ -187,11 +187,41 @@ async function getLatestCallRecordByCardId(cardId) {
     }
 }
 
+async function updateBrandInfo(brandName, updateData) {
+    try {
+        const client = new MongoClient(uri, {
+            serverApi: {
+                version: ServerApiVersion.v1,
+                strict: true,
+                deprecationErrors: true,
+            }
+        });
+
+        await client.connect();
+        await client.db("admin").command({ ping: 1 });
+
+        const db = client.db('insta09_database');
+        const collection = db.collection('99_test_brand_phone_data');
+        
+        const result = await collection.updateOne(
+            { brand_name: brandName },
+            { $set: updateData }
+        );
+        
+        await client.close();
+        return result;
+    } catch (error) {
+        console.error('브랜드 정보 업데이트 중 오류:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     getMongoData,
     getVendorData,
     getBrandPhoneData,
     saveCallRecord,
     getCallRecords,
-    getLatestCallRecordByCardId
+    getLatestCallRecordByCardId,
+    updateBrandInfo
 }; 

@@ -46,6 +46,20 @@ function createWindow() {
     mainWindow.maximize();
     mainWindow.loadFile('index.html');
 
+    // 모든 외부 링크를 기본 브라우저에서 열도록 설정
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        require('electron').shell.openExternal(url);
+        return { action: 'deny' };
+    });
+
+    // 모든 링크 클릭 이벤트 처리
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (url.startsWith('http')) {
+            event.preventDefault();
+            require('electron').shell.openExternal(url);
+        }
+    });
+
     // 개발자 도구 열기 (F12)
     mainWindow.webContents.on('before-input-event', (event, input) => {
         if (input.key === 'F12') {
