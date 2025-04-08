@@ -120,11 +120,22 @@ async function handleCall(phoneNumber) {
                                     callButton.textContent = '통화하기';
                                     callButton.classList.remove('end-call');
                                 }
+                                
+                                // 통화 종료 후 메모 입력 활성화
+                                const callNotes = document.getElementById('call-notes');
+                                if (callNotes) {
+                                    callNotes.disabled = false;
+                                    callNotes.focus();
+                                }
+                                
                                 // 저장과 취소 버튼 표시
                                 const saveButton = callForm.querySelector('.save-button');
                                 const cancelButton = callForm.querySelector('.cancel-button');
                                 if (saveButton) saveButton.style.display = 'inline-block';
                                 if (cancelButton) cancelButton.style.display = 'inline-block';
+                                
+                                // 통화 종료 버튼 숨기기
+                                endCallButton.style.display = 'none';
                             }
                         };
                         
@@ -467,6 +478,12 @@ async function updateRightPanel(item) {
 }
 
 async function selectCard(index) {
+    // 통화 중일 때는 카드 선택 방지
+    if (vendorCallManager.isCalling) {
+        alert('통화 중에는 다른 카드를 선택할 수 없습니다.');
+        return;
+    }
+
     // 통화 상태 폼이 표시되어 있고 저장되지 않은 경우 카드 선택 방지
     const callForm = document.querySelector('.call-status-form');
     if (callForm && callForm.querySelector('.save-button').style.display === 'inline-block') {

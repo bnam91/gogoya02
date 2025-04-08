@@ -51,10 +51,7 @@ async function getVendorData(skip = 0, limit = 20, filters = {}) {
         
         // 브랜드명 검색 필터
         if (filters.searchQuery) {
-            query.brand = { 
-                $regex: filters.searchQuery, 
-                $options: 'i'  // 대소문자 구분 없이 검색
-            };
+            query.brand = { $regex: filters.searchQuery, $options: 'i' };
         }
         
         // 카테고리 필터

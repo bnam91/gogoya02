@@ -157,9 +157,11 @@ class VendorFilter {
         const verificationRadios = this.filterContainer.querySelectorAll('input[name="verification"]');
 
         // 검색 입력 이벤트
-        searchInput.addEventListener('input', async (e) => {
-            this.searchQuery = e.target.value.toLowerCase();
-            await this.filterCards();
+        searchInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                this.searchQuery = e.target.value.trim();
+                await this.filterCards();
+            }
         });
 
         // 드롭다운 토글
