@@ -1,6 +1,7 @@
-const mongo = require('./mongo');
-const vendorCallManager = require('./vendorCallManager');
-const vendorFilter = require('./vendorFilter');
+const mongo = window.mongo;
+const vendorCallManager = window.vendorCallManager;
+const vendorFilter = window.vendorFilter;
+const vendorInfoEditor = window.vendorInfoEditor;
 
 let isLoading = false;
 let currentSkip = 0;
@@ -8,6 +9,17 @@ let hasMoreData = true;
 let selectedCardIndex = -1;
 let cardData = []; // 카드 데이터를 저장할 배열
 let currentBrandData = null;
+
+// 전역 변수들을 window.vendor 객체에 노출
+window.vendor = {
+    get currentSkip() { return currentSkip; },
+    set currentSkip(value) { currentSkip = value; },
+    get hasMoreData() { return hasMoreData; },
+    set hasMoreData(value) { hasMoreData = value; },
+    get cardData() { return cardData; },
+    set cardData(value) { cardData = value; },
+    loadVendorData
+};
 
 function updateCallDuration() {
     if (!vendorCallManager.callStartTime || !vendorCallManager.isCalling) return;
@@ -299,7 +311,12 @@ async function updateRightPanel(item) {
                             </div>
                             <div class="info-item">
                                 <label>인증 여부</label>
-                                <span>${brandPhoneData.is_verified ? '인증됨' : '미인증'}</span>
+                                <span class="verification-status editable" data-status="${brandPhoneData.is_verified}">${
+                                    brandPhoneData.is_verified === true ? '<span class="status-badge verified">✓ 인증완료</span>' :
+                                    brandPhoneData.is_verified === false ? '<span class="status-badge unverified">✕ 미인증</span>' :
+                                    brandPhoneData.is_verified === 'yet' ? '<span class="status-badge pending">⟳ 대기중</span>' : 
+                                    '<span class="status-badge unknown">? 알 수 없음</span>'
+                                }</span>
                             </div>
                         </div>
                     </div>
@@ -394,6 +411,55 @@ async function updateRightPanel(item) {
         // 통화 기록 업데이트
         await updateCallHistory(brandPhoneData.brand_name);
 
+        // 인증 상태 변경 이벤트 리스너 추가
+        const verificationStatus = rightPanel.querySelector('.verification-status');
+        if (verificationStatus) {
+            verificationStatus.addEventListener('click', async () => {
+                const currentStatus = brandPhoneData.is_verified;
+                let newStatus;
+                
+                // 상태 순환: false -> 'yet' -> true -> false
+                if (currentStatus === false) {
+                    newStatus = 'yet';
+                } else if (currentStatus === 'yet') {
+                    newStatus = true;
+                } else {
+                    newStatus = false;
+                }
+                
+                try {
+                    // MongoDB 업데이트
+                    await mongo.updateBrandInfo(brandPhoneData.brand_name, {
+                        is_verified: newStatus
+                    });
+                    
+                    // UI 업데이트
+                    brandPhoneData.is_verified = newStatus;
+                    verificationStatus.setAttribute('data-status', String(newStatus));
+                    verificationStatus.innerHTML = 
+                        newStatus === true ? '<span class="status-badge verified">✓ 인증완료</span>' :
+                        newStatus === false ? '<span class="status-badge unverified">✕ 미인증</span>' :
+                        newStatus === 'yet' ? '<span class="status-badge pending">⟳ 대기중</span>' :
+                        '<span class="status-badge unknown">? 알 수 없음</span>';
+                    
+                    // 성공 메시지 표시
+                    const toast = document.createElement('div');
+                    toast.className = 'toast-message';
+                    toast.textContent = '인증 상태가 업데이트되었습니다.';
+                    document.body.appendChild(toast);
+                    
+                    // 3초 후 토스트 메시지 제거
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                    
+                } catch (error) {
+                    console.error('인증 상태 업데이트 중 오류:', error);
+                    alert('인증 상태 업데이트 중 오류가 발생했습니다.');
+                }
+            });
+        }
+        
     } catch (error) {
         console.error('브랜드 정보 로드 중 오류:', error);
         rightPanel.innerHTML = '<p>브랜드 정보를 불러오는 중 오류가 발생했습니다.</p>';
@@ -677,7 +743,16 @@ async function loadVendorData(isInitialLoad = true) {
     
     try {
         isLoading = true;
-        const result = await mongo.getVendorData(currentSkip);
+        
+        // 현재 필터 상태를 가져옴
+        const filters = {
+            searchQuery: vendorFilter.searchQuery,
+            categories: vendorFilter.selectedCategories,
+            grades: vendorFilter.selectedGrades,
+            hasBrandInfo: vendorFilter.hasBrandInfo
+        };
+        
+        const result = await mongo.getVendorData(currentSkip, 20, filters);
         const { data, hasMore } = result;
         hasMoreData = hasMore;
         
@@ -732,7 +807,8 @@ function handleScroll(e) {
     }
 }
 
-function initVendor() {
+async function initVendor() {
+    // 데이터 초기화
     currentSkip = 0;
     hasMoreData = true;
     selectedCardIndex = -1;
@@ -747,7 +823,11 @@ function initVendor() {
     rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
 
     // 필터 초기화
-    vendorFilter.init();
+    if (window.vendorFilter && typeof window.vendorFilter.init === 'function') {
+        window.vendorFilter.init();
+    } else {
+        console.error('vendorFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
+    }
 }
 
 document.addEventListener('keydown', handleKeyDown);

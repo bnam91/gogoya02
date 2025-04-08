@@ -6,6 +6,7 @@ class VendorFilter {
         this.filterContainer = null;
         this.searchQuery = '';
         this.hasBrandInfo = null; // 브랜드 정보 유무 필터 상태
+        this.selectedVerificationStatus = null; // 인증 상태 필터 추가
         this.categoryOptions = [
             "🍽주방용품&식기",
             "🛋생활용품&가전",
@@ -17,6 +18,11 @@ class VendorFilter {
         ];
         this.gradeOptions = ["S", "A", "B", "C", "D", "R"];
         this.nextStepOptions = ['제안서 요청', '재시도 예정', '진행거절', '번호오류', '콜백대기', '기타'];
+        this.verificationOptions = [
+            { value: 'true', label: '✓ 인증완료' },
+            { value: 'yet', label: '⟳ 대기중' },
+            { value: 'false', label: '✕ 미인증' }
+        ];
     }
 
     init() {
@@ -60,6 +66,27 @@ class VendorFilter {
                                 <input type="radio" name="brand-info" id="brand-info-none" value="none">
                                 <label for="brand-info-none">정보 없음</label>
                             </div>
+                        </div>
+                    </div>
+                    <div class="filter-dropdown">
+                        <div class="filter-label">인증 상태</div>
+                        <div class="filter-select">
+                            <div class="selected-verification">인증 상태 선택</div>
+                            <div class="dropdown-arrow">▼</div>
+                        </div>
+                        <div class="filter-options">
+                            <div class="filter-option" data-verification="all">
+                                <input type="radio" name="verification" id="verification-all" value="all" checked>
+                                <label for="verification-all">전체</label>
+                            </div>
+                            ${this.verificationOptions.map(option => `
+                                <div class="filter-option" data-verification="${option.value}">
+                                    <input type="radio" name="verification" id="verification-${option.value}" value="${option.value}">
+                                    <label for="verification-${option.value}" class="verification-label ${option.value}">
+                                        ${option.label}
+                                    </label>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                     <div class="filter-dropdown">
@@ -127,11 +154,12 @@ class VendorFilter {
         const resetButton = this.filterContainer.querySelector('.filter-reset-button');
         const searchInput = this.filterContainer.querySelector('.search-input');
         const brandInfoRadios = this.filterContainer.querySelectorAll('input[name="brand-info"]');
+        const verificationRadios = this.filterContainer.querySelectorAll('input[name="verification"]');
 
         // 검색 입력 이벤트
-        searchInput.addEventListener('input', (e) => {
+        searchInput.addEventListener('input', async (e) => {
             this.searchQuery = e.target.value.toLowerCase();
-            this.filterCards();
+            await this.filterCards();
         });
 
         // 드롭다운 토글
@@ -176,10 +204,19 @@ class VendorFilter {
 
         // 브랜드 정보 필터 변경 이벤트
         brandInfoRadios.forEach(radio => {
-            radio.addEventListener('change', (e) => {
+            radio.addEventListener('change', async (e) => {
                 this.hasBrandInfo = e.target.value === 'all' ? null : e.target.value === 'has';
                 this.updateSelectedBrandInfoDisplay();
-                this.filterCards();
+                await this.filterCards();
+            });
+        });
+
+        // 인증 상태 필터 이벤트 리스너 추가
+        verificationRadios.forEach(radio => {
+            radio.addEventListener('change', async (e) => {
+                this.selectedVerificationStatus = e.target.value === 'all' ? null : e.target.value;
+                this.updateSelectedVerificationDisplay();
+                await this.filterCards();
             });
         });
 
@@ -217,14 +254,19 @@ class VendorFilter {
         this.selectedNextSteps = [];
         this.searchQuery = '';
 
+        // 인증 상태 필터 초기화
+        this.selectedVerificationStatus = null;
+        const verificationAllRadio = this.filterContainer.querySelector('#verification-all');
+        if (verificationAllRadio) {
+            verificationAllRadio.checked = true;
+        }
+
         // 디스플레이 텍스트 초기화
         this.updateSelectedItemsDisplay();
         this.updateSelectedGradesDisplay();
         this.updateSelectedNextStepsDisplay();
         this.updateSelectedBrandInfoDisplay();
-
-        // 카드 필터링 초기화
-        this.filterCards();
+        this.updateSelectedVerificationDisplay();
 
         // 초기화 버튼 애니메이션
         const resetButton = this.filterContainer.querySelector('.filter-reset-button');
@@ -232,6 +274,22 @@ class VendorFilter {
         setTimeout(() => {
             resetButton.classList.remove('rotate');
         }, 300);
+
+        // 중앙 패널 초기화
+        const dataList = document.getElementById('vendor-data-list');
+        dataList.innerHTML = '<p>데이터를 불러오는 중...</p>';
+
+        // 우측 패널 초기화
+        const rightPanel = document.querySelector('.vendor-right');
+        rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
+
+        // 데이터를 처음부터 다시 로드
+        window.vendor.currentSkip = 0;
+        window.vendor.hasMoreData = true;
+        window.vendor.cardData = [];
+        window.vendor.selectedCardIndex = -1;
+        window.vendor.currentBrandData = null;
+        window.vendor.loadVendorData(true);
     }
 
     updateSelectedCategories() {
@@ -288,30 +346,93 @@ class VendorFilter {
         }
     }
 
-    filterCards() {
+    updateSelectedVerificationDisplay() {
+        const selectedVerificationContainer = this.filterContainer.querySelector('.selected-verification');
+        if (!this.selectedVerificationStatus) {
+            selectedVerificationContainer.textContent = '인증 상태 선택';
+        } else {
+            const option = this.verificationOptions.find(opt => opt.value === this.selectedVerificationStatus);
+            selectedVerificationContainer.textContent = option ? option.label : '인증 상태 선택';
+        }
+    }
+
+    async filterCards() {
+        // 로딩 토스트 메시지 표시
+        this.showToast('데이터를 필터링하는 중...', 'loading');
+        
+        // 필터링 시 스크롤 위치와 데이터 초기화
+        window.vendor.currentSkip = 0;
+        window.vendor.hasMoreData = true;
+        window.vendor.cardData = [];
+        
+        // 필터링된 데이터 로드
+        await window.vendor.loadVendorData(true);
+        
+        // 필터링 완료 후 결과 토스트 메시지 표시
         const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            const brandName = card.querySelector('.brand-name').textContent.toLowerCase();
-            const category = card.querySelector('.item-category').textContent;
-            const grade = card.querySelector('.grade-value').textContent;
-            const nextStep = card.querySelector('.next-step-value')?.textContent || '';
-            const hasBrandInfo = card.dataset.hasBrandInfo === 'true';
+        this.showFilterResultToast(cards.length, cards.length);
+    }
 
-            const matchesSearch = !this.searchQuery || brandName.includes(this.searchQuery);
-            const matchesCategory = this.selectedCategories.length === 0 || this.selectedCategories.includes(category);
-            const matchesGrade = this.selectedGrades.length === 0 || this.selectedGrades.includes(grade);
-            const matchesNextStep = this.selectedNextSteps.length === 0 || this.selectedNextSteps.includes(nextStep);
-            const matchesBrandInfo = this.hasBrandInfo === null || (this.hasBrandInfo === hasBrandInfo);
+    // 토스트 메시지 표시 메서드
+    showToast(message, type = 'info', duration = 3000) {
+        // 기존 토스트 제거
+        const existingToast = document.querySelector('.toast-message');
+        if (existingToast) {
+            existingToast.remove();
+        }
 
-            if (matchesSearch && matchesCategory && matchesGrade && matchesNextStep && matchesBrandInfo) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
+        const toast = document.createElement('div');
+        toast.className = `toast-message ${type}`;
+        
+        // 타입에 따른 아이콘 추가
+        const icon = type === 'loading' ? '⌛' : 
+                    type === 'success' ? '✓' : 
+                    type === 'error' ? '✕' : 'ℹ';
+        
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span class="toast-text">${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+
+        // loading 타입이 아닌 경우에만 자동으로 제거
+        if (type !== 'loading') {
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        return toast; // 토스트 엘리먼트 반환 (나중에 수동으로 제거할 수 있도록)
+    }
+
+    // 필터링 결과 토스트 메시지 표시
+    showFilterResultToast(visibleCount, totalCount) {
+        // 기존 로딩 토스트 제거
+        const loadingToast = document.querySelector('.toast-message.loading');
+        if (loadingToast) {
+            loadingToast.remove();
+        }
+
+        // 결과 메시지 생성
+        let message = '';
+        let type = 'info';
+
+        if (visibleCount === 0) {
+            message = '검색 결과가 없습니다.';
+            type = 'error';
+        } else if (visibleCount === totalCount) {
+            message = `전체 ${totalCount}개의 항목이 표시됩니다.`;
+            type = 'success';
+        } else {
+            message = `전체 ${totalCount}개 중 ${visibleCount}개의 항목이 필터링되었습니다.`;
+            type = 'success';
+        }
+
+        this.showToast(message, type);
     }
 }
 
-// 필터 인스턴스 생성 및 초기화
-const vendorFilter = new VendorFilter();
-module.exports = vendorFilter; 
+// 클래스를 전역 스코프에 노출
+window.VendorFilter = VendorFilter; 

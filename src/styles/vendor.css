@@ -928,15 +928,47 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
+    min-width: 250px;
 }
 
+.toast-message.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.toast-message.error {
+    background-color: #f44336;
+    color: white;
+}
+
+.toast-message.info {
+    background-color: #2196F3;
+    color: white;
+}
+
+.toast-message.loading {
+    background-color: #FF9800;
+    color: white;
+}
+
+.toast-icon {
+    font-size: 1.2em;
+}
+
+.toast-text {
+    flex: 1;
+}
+
+/* 토스트 애니메이션 */
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -946,4 +978,176 @@
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+.toast-message.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* 로딩 아이콘 애니메이션 */
+.toast-message.loading .toast-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.verification-status {
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.verification-status:hover {
+    transform: scale(1.05);
+}
+
+.verification-status:active {
+    transform: scale(0.95);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.9em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* 인증완료 상태 */
+.status-badge.verified {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #43A047;
+}
+
+.status-badge.verified:hover {
+    background-color: #43A047;
+    box-shadow: 0 3px 6px rgba(76, 175, 80, 0.3);
+}
+
+/* 미인증 상태 */
+.status-badge.unverified {
+    background-color: #f44336;
+    color: white;
+    border: 1px solid #e53935;
+}
+
+.status-badge.unverified:hover {
+    background-color: #e53935;
+    box-shadow: 0 3px 6px rgba(244, 67, 54, 0.3);
+}
+
+/* 대기중 상태 */
+.status-badge.pending {
+    background-color: #FF9800;
+    color: white;
+    border: 1px solid #FB8C00;
+}
+
+.status-badge.pending:hover {
+    background-color: #FB8C00;
+    box-shadow: 0 3px 6px rgba(255, 152, 0, 0.3);
+}
+
+/* 알 수 없음 상태 */
+.status-badge.unknown {
+    background-color: #9E9E9E;
+    color: white;
+    border: 1px solid #757575;
+}
+
+.status-badge.unknown:hover {
+    background-color: #757575;
+    box-shadow: 0 3px 6px rgba(158, 158, 158, 0.3);
+}
+
+/* 아이콘 스타일 */
+.status-badge::before {
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+/* 애니메이션 효과 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.status-badge {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 인증 상태 필터 스타일 */
+.verification-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.verification-label.true {
+    color: #4CAF50;
+    background-color: #e8f5e9;
+}
+
+.verification-label.false {
+    color: #f44336;
+    background-color: #ffebee;
+}
+
+.verification-label.yet {
+    color: #FF9800;
+    background-color: #fff3e0;
+}
+
+.selected-verification {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 선택된 상태일 때의 스타일 */
+.filter-option[data-verification] input:checked + label {
+    font-weight: 500;
+}
+
+.filter-option[data-verification="true"] input:checked + label {
+    background-color: #e8f5e9;
+}
+
+.filter-option[data-verification="false"] input:checked + label {
+    background-color: #ffebee;
+}
+
+.filter-option[data-verification="yet"] input:checked + label {
+    background-color: #fff3e0;
 } 

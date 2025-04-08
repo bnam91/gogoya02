@@ -1,5 +1,6 @@
-const phone = require('./phone');
-const mongo = require('./mongo');
+// const mongo = require('./mongo'); 삭제
+// const phone = require('./phone'); 삭제
+// 대신 window.mongo와 window.phone 사용
 
 class VendorCallManager {
     constructor() {
@@ -27,7 +28,7 @@ class VendorCallManager {
     async endCall() {
         try {
             if (this.isCalling) {
-                await phone.endCall();
+                await window.phone.endCall();
                 this.isCalling = false;
                 
                 if (this.callDurationTimer) {
@@ -53,7 +54,7 @@ class VendorCallManager {
 
     async startCall(phoneNumber) {
         try {
-            await phone.call(phoneNumber);
+            await window.phone.call(phoneNumber);
             this.isCalling = true;
             this.callStartTime = new Date();
             
@@ -78,7 +79,7 @@ class VendorCallManager {
             customer_service_number: this.currentBrandData.customer_service_number,
             contact_person: {
                 name: "고야앤드미디어",
-                phone: "01021456993"
+                phone: "01021300380"
             },
             call_date: this.callStartTime.toISOString(),
             call_duration_sec: duration,
@@ -88,7 +89,7 @@ class VendorCallManager {
         };
         
         try {
-            await mongo.saveCallRecord(callRecord);
+            await window.mongo.saveCallRecord(callRecord);
             return true;
         } catch (error) {
             console.error('통화 기록 저장 중 오류:', error);
@@ -102,7 +103,7 @@ class VendorCallManager {
 
     async getCallHistory(brandName) {
         try {
-            return await mongo.getCallRecords(brandName);
+            return await window.mongo.getCallRecords(brandName);
         } catch (error) {
             console.error('통화 기록 조회 중 오류:', error);
             throw error;
@@ -110,4 +111,4 @@ class VendorCallManager {
     }
 }
 
-module.exports = new VendorCallManager(); 
+module.exports = VendorCallManager; 

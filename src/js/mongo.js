@@ -18,7 +18,7 @@ async function getMongoData() {
         console.log("MongoDB 연결 성공!");
 
         const db = client.db('insta09_database');
-        const collection = db.collection('99_test_brand_phone_data');
+        const collection = db.collection('gogoya_vendor_brand_info');
         
         const data = await collection.find({}).toArray();
         await client.close();
@@ -30,7 +30,7 @@ async function getMongoData() {
     }
 }
 
-async function getVendorData(skip = 0, limit = 20) {
+async function getVendorData(skip = 0, limit = 20, filters = {}) {
     try {
         const client = new MongoClient(uri, {
             serverApi: {
@@ -44,10 +44,45 @@ async function getVendorData(skip = 0, limit = 20) {
         await client.db("admin").command({ ping: 1 });
 
         const db = client.db('insta09_database');
-        const collection = db.collection('04_test_item_today_data');
+        const collection = db.collection('04_main_item_today_data');
+        
+        // 필터 쿼리 생성
+        const query = {};
+        
+        // 브랜드명 검색 필터
+        if (filters.searchQuery) {
+            query.brand = { $regex: filters.searchQuery, $options: 'i' };
+        }
+        
+        // 카테고리 필터
+        if (filters.categories && filters.categories.length > 0) {
+            query.item_category = { $in: filters.categories };
+        }
+        
+        // 등급 필터
+        if (filters.grades && filters.grades.length > 0) {
+            query.grade = { $in: filters.grades };
+        }
+
+        // 브랜드 정보 유무 필터
+        if (filters.hasBrandInfo !== null) {
+            // 먼저 브랜드 정보가 있는 브랜드들의 목록을 가져옴
+            const brandInfoCollection = db.collection('gogoya_vendor_brand_info');
+            const brandInfoCursor = await brandInfoCollection.find({}, { projection: { brand_name: 1 } });
+            const brandInfos = await brandInfoCursor.toArray();
+            const brandNamesWithInfo = brandInfos.map(info => info.brand_name);
+
+            if (filters.hasBrandInfo) {
+                // 브랜드 정보가 있는 경우
+                query.brand = { $in: brandNamesWithInfo };
+            } else {
+                // 브랜드 정보가 없는 경우
+                query.brand = { $nin: brandNamesWithInfo };
+            }
+        }
         
         // 필요한 필드만 프로젝션
-        const cursor = collection.find({}, {
+        const cursor = collection.find(query, {
             projection: {
                 _id: 1,
                 NEW: 1,
@@ -62,7 +97,11 @@ async function getVendorData(skip = 0, limit = 20) {
                 item_feed_link: 1
             }
         })
-        .sort({ crawl_date: -1 })  // 크롤링 날짜 기준 내림차순
+        .sort([
+            ['crawl_date', -1],  // 크롤링 날짜 기준 내림차순
+            ['brand', 1],        // 브랜드명 기준 오름차순
+            ['_id', 1]           // _id 기준 오름차순
+        ])
         .skip(skip)
         .limit(limit);
             
@@ -93,7 +132,7 @@ async function getBrandPhoneData(brandName) {
         await client.db("admin").command({ ping: 1 });
 
         const db = client.db('insta09_database');
-        const collection = db.collection('99_test_brand_phone_data');
+        const collection = db.collection('gogoya_vendor_brand_info');
         const data = await collection.findOne({ brand_name: brandName });
         await client.close();
         return data;
@@ -201,7 +240,7 @@ async function updateBrandInfo(brandName, updateData) {
         await client.db("admin").command({ ping: 1 });
 
         const db = client.db('insta09_database');
-        const collection = db.collection('99_test_brand_phone_data');
+        const collection = db.collection('gogoya_vendor_brand_info');
         
         const result = await collection.updateOne(
             { brand_name: brandName },

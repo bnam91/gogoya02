@@ -85,4 +85,6 @@ class VendorInfoEditor {
 }
 
 // 전역 인스턴스 생성
-const vendorInfoEditor = new VendorInfoEditor(); 
+const vendorInfoEditor = new VendorInfoEditor();
+
+module.exports = VendorInfoEditor;  // 클래스 자체를 내보냄 
