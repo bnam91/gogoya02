@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const config = require('./config');
 
 const uri = "mongodb+srv://coq3820:JmbIOcaEOrvkpQo1@cluster0.qj1ty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const ITEMS_PER_PAGE = 20;
@@ -17,8 +18,8 @@ async function getMongoData() {
         await client.db("admin").command({ ping: 1 });
         console.log("MongoDB 연결 성공!");
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_brand_info');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.vendorBrandInfo);
         
         const data = await collection.find({}).toArray();
         await client.close();
@@ -43,8 +44,8 @@ async function getVendorData(skip = 0, limit = 20, filters = {}) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_04_main_item_today_data');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.mainItemTodayData);
         
         // 필터 쿼리 생성
         const query = {};
@@ -69,17 +70,14 @@ async function getVendorData(skip = 0, limit = 20, filters = {}) {
 
         // 브랜드 정보 유무 필터
         if (filters.hasBrandInfo !== null) {
-            // 먼저 브랜드 정보가 있는 브랜드들의 목록을 가져옴
-            const brandInfoCollection = db.collection('dev_gogoya_vendor_brand_info');
+            const brandInfoCollection = db.collection(config.database.collections.vendorBrandInfo);
             const brandInfoCursor = await brandInfoCollection.find({}, { projection: { brand_name: 1 } });
             const brandInfos = await brandInfoCursor.toArray();
             const brandNamesWithInfo = brandInfos.map(info => info.brand_name);
 
             if (filters.hasBrandInfo) {
-                // 브랜드 정보가 있는 경우
                 query.brand = { $in: brandNamesWithInfo };
             } else {
-                // 브랜드 정보가 없는 경우
                 query.brand = { $nin: brandNamesWithInfo };
             }
         }
@@ -134,8 +132,8 @@ async function getBrandPhoneData(brandName) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_brand_info');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.vendorBrandInfo);
         const data = await collection.findOne({ brand_name: brandName });
         await client.close();
         return data;
@@ -158,8 +156,8 @@ async function saveCallRecord(callData) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_CallRecords');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
         
         const result = await collection.insertOne(callData);
         await client.close();
@@ -183,10 +181,9 @@ async function getCallRecords(brandName) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_CallRecords');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
         
-        // brand_name으로 통화 기록 조회 (최신순으로 정렬)
         const records = await collection.find({ brand_name: brandName })
             .sort({ call_date: -1 })
             .toArray();
@@ -212,10 +209,9 @@ async function getLatestCallRecordByCardId(cardId) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_CallRecords');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
         
-        // card_id로 통화 기록 조회 (최신순으로 정렬하고 첫 번째만 가져옴)
         const record = await collection.findOne(
             { card_id: cardId },
             { sort: { call_date: -1 } }
@@ -242,8 +238,8 @@ async function updateBrandInfo(brandName, updateData) {
         await client.connect();
         await client.db("admin").command({ ping: 1 });
 
-        const db = client.db('insta09_database');
-        const collection = db.collection('dev_gogoya_vendor_brand_info');
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.vendorBrandInfo);
         
         const result = await collection.updateOne(
             { brand_name: brandName },
