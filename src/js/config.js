@@ -2,9 +2,9 @@ module.exports = {
     database: {
         name: 'insta09_database',
         collections: {
-            vendorBrandInfo: 'dev_gogoya_vendor_brand_info',
-            mainItemTodayData: 'dev_04_main_item_today_data',
-            callRecords: 'dev_gogoya_vendor_CallRecords'
+            vendorBrandInfo: 'gogoya_vendor_brand_info',
+            mainItemTodayData: '04_main_item_today_data',
+            callRecords: 'gogoya_vendor_CallRecords'
         }
     }
 }; 
