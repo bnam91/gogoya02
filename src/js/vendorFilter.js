@@ -382,7 +382,8 @@ class VendorFilter {
             categories: this.selectedCategories,
             grades: this.selectedGrades,
             hasBrandInfo: this.hasBrandInfo,
-            verificationStatus: this.selectedVerificationStatus
+            verificationStatus: this.selectedVerificationStatus,
+            nextSteps: this.selectedNextSteps
         };
         
         await window.vendor.loadVendorData(true, filters);

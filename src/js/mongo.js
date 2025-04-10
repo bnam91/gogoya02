@@ -126,6 +126,24 @@ async function getVendorData(skip = 0, limit = 20, filters = {}) {
                 query.brand = { $nin: brandNamesWithInfo };
             }
         }
+
+        // 다음 단계 필터
+        if (filters.nextSteps && filters.nextSteps.length > 0) {
+            const callRecordsCollection = db.collection(config.database.collections.callRecords);
+            const callRecordsCursor = await callRecordsCollection.find(
+                { nextstep: { $in: filters.nextSteps } },
+                { projection: { brand_name: 1 } }
+            );
+            const callRecords = await callRecordsCursor.toArray();
+            const brandNamesWithNextStep = callRecords.map(record => record.brand_name);
+            
+            if (brandNamesWithNextStep.length > 0) {
+                query.brand = { $in: brandNamesWithNextStep };
+            } else {
+                // 해당하는 다음 단계가 없는 경우 빈 결과를 반환
+                query.brand = { $in: [] };
+            }
+        }
         
         // 필요한 필드만 프로젝션
         const cursor = collection.find(query, {
