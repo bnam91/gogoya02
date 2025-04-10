@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const config = require('./config');
+const { ObjectId } = require('mongodb');
 
 const uri = "mongodb+srv://coq3820:JmbIOcaEOrvkpQo1@cluster0.qj1ty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const ITEMS_PER_PAGE = 20;
@@ -254,6 +255,35 @@ async function updateBrandInfo(brandName, updateData) {
     }
 }
 
+async function updateCallRecord(recordId, updateData) {
+    try {
+        const client = new MongoClient(uri, {
+            serverApi: {
+                version: ServerApiVersion.v1,
+                strict: true,
+                deprecationErrors: true,
+            }
+        });
+
+        await client.connect();
+        await client.db("admin").command({ ping: 1 });
+
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
+        
+        const result = await collection.updateOne(
+            { _id: new ObjectId(recordId) },
+            { $set: updateData }
+        );
+            
+        await client.close();
+        return result;
+    } catch (error) {
+        console.error('통화 기록 업데이트 중 오류:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     getMongoData,
     getVendorData,
@@ -261,5 +291,6 @@ module.exports = {
     saveCallRecord,
     getCallRecords,
     getLatestCallRecordByCardId,
-    updateBrandInfo
+    updateBrandInfo,
+    updateCallRecord
 }; 

@@ -11,6 +11,26 @@
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    position: relative;
+}
+
+.vendor-left::before {
+    content: "데이터를 불러오는 중입니다. 기다려주세요.";
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #000000;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.vendor-left .vendor-data-list {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.vendor-left .vendor-data-list.loaded {
+    opacity: 1;
 }
 
 .vendor-right {
@@ -653,6 +673,19 @@
     margin-bottom: 10px;
     padding: 10px;
     font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.call-record:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.call-record.selected {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.3);
 }
 
 .call-record-header {
@@ -923,91 +956,7 @@
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* 토스트 메시지 스타일 */
-.toast-message {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 1000;
-    animation: slideIn 0.3s ease-out;
-    min-width: 250px;
-}
-
-.toast-message.success {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.toast-message.error {
-    background-color: #f44336;
-    color: white;
-}
-
-.toast-message.info {
-    background-color: #2196F3;
-    color: white;
-}
-
-.toast-message.loading {
-    background-color: #FF9800;
-    color: white;
-}
-
-.toast-icon {
-    font-size: 1.2em;
-}
-
-.toast-text {
-    flex: 1;
-}
-
-/* 토스트 애니메이션 */
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.toast-message.fade-out {
-    animation: fadeOut 0.3s ease-out forwards;
-}
-
-@keyframes fadeOut {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-/* 로딩 아이콘 애니메이션 */
-.toast-message.loading .toast-icon {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
+/* 토스트 메시지 스타일 제거 */
 
 .verification-status {
     cursor: pointer;
@@ -1150,4 +1099,21 @@
 
 .filter-option[data-verification="yet"] input:checked + label {
     background-color: #fff3e0;
+}
+
+/* 건너뛰기 상태 */
+.status-badge.skip {
+    background-color: #607D8B;
+    color: white;
+    border: 1px solid #546E7A;
+}
+
+.status-badge.skip:hover {
+    background-color: #546E7A;
+    box-shadow: 0 3px 6px rgba(96, 125, 139, 0.3);
+}
+
+.verification-label.skip {
+    color: #607D8B;
+    background-color: #ECEFF1;
 } 

@@ -219,7 +219,7 @@ async function updateCallHistory(brandName) {
             const seconds = duration % 60;
 
             html += `
-                <div class="call-record">
+                <div class="call-record" data-record-id="${record._id}">
                     <div class="call-record-header">
                         <span class="call-date">${callDate.toLocaleString()}</span>
                         <span class="call-duration">${minutes}분 ${seconds}초</span>
@@ -233,12 +233,10 @@ async function updateCallHistory(brandName) {
                             <label>다음 단계:</label>
                             <span>${record.nextstep}</span>
                         </div>
-                        ${record.notes ? `
-                            <div class="record-item">
-                                <label>메모:</label>
-                                <span class="notes">${record.notes}</span>
-                            </div>
-                        ` : ''}
+                        <div class="record-item">
+                            <label>메모:</label>
+                            <span class="notes" data-record-id="${record._id}">${record.notes || '메모 없음'}</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -246,6 +244,91 @@ async function updateCallHistory(brandName) {
 
         html += '</div>';
         extraContent.innerHTML = html;
+
+        // 통화기록 선택 이벤트 리스너 추가
+        const callRecords = extraContent.querySelectorAll('.call-record');
+        callRecords.forEach(record => {
+            record.addEventListener('click', () => {
+                // 기존 선택 해제
+                callRecords.forEach(r => r.classList.remove('selected'));
+                // 새 선택 적용
+                record.classList.add('selected');
+            });
+        });
+
+        // 메모 더블클릭 이벤트 리스너 추가
+        const notesElements = extraContent.querySelectorAll('.notes');
+        notesElements.forEach(notesElement => {
+            notesElement.addEventListener('dblclick', async () => {
+                const recordId = notesElement.dataset.recordId;
+                const currentNotes = notesElement.textContent;
+                
+                // 메모 수정 UI 생성
+                const notesContainer = notesElement.parentElement;
+                const notesInput = document.createElement('textarea');
+                notesInput.className = 'notes-input';
+                notesInput.value = currentNotes === '메모 없음' ? '' : currentNotes;
+                
+                const notesButtons = document.createElement('div');
+                notesButtons.className = 'notes-buttons';
+                
+                const saveButton = document.createElement('button');
+                saveButton.className = 'notes-button notes-save';
+                saveButton.textContent = '저장';
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'notes-button notes-cancel';
+                cancelButton.textContent = '취소';
+                
+                notesButtons.appendChild(saveButton);
+                notesButtons.appendChild(cancelButton);
+                
+                // 기존 메모 숨기기
+                notesElement.style.display = 'none';
+                
+                // 수정 UI 추가
+                notesContainer.appendChild(notesInput);
+                notesContainer.appendChild(notesButtons);
+                
+                // 저장 버튼 이벤트
+                saveButton.onclick = async () => {
+                    const newNotes = notesInput.value.trim();
+                    try {
+                        // MongoDB 업데이트
+                        await mongo.updateCallRecord(recordId, { notes: newNotes });
+                        
+                        // UI 업데이트
+                        notesElement.textContent = newNotes || '메모 없음';
+                        notesElement.style.display = 'block';
+                        notesInput.remove();
+                        notesButtons.remove();
+                        
+                        // 성공 메시지 표시
+                        const toast = document.createElement('div');
+                        toast.className = 'toast-message success';
+                        toast.textContent = '메모가 저장되었습니다.';
+                        document.body.appendChild(toast);
+                        
+                        setTimeout(() => {
+                            toast.remove();
+                        }, 3000);
+                    } catch (error) {
+                        console.error('메모 저장 중 오류:', error);
+                        alert('메모 저장 중 오류가 발생했습니다.');
+                    }
+                };
+                
+                // 취소 버튼 이벤트
+                cancelButton.onclick = () => {
+                    notesElement.style.display = 'block';
+                    notesInput.remove();
+                    notesButtons.remove();
+                };
+                
+                // 입력 필드에 포커스
+                notesInput.focus();
+            });
+        });
     } catch (error) {
         console.error('통화 기록 조회 중 오류:', error);
         extraContent.innerHTML = `
@@ -257,13 +340,17 @@ async function updateCallHistory(brandName) {
 
 async function updateRightPanel(item) {
     const rightPanel = document.querySelector('.vendor-right');
+    const extraContent = document.querySelector('.extra-content');
+    
     if (!item) {
         rightPanel.innerHTML = '<p>브랜드 정보가 없습니다.</p>';
+        extraContent.innerHTML = '<h3>통화 기록</h3><p>카드를 선택하면 통화 기록이 표시됩니다.</p>';
         return;
     }
 
     // 로딩 상태 표시
     rightPanel.innerHTML = '<p>브랜드 정보를 불러오는 중...</p>';
+    extraContent.innerHTML = '<h3>통화 기록</h3><p>통화 기록을 불러오는 중...</p>';
 
     try {
         const brandName = item.brand;
@@ -323,10 +410,11 @@ async function updateRightPanel(item) {
                             <div class="info-item">
                                 <label>인증 여부</label>
                                 <span class="verification-status editable" data-status="${brandPhoneData.is_verified}">${
-                                    brandPhoneData.is_verified === true ? '<span class="status-badge verified">✓ 인증완료</span>' :
-                                    brandPhoneData.is_verified === false ? '<span class="status-badge unverified">✕ 미인증</span>' :
-                                    brandPhoneData.is_verified === 'yet' ? '<span class="status-badge pending">⟳ 대기중</span>' : 
-                                    '<span class="status-badge unknown">? 알 수 없음</span>'
+                                    brandPhoneData.is_verified === 'true' ? '<span class="status-badge verified">인증완료</span>' :
+                                    brandPhoneData.is_verified === 'false' ? '<span class="status-badge unverified">미인증</span>' :
+                                    brandPhoneData.is_verified === 'yet' ? '<span class="status-badge pending">대기중</span>' :
+                                    brandPhoneData.is_verified === 'skip' ? '<span class="status-badge skip">스킵</span>' :
+                                    '<span class="status-badge unknown">알 수 없음</span>'
                                 }</span>
                             </div>
                         </div>
@@ -429,13 +517,15 @@ async function updateRightPanel(item) {
                 const currentStatus = brandPhoneData.is_verified;
                 let newStatus;
                 
-                // 상태 순환: false -> 'yet' -> true -> false
-                if (currentStatus === false) {
-                    newStatus = 'yet';
-                } else if (currentStatus === 'yet') {
-                    newStatus = true;
+                // 상태 순환: 'yet' -> 'true' -> 'false' -> 'skip' -> 'yet'
+                if (currentStatus === 'yet') {
+                    newStatus = 'true';
+                } else if (currentStatus === 'true') {
+                    newStatus = 'false';
+                } else if (currentStatus === 'false') {
+                    newStatus = 'skip';
                 } else {
-                    newStatus = false;
+                    newStatus = 'yet';
                 }
                 
                 try {
@@ -446,22 +536,31 @@ async function updateRightPanel(item) {
                     
                     // UI 업데이트
                     brandPhoneData.is_verified = newStatus;
-                    verificationStatus.setAttribute('data-status', String(newStatus));
+                    verificationStatus.setAttribute('data-status', newStatus);
                     verificationStatus.innerHTML = 
-                        newStatus === true ? '<span class="status-badge verified">✓ 인증완료</span>' :
-                        newStatus === false ? '<span class="status-badge unverified">✕ 미인증</span>' :
-                        newStatus === 'yet' ? '<span class="status-badge pending">⟳ 대기중</span>' :
-                        '<span class="status-badge unknown">? 알 수 없음</span>';
+                        newStatus === 'true' ? '<span class="status-badge verified">인증완료</span>' :
+                        newStatus === 'false' ? '<span class="status-badge unverified">미인증</span>' :
+                        newStatus === 'yet' ? '<span class="status-badge pending">대기중</span>' :
+                        newStatus === 'skip' ? '<span class="status-badge skip">스킵</span>' :
+                        '<span class="status-badge unknown">알 수 없음</span>';
                     
                     // 성공 메시지 표시
+                    // 기존 토스트 제거
+                    const existingToast = document.querySelector('.toast-message');
+                    if (existingToast) {
+                        existingToast.remove();
+                    }
+
                     const toast = document.createElement('div');
-                    toast.className = 'toast-message';
+                    toast.className = 'toast-message success';
+                    toast.style.zIndex = '9999';
                     toast.textContent = '인증 상태가 업데이트되었습니다.';
                     document.body.appendChild(toast);
                     
                     // 3초 후 토스트 메시지 제거
                     setTimeout(() => {
-                        toast.remove();
+                        toast.classList.add('fade-out');
+                        setTimeout(() => toast.remove(), 300);
                     }, 3000);
                     
                 } catch (error) {

@@ -19,9 +19,10 @@ class VendorFilter {
         this.gradeOptions = ["S", "A", "B", "C", "D", "R"];
         this.nextStepOptions = ['제안서 요청', '재시도 예정', '진행거절', '번호오류', '콜백대기', '기타'];
         this.verificationOptions = [
-            { value: 'true', label: '✓ 인증완료' },
-            { value: 'yet', label: '⟳ 대기중' },
-            { value: 'false', label: '✕ 미인증' }
+            { value: 'true', label: '인증완료' },
+            { value: 'yet', label: '대기중' },
+            { value: 'false', label: '미인증' },
+            { value: 'skip', label: '스킵' }
         ];
     }
 
