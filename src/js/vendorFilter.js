@@ -368,8 +368,24 @@ class VendorFilter {
         window.vendor.hasMoreData = true;
         window.vendor.cardData = [];
         
+        // 중앙 패널 초기화
+        const dataList = document.getElementById('vendor-data-list');
+        dataList.innerHTML = '<p>데이터를 불러오는 중...</p>';
+        
+        // 우측 패널 초기화
+        const rightPanel = document.querySelector('.vendor-right');
+        rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
+        
         // 필터링된 데이터 로드
-        await window.vendor.loadVendorData(true);
+        const filters = {
+            searchQuery: this.searchQuery,
+            categories: this.selectedCategories,
+            grades: this.selectedGrades,
+            hasBrandInfo: this.hasBrandInfo,
+            verificationStatus: this.selectedVerificationStatus
+        };
+        
+        await window.vendor.loadVendorData(true, filters);
         
         // 필터링 완료 후 결과 토스트 메시지 표시
         const cards = document.querySelectorAll('.card');

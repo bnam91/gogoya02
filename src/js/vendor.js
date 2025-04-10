@@ -854,19 +854,22 @@ async function createCard(item, index, startIndex) {
     return card;
 }
 
-async function loadVendorData(isInitialLoad = true) {
+async function loadVendorData(isInitialLoad = true, filters = {}) {
     if (isLoading || (!isInitialLoad && !hasMoreData)) return;
     
     try {
         isLoading = true;
         
-        // 현재 필터 상태를 가져옴
-        const filters = {
-            searchQuery: vendorFilter.searchQuery,
-            categories: vendorFilter.selectedCategories,
-            grades: vendorFilter.selectedGrades,
-            hasBrandInfo: vendorFilter.hasBrandInfo
-        };
+        // 필터가 전달되지 않은 경우 현재 필터 상태를 가져옴
+        if (Object.keys(filters).length === 0) {
+            filters = {
+                searchQuery: vendorFilter.searchQuery,
+                categories: vendorFilter.selectedCategories,
+                grades: vendorFilter.selectedGrades,
+                hasBrandInfo: vendorFilter.hasBrandInfo,
+                verificationStatus: vendorFilter.selectedVerificationStatus
+            };
+        }
         
         const result = await mongo.getVendorData(currentSkip, 20, filters);
         const { data, hasMore } = result;
