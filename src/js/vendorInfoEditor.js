@@ -70,12 +70,16 @@ class VendorInfoEditor {
 
     showToast(message) {
         const toast = document.createElement('div');
-        toast.className = 'toast-message';
-        toast.textContent = message;
+        toast.className = 'toast-message success';
+        toast.innerHTML = `
+            <span class="toast-icon">✓</span>
+            <span class="toast-text">${message}</span>
+        `;
         document.body.appendChild(toast);
         
         setTimeout(() => {
-            toast.remove();
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 

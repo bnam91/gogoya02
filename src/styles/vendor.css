@@ -715,14 +715,17 @@
 
 .record-item {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 4px;
     line-height: 1.3;
+    margin-bottom: 8px;
 }
 
 .record-item label {
     color: #495057;
     font-weight: 500;
-    min-width: 70px;
+    display: block;
+    margin-bottom: 2px;
     font-size: 0.9em;
 }
 
@@ -730,11 +733,34 @@
     font-size: 0.9em;
 }
 
+.record-item span.nextstep {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-radius: 4px;
+    margin-top: 2px;
+    font-size: 0.85em;
+}
+
 .record-item .notes {
     white-space: pre-wrap;
     color: #495057;
     font-size: 0.9em;
-    line-height: 1.3;
+    line-height: 1.4;
+    padding: 6px 8px;
+    width: 100%;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    margin-top: 2px;
+    overflow: auto;
+    max-height: 150px; /* 너무 길면 스크롤바 표시 */
+}
+
+.record-item .notes:empty:before {
+    content: '메모 없음';
+    color: #adb5bd;
+    font-style: italic;
 }
 
 /* NEW 상태 표시 */
@@ -1116,4 +1142,117 @@
 .verification-label.skip {
     color: #607D8B;
     background-color: #ECEFF1;
+}
+
+/* 다음단계 편집 스타일 */
+.nextstep {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.nextstep:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.nextstep-select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.nextstep-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.nextstep-button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.nextstep-save {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.nextstep-save:hover {
+    background-color: #3e8e41;
+}
+
+.nextstep-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.nextstep-cancel:hover {
+    background-color: #d32f2f;
+}
+
+/* 메모 편집 스타일 개선 */
+.notes {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: block;
+}
+
+.notes:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.notes-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    resize: vertical;
+}
+
+.notes-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.notes-button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.notes-save {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.notes-save:hover {
+    background-color: #3e8e41;
+}
+
+.notes-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.notes-cancel:hover {
+    background-color: #d32f2f;
 } 

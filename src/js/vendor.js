@@ -226,16 +226,16 @@ async function updateCallHistory(brandName) {
                     </div>
                     <div class="call-record-details">
                         <div class="record-item">
-                            <label>통화 상태:</label>
+                            <label>통화 상태</label>
                             <span>${record.call_status}</span>
                         </div>
                         <div class="record-item">
-                            <label>다음 단계:</label>
-                            <span>${record.nextstep}</span>
+                            <label>다음 단계</label>
+                            <span class="nextstep" data-record-id="${record._id}" data-nextstep="${record.nextstep || ''}">${record.nextstep || '미설정'}</span>
                         </div>
                         <div class="record-item">
-                            <label>메모:</label>
-                            <span class="notes" data-record-id="${record._id}">${record.notes || '메모 없음'}</span>
+                            <label>메모</label>
+                            <span class="notes" data-record-id="${record._id}">${record.notes || ''}</span>
                         </div>
                     </div>
                 </div>
@@ -253,6 +253,101 @@ async function updateCallHistory(brandName) {
                 callRecords.forEach(r => r.classList.remove('selected'));
                 // 새 선택 적용
                 record.classList.add('selected');
+            });
+        });
+
+        // 다음단계 더블클릭 이벤트 리스너 추가
+        const nextstepElements = extraContent.querySelectorAll('.nextstep');
+        nextstepElements.forEach(nextstepElement => {
+            nextstepElement.addEventListener('dblclick', async () => {
+                const recordId = nextstepElement.dataset.recordId;
+                const currentNextStep = nextstepElement.dataset.nextstep;
+                
+                // 다음단계 수정 UI 생성
+                const nextstepContainer = nextstepElement.parentElement;
+                
+                // 셀렉트 박스 생성
+                const nextstepSelect = document.createElement('select');
+                nextstepSelect.className = 'nextstep-select';
+                
+                // 옵션 추가
+                const options = ['', '제안서 요청', '재시도 예정', '진행거절', '번호오류', '콜백대기', '기타'];
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option || '선택하세요';
+                    if (option === currentNextStep) {
+                        optionElement.selected = true;
+                    }
+                    nextstepSelect.appendChild(optionElement);
+                });
+                
+                // 버튼 컨테이너 생성
+                const nextstepButtons = document.createElement('div');
+                nextstepButtons.className = 'nextstep-buttons';
+                
+                // 저장 버튼
+                const saveButton = document.createElement('button');
+                saveButton.className = 'nextstep-button nextstep-save';
+                saveButton.textContent = '저장';
+                
+                // 취소 버튼
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'nextstep-button nextstep-cancel';
+                cancelButton.textContent = '취소';
+                
+                nextstepButtons.appendChild(saveButton);
+                nextstepButtons.appendChild(cancelButton);
+                
+                // 기존 다음단계 숨기기
+                nextstepElement.style.display = 'none';
+                
+                // 수정 UI 추가
+                nextstepContainer.appendChild(nextstepSelect);
+                nextstepContainer.appendChild(nextstepButtons);
+                
+                // 저장 버튼 이벤트
+                saveButton.onclick = async () => {
+                    const newNextStep = nextstepSelect.value;
+                    try {
+                        // MongoDB 업데이트
+                        await mongo.updateCallRecord(recordId, { nextstep: newNextStep });
+                        
+                        // UI 업데이트
+                        nextstepElement.textContent = newNextStep || '미설정';
+                        nextstepElement.dataset.nextstep = newNextStep;
+                        nextstepElement.style.display = 'inline';
+                        nextstepSelect.remove();
+                        nextstepButtons.remove();
+                        
+                        // 성공 메시지 표시
+                        const toast = document.createElement('div');
+                        toast.className = 'toast-message success';
+                        toast.innerHTML = `
+                            <span class="toast-icon">✓</span>
+                            <span class="toast-text">다음 단계가 업데이트되었습니다.</span>
+                        `;
+                        document.body.appendChild(toast);
+                        
+                        setTimeout(() => {
+                            toast.classList.add('fade-out');
+                            setTimeout(() => toast.remove(), 300);
+                        }, 3000);
+                        
+                        // 선택된 카드의 통화 상태 업데이트
+                        await updateCardCallStatus(recordId, newNextStep);
+                    } catch (error) {
+                        console.error('다음 단계 저장 중 오류:', error);
+                        alert('다음 단계 저장 중 오류가 발생했습니다.');
+                    }
+                };
+                
+                // 취소 버튼 이벤트
+                cancelButton.onclick = () => {
+                    nextstepElement.style.display = 'inline';
+                    nextstepSelect.remove();
+                    nextstepButtons.remove();
+                };
             });
         });
 
@@ -306,11 +401,15 @@ async function updateCallHistory(brandName) {
                         // 성공 메시지 표시
                         const toast = document.createElement('div');
                         toast.className = 'toast-message success';
-                        toast.textContent = '메모가 저장되었습니다.';
+                        toast.innerHTML = `
+                            <span class="toast-icon">✓</span>
+                            <span class="toast-text">메모가 저장되었습니다.</span>
+                        `;
                         document.body.appendChild(toast);
                         
                         setTimeout(() => {
-                            toast.remove();
+                            toast.classList.add('fade-out');
+                            setTimeout(() => toast.remove(), 300);
                         }, 3000);
                     } catch (error) {
                         console.error('메모 저장 중 오류:', error);
@@ -335,6 +434,40 @@ async function updateCallHistory(brandName) {
             <h3>통화 기록</h3>
             <p>통화 기록을 불러오는 중 오류가 발생했습니다.</p>
         `;
+    }
+}
+
+// 선택된 카드의 통화 상태 업데이트 (다음 단계 포함)
+async function updateCardCallStatus(recordId, newNextStep) {
+    try {
+        // 해당 기록 조회
+        const record = await mongo.getCallRecordById(recordId);
+        if (!record || !record.card_id) return;
+        
+        // 선택된 카드 찾기
+        const selectedCard = document.querySelector(`.card[data-id="${record.card_id}"]`) || 
+                            document.querySelector('.card.selected');
+        
+        if (selectedCard) {
+            const callStatusElement = selectedCard.querySelector('.call-status');
+            if (callStatusElement) {
+                // 기존 다음 단계 요소 찾기
+                const nextStepElement = callStatusElement.querySelector('.next-step-value');
+                
+                if (nextStepElement) {
+                    // 있으면 업데이트
+                    nextStepElement.textContent = newNextStep;
+                } else if (newNextStep) {
+                    // 없으면 새로 추가
+                    const newNextStepElement = document.createElement('span');
+                    newNextStepElement.className = 'next-step-value';
+                    newNextStepElement.textContent = newNextStep;
+                    callStatusElement.appendChild(newNextStepElement);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('카드 통화 상태 업데이트 중 오류:', error);
     }
 }
 
@@ -554,7 +687,10 @@ async function updateRightPanel(item) {
                     const toast = document.createElement('div');
                     toast.className = 'toast-message success';
                     toast.style.zIndex = '9999';
-                    toast.textContent = '인증 상태가 업데이트되었습니다.';
+                    toast.innerHTML = `
+                        <span class="toast-icon">✓</span>
+                        <span class="toast-text">인증 상태가 업데이트되었습니다.</span>
+                    `;
                     document.body.appendChild(toast);
                     
                     // 3초 후 토스트 메시지 제거
@@ -739,6 +875,7 @@ async function handleKeyDown(e) {
 async function createCard(item, index, startIndex) {
     const card = document.createElement('div');
     card.className = 'card';
+    card.dataset.id = item._id;
     
     // 브랜드 정보 유무 확인
     try {

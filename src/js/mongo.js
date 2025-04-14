@@ -245,6 +245,15 @@ async function updateCallRecord(recordId, updateData) {
     });
 }
 
+async function getCallRecordById(recordId) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
+        return await collection.findOne({ _id: new ObjectId(recordId) });
+    });
+}
+
 module.exports = {
     getMongoData,
     getVendorData,
@@ -253,5 +262,6 @@ module.exports = {
     getCallRecords,
     getLatestCallRecordByCardId,
     updateBrandInfo,
-    updateCallRecord
+    updateCallRecord,
+    getCallRecordById
 }; 
