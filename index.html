@@ -35,7 +35,9 @@
                         <span class="toggle-icon">▼</span>
                     </div>
                     <ul class="submenu">
+                        <li data-page="vendor/dashboard">대시보드</li>
                         <li data-page="vendor/brandcontact">브랜드 컨택</li>
+                        <li data-page="vendor/testtab">테스트</li>
                     </ul>
                 </li>
             </ul>
@@ -45,6 +47,15 @@
             <!-- 홈 페이지 콘텐츠 -->
             <div id="home-content" class="content-section active">
                 대기중입니다
+            </div>
+            <!-- 대시보드탭 콘텐츠 -->
+            <div id="dashboard-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">대시보드</span>
+                </div>
             </div>
             <!-- 벤더 페이지 콘텐츠 -->
             <div id="vendor-content" class="content-section">
@@ -72,6 +83,15 @@
                             <p>여기에 추가 정보가 표시됩니다.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- 테스트탭 콘텐츠 -->
+            <div id="testtab-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">테스트</span>
                 </div>
             </div>
         </div>
@@ -142,8 +162,12 @@
                 const page = this.dataset.page;
                 if (page === 'home') {
                     showContent('home');
+                } else if (page === 'vendor/dashboard') {
+                    showContent('dashboard');
                 } else if (page === 'vendor/brandcontact') {
                     showContent('vendor');
+                } else if (page === 'vendor/testtab') {
+                    showContent('testtab');
                 }
             });
         });
@@ -157,9 +181,15 @@
             // 선택된 콘텐츠 섹션 활성화
             document.getElementById(content + '-content').classList.add('active');
             
+            // 모든 필터 컨테이너 제거
+            document.querySelectorAll('.filter-container').forEach(filter => {
+                filter.remove();
+            });
+            
             // 벤더 페이지인 경우 초기화 함수 실행
             if (content === 'vendor') {
                 vendor.initVendor();
+                vendorFilter.init();
             }
         }
     </script>

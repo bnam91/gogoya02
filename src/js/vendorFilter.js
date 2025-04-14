@@ -27,18 +27,23 @@ class VendorFilter {
     }
 
     init() {
-        // 이미 존재하는 필터 컨테이너가 있다면 제거
-        const existingFilter = document.querySelector('.filter-container');
-        if (existingFilter) {
-            existingFilter.remove();
+        // 모든 필터 컨테이너 제거
+        document.querySelectorAll('.filter-container').forEach(filter => {
+            filter.remove();
+        });
+        
+        // 현재 페이지가 브랜드 컨택 페이지인 경우에만 필터 생성
+        const currentPage = document.querySelector('.content-section.active').id;
+        if (currentPage === 'vendor-content') {
+            const breadcrumb = document.querySelector('#vendor-content .breadcrumb');
+            if (breadcrumb) {
+                this.createFilterUI(breadcrumb);
+                this.setupEventListeners();
+            }
         }
-        this.createFilterUI();
-        this.setupEventListeners();
     }
 
-    createFilterUI() {
-        // 브레드크럼 아래에 필터 컨테이너 추가
-        const breadcrumb = document.querySelector('.breadcrumb');
+    createFilterUI(breadcrumb) {
         this.filterContainer = document.createElement('div');
         this.filterContainer.className = 'filter-container';
         this.filterContainer.innerHTML = `
@@ -105,7 +110,6 @@ class VendorFilter {
                             `).join('')}
                         </div>
                     </div>
-
                     <div class="filter-dropdown">
                         <div class="filter-label">인플루언서 등급</div>
                         <div class="filter-select">
@@ -121,7 +125,6 @@ class VendorFilter {
                             `).join('')}
                         </div>
                     </div>
-
                     <div class="filter-dropdown">
                         <div class="filter-label">다음 단계</div>
                         <div class="filter-select">
