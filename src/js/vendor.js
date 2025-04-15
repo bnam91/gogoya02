@@ -584,9 +584,9 @@ async function handleKeyDown(e) {
     
     if (visibleCards.length === 0) return;
 
-    const vendorLeft = document.querySelector('.vendor-left');
+    const dataList = document.getElementById('vendor-data-list');
     const cardHeight = visibleCards[0].offsetHeight;
-    const containerHeight = vendorLeft.clientHeight;
+    const containerHeight = dataList.clientHeight;
 
     switch (e.key) {
         case 'ArrowUp':
@@ -615,8 +615,8 @@ async function handleKeyDown(e) {
                     // 선택된 카드가 화면 상단에 오도록 스크롤 조정
                     const selectedCard = document.querySelector('.card.selected');
                     const cardTop = selectedCard.offsetTop;
-                    if (cardTop < vendorLeft.scrollTop) {
-                        vendorLeft.scrollTop = cardTop;
+                    if (cardTop < dataList.scrollTop) {
+                        dataList.scrollTop = cardTop;
                     }
                 }
             }
@@ -648,8 +648,8 @@ async function handleKeyDown(e) {
                     // 선택된 카드가 화면 하단에 오도록 스크롤 조정
                     const selectedCard = document.querySelector('.card.selected');
                     const cardBottom = selectedCard.offsetTop + selectedCard.offsetHeight;
-                    if (cardBottom > vendorLeft.scrollTop + containerHeight) {
-                        vendorLeft.scrollTop = cardBottom - containerHeight;
+                    if (cardBottom > dataList.scrollTop + containerHeight) {
+                        dataList.scrollTop = cardBottom - containerHeight;
                     }
                 }
             }
@@ -819,6 +819,9 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
 
         const cards = await Promise.all(cardPromises);
         cards.forEach(card => dataList.appendChild(card));
+        
+        // 데이터 로드 완료 후 클래스 추가
+        dataList.classList.add('loaded');
 
         currentSkip += data.length;
         
@@ -856,8 +859,8 @@ async function initVendor() {
     cardData = []; // 데이터 초기화
     loadVendorData(true);
     
-    const vendorLeft = document.querySelector('.vendor-left');
-    vendorLeft.addEventListener('scroll', handleScroll);
+    const dataList = document.getElementById('vendor-data-list');
+    dataList.addEventListener('scroll', handleScroll);
     
     // 우측 패널 초기화
     const rightPanel = document.querySelector('.vendor-right');

@@ -6,12 +6,34 @@
     height: calc(100vh - 120px);
 }
 
+/* 스크롤바 스타일은 main.css에서 전역으로 적용됨 */
+/* 개별 스타일 필요시 아래 주석 해제
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+*/
+
 .vendor-left {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
+    overflow-y: hidden;
     position: relative;
+    height: 100%;
 }
 
 .vendor-left::before {
@@ -27,6 +49,7 @@
 .vendor-left .vendor-data-list {
     opacity: 0;
     transition: opacity 0.3s ease;
+    height: 100%;
 }
 
 .vendor-left .vendor-data-list.loaded {

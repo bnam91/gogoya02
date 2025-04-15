@@ -1,12 +1,12 @@
 /* 제안서 관리 컨테이너 스타일 */
-.request-container {
+#request-content .request-container {
     display: flex;
     gap: 10px;
     padding: 0px;
     height: calc(100vh - 70px); /* 브레드크럼 높이를 제외 */
 }
 
-.request-panel {
+#request-content .request-panel {
     flex: 1; /* 모든 패널이 동일한 너비를 가지도록 설정 */
     min-width: 0; /* flex 아이템이 최소 너비를 가지도록 설정 */
     background: #fff;
@@ -16,7 +16,7 @@
     overflow: hidden; /* 스크롤바 숨김 */
 }
 
-.card-container {
+#request-content .card-container {
     background: white;
     border-radius: 8px;
     padding: 15px 10px; /* 좌우 패딩 감소 */
@@ -26,7 +26,7 @@
 }
 
 /* 패널 헤더 스타일 */
-.panel-header {
+#request-content .panel-header {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
@@ -34,14 +34,14 @@
 }
 
 /* 패널 제목 스타일 */
-.request-panel h3 {
+#request-content .request-panel h3 {
     margin: 0;
     font-size: 0.95rem;
     color: #333;
 }
 
 /* 건수 배지 스타일 */
-.count-badge {
+#request-content .count-badge {
     background-color: #f0f0f0;
     color: #666;
     font-size: 0.75rem;
@@ -54,25 +54,25 @@
 }
 
 /* 테이블 행 높이 일정하게 설정 */
-.brand-table tr {
+#request-content .brand-table tr {
     height: 40px; /* 모든 행의 높이를 고정 */
     transition: background-color 0.2s;
 }
 
-.brand-table tbody tr {
+#request-content .brand-table tbody tr {
     cursor: pointer; /* 테이블 행에 클릭 가능한 커서 표시 */
 }
 
-.brand-table tr:hover {
+#request-content .brand-table tr:hover {
     background-color: #f0f0f0; /* 호버 효과 강화 */
 }
 
-.brand-table tr:last-child td {
+#request-content .brand-table tr:last-child td {
     border-bottom: none;
 }
 
 /* 테이블 헤더 스타일 */
-.brand-table th {
+#request-content .brand-table th {
     background-color: #f8f9fa;
     font-weight: 600;
     color: #333;
@@ -86,7 +86,7 @@
 }
 
 /* 모든 셀에 공통 스타일 적용 */
-.brand-table td {
+#request-content .brand-table td {
     font-size: 0.8rem;
     vertical-align: middle; /* 셀 내용 수직 가운데 정렬 */
     padding: 8px 10px;
@@ -98,7 +98,7 @@
 }
 
 /* 상태 표시 스타일 */
-.next-step-value {
+#request-content .next-step-value {
     display: inline-block;
     padding: 3px 8px;
     background-color: #eaf7ff;
@@ -110,7 +110,7 @@
 }
 
 /* 브랜드 열 너비 조정 */
-.brand-table td:nth-child(2) {
+#request-content .brand-table td:nth-child(2) {
     width: 100px;
     min-width: 100px;
     max-width: 120px;
@@ -120,12 +120,12 @@
     padding-left: 8px !important;
 }
 
-.brand-table th:nth-child(2) {
+#request-content .brand-table th:nth-child(2) {
     padding-left: 8px !important;
 }
 
 /* 메일주소 열 너비 조정 */
-.brand-table td:nth-child(3) {
+#request-content .brand-table td:nth-child(3) {
     width: 100px;
     min-width: 100px;
     max-width: 120px;
@@ -133,8 +133,8 @@
 }
 
 /* 메모 열 너비 조정 - 좌측 패널과 중앙 패널 모두 적용 */
-.brand-table td:nth-child(4),
-.request-panel:nth-child(2) .brand-table td:nth-child(4) {
+#request-content .brand-table td:nth-child(4),
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(4) {
     width: 170px;
     min-width: 170px;
     max-width: 170px;
@@ -145,8 +145,8 @@
 }
 
 /* 호버 시 툴팁으로 전체 내용 표시 - 좌측 패널과 중앙 패널 모두 적용 */
-.brand-table td:nth-child(4):hover::after,
-.request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
+#request-content .brand-table td:nth-child(4):hover::after,
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
     content: attr(title);
     position: absolute;
     left: 0;
@@ -165,7 +165,7 @@
 }
 
 /* 날짜 열 너비 조정 */
-.brand-table td:nth-child(5) {
+#request-content .brand-table td:nth-child(5) {
     width: 60px;
     min-width: 60px;
     max-width: 60px;
@@ -173,7 +173,7 @@
 }
 
 /* 상태 열 너비 조정 */
-.brand-table td:nth-child(6) {
+#request-content .brand-table td:nth-child(6) {
     width: 85px;
     min-width: 85px;
     max-width: 85px;
@@ -181,14 +181,15 @@
 }
 
 /* 테이블 셀 패딩 조정 */
-.brand-table td, .brand-table th {
+#request-content .brand-table td, 
+#request-content .brand-table th {
     padding: 0;
 }
 
 /* 체크박스 열 스타일 */
-.checkbox-col, 
-.brand-table th:first-child,
-.brand-table td:first-child {
+#request-content .checkbox-col, 
+#request-content .brand-table th:first-child,
+#request-content .brand-table td:first-child {
     width: 20px !important;
     min-width: 20px !important;
     max-width: 20px !important;
@@ -197,7 +198,7 @@
     text-align: center;
 }
 
-.checkbox-col input[type="checkbox"] {
+#request-content .checkbox-col input[type="checkbox"] {
     cursor: pointer;
     width: 14px;
     height: 14px;
@@ -206,24 +207,24 @@
 }
 
 /* 체크박스가 체크된 행 스타일 */
-.brand-table tr:has(.brand-checkbox:checked) {
+#request-content .brand-table tr:has(.brand-checkbox:checked) {
     background-color: #f0f7ff;
 }
 
 /* 체크박스 선택 시 호버 효과 */
-.brand-table tr:has(.brand-checkbox:checked):hover {
+#request-content .brand-table tr:has(.brand-checkbox:checked):hover {
     background-color: #e0f0ff;
 }
 
 /* 데이터 없음 스타일 */
-.no-data {
+#request-content .no-data {
     text-align: center;
     color: #999;
     font-style: italic;
     padding: 20px 0;
 }
 
-/* 스크롤바 스타일 커스터마이징 */
+/* 스크롤바 스타일 커스터마이징 - 이 부분은 전역 스타일로 유지 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -244,7 +245,7 @@
 }
 
 /* 테이블 스타일 */
-.brand-table {
+#request-content .brand-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px; /* 여백 감소 */
@@ -260,7 +261,7 @@
 }
 
 /* 중앙 패널 안내 텍스트 */
-.center-panel-placeholder {
+#request-content .center-panel-placeholder {
     text-align: center;
     color: #999;
     font-style: italic;
@@ -269,18 +270,18 @@
 }
 
 /* 선택된 브랜드 테이블 스타일 - 원본 테이블과 동일 */
-.request-panel:nth-child(2) .brand-table {
+#request-content .request-panel:nth-child(2) .brand-table {
     max-height: calc(100vh - 170px); /* 테이블에 최대 높이 제한 */
 }
 
 /* 좌측과 중앙 패널의 패딩 조정 */
-.request-panel:nth-child(1) .card-container,
-.request-panel:nth-child(2) .card-container {
+#request-content .request-panel:nth-child(1) .card-container,
+#request-content .request-panel:nth-child(2) .card-container {
     padding: 15px 0 15px 0;
 }
 
 /* 중앙 패널 테이블 열 너비도 동일하게 적용 */
-.request-panel:nth-child(2) .brand-table td:nth-child(1) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(1) {
     width: 20px !important;
     min-width: 20px !important;
     max-width: 20px !important;
@@ -289,7 +290,7 @@
     text-align: center;
 }
 
-.request-panel:nth-child(2) .brand-table th:nth-child(1) {
+#request-content .request-panel:nth-child(2) .brand-table th:nth-child(1) {
     width: 20px !important;
     min-width: 20px !important;
     max-width: 20px !important;
@@ -299,7 +300,7 @@
 }
 
 /* 브랜드 열 스타일 */
-.request-panel:nth-child(2) .brand-table td:nth-child(2) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(2) {
     width: 100px;
     min-width: 100px;
     max-width: 120px;
@@ -309,12 +310,12 @@
     padding-left: 8px !important;
 }
 
-.request-panel:nth-child(2) .brand-table th:nth-child(2) {
+#request-content .request-panel:nth-child(2) .brand-table th:nth-child(2) {
     padding-left: 8px !important;
 }
 
 /* 메일주소 열 스타일 */
-.request-panel:nth-child(2) .brand-table td:nth-child(3) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(3) {
     width: 100px;
     min-width: 100px;
     max-width: 120px;
@@ -322,7 +323,7 @@
 }
 
 /* 메모 열 스타일 */
-.request-panel:nth-child(2) .brand-table td:nth-child(4) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(4) {
     max-width: 170px;
     white-space: nowrap;
     overflow: hidden;
@@ -331,7 +332,7 @@
 }
 
 /* 호버 시 툴팁 */
-.request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
     content: attr(title);
     position: absolute;
     left: 0;
@@ -350,7 +351,7 @@
 }
 
 /* 날짜 열 스타일 */
-.request-panel:nth-child(2) .brand-table td:nth-child(5) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(5) {
     width: 60px;
     min-width: 60px;
     max-width: 60px;
@@ -358,7 +359,7 @@
 }
 
 /* 상태 열 스타일 */
-.request-panel:nth-child(2) .brand-table td:nth-child(6) {
+#request-content .request-panel:nth-child(2) .brand-table td:nth-child(6) {
     width: 85px;
     min-width: 85px;
     max-width: 85px;
@@ -370,4 +371,4 @@
 .request-panel:nth-child(2) .brand-table td:nth-child(2) {
     max-width: 250px;
 }
-*/ 
+*/
