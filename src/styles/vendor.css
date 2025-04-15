@@ -154,6 +154,13 @@
     padding-left: 50px; /* NEW 배지를 위한 공간 확보 */
 }
 
+.card-header .brand-name {
+    font-weight: 700 !important;
+    color: #131314 !important;
+    font-size: 1.2em !important;
+    order: 2; /* 브랜드네임을 중간으로 이동 */
+}
+
 .brand-name {
     font-weight: 700;
     color: #131314;
@@ -164,7 +171,7 @@
 .new-status {
     position: absolute;
     left: 0;
-    top: 50%;
+    top: 32%;
     transform: translateY(-50%);
     background-color: #4CAF50;
     color: white;
@@ -309,7 +316,7 @@
 .brand-info-header h3 {
     margin: 0;
     color: #131314;
-    font-size: 1.5em;
+    font-size: 1.5em !important;
     margin-bottom: 15px;
 }
 
@@ -329,6 +336,7 @@
 
 .brand-info-grid {
     padding: 20px;
+    font-size: 1em !important;
 }
 
 .info-section {
@@ -341,7 +349,7 @@
 
 .info-section h4 {
     color: #666;
-    font-size: 0.9em;
+    font-size: 0.9em !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 15px;
@@ -359,6 +367,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    font-size: 1em !important;
 }
 
 .info-item.full-width {
@@ -366,13 +375,13 @@
 }
 
 .info-item label {
-    font-size: 0.85em;
+    font-size: 0.85em !important;
     color: #666;
 }
 
 .info-item span, .info-item a {
     color: #131314;
-    font-size: 0.95em;
+    font-size: 0.95em !important;
     line-height: 1.4;
     word-break: break-word;
 }
@@ -381,6 +390,7 @@
     color: #007bff;
     text-decoration: none;
     transition: color 0.3s;
+    font-size: 0.95em !important;
 }
 
 .info-item a.link:hover {
@@ -396,7 +406,7 @@
 
 .phone-number {
     color: #131314;
-    font-size: 0.95em;
+    font-size: 0.95em !important;
     line-height: 1.4;
     word-break: break-word;
 }
@@ -409,6 +419,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 0.95em;
 }
 
 .call-button:hover {
@@ -425,7 +436,7 @@
 
 .aliases-list {
     color: #666;
-    font-size: 0.9em;
+    font-size: 0.9em !important;
     font-style: italic;
 }
 
@@ -1011,6 +1022,7 @@
     cursor: pointer;
     display: inline-block;
     transition: transform 0.2s;
+    font-size: inherit;
 }
 
 .verification-status:hover {
