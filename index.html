@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/vendor.css">
     <link rel="stylesheet" href="src/styles/toast.css">
+    <link rel="stylesheet" href="src/styles/vendor_dashboard/dashboard.css">
+    <link rel="stylesheet" href="src/styles/vendor_request/request.css">
 </head>
 <body>
     <!-- 메인 컨테이너 -->
@@ -37,7 +39,7 @@
                     <ul class="submenu">
                         <li data-page="vendor/dashboard">대시보드</li>
                         <li data-page="vendor/brandcontact">브랜드 컨택</li>
-                        <li data-page="vendor/testtab">테스트</li>
+                        <li data-page="vendor/request">제안서 관리</li>
                     </ul>
                 </li>
             </ul>
@@ -55,6 +57,10 @@
                     <span class="breadcrumb-item">벤더</span>
                     <span class="breadcrumb-separator">/</span>
                     <span class="breadcrumb-item current">대시보드</span>
+                </div>
+                <!-- 대시보드 컨테이너 (3단 레이아웃) -->
+                <div class="dashboard-container" id="dashboard-container">
+                    <!-- 여기에 vendor_dashboard.html의 내용이 동적으로 로드됩니다 -->
                 </div>
             </div>
             <!-- 벤더 페이지 콘텐츠 -->
@@ -85,13 +91,13 @@
                     </div>
                 </div>
             </div>
-            <!-- 테스트탭 콘텐츠 -->
-            <div id="testtab-content" class="content-section">
+            <!-- 제안서 관리 콘텐츠 -->
+            <div id="request-content" class="content-section">
                 <!-- 브레드크럼 네비게이션 -->
                 <div class="breadcrumb">
                     <span class="breadcrumb-item">벤더</span>
                     <span class="breadcrumb-separator">/</span>
-                    <span class="breadcrumb-item current">테스트</span>
+                    <span class="breadcrumb-item current">제안서 관리</span>
                 </div>
             </div>
         </div>
@@ -110,8 +116,14 @@
     </div>
     <script>
         // 공통으로 사용할 모듈 선언
-        window.mongo = require('./src/js/mongo');
-        window.phone = require('./src/js/phone');
+        const mongo = require('./src/js/mongo');
+        const phone = require('./src/js/phone');
+        window.mongo = mongo;
+        window.phone = phone;
+        
+        // 몽고 객체 디버깅
+        console.log('MongoDB 모듈 로드:', window.mongo);
+        console.log('MongoDB 함수 목록:', Object.keys(window.mongo));
     </script>
 
     <!-- 그 다음 각 클래스 파일들을 로드 -->
@@ -119,6 +131,8 @@
     <script src="src/js/vendorCallManager.js"></script>
     <script src="src/js/vendorInfoEditor.js"></script>
     <script src="src/js/vendorCallHistory.js"></script>
+    <script src="src/js/vendor_dashboard/dashboard.js"></script>
+    <script src="src/js/vendor_request/request.js"></script>
 
     <!-- 마지막으로 메인 로직을 로드 -->
     <script>
@@ -129,6 +143,56 @@
         
         // vendor.js 로드
         const vendor = require('./src/js/vendor');
+
+        // 대시보드 콘텐츠 로드 함수
+        async function loadDashboardContent() {
+            try {
+                const response = await fetch('src/pages/vendor/vendor_dashboard.html');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const dashboardContent = doc.querySelector('.dashboard-container');
+                document.getElementById('dashboard-container').innerHTML = dashboardContent.innerHTML;
+                
+                // 대시보드 초기화
+                if (window.dashboard) {
+                    window.dashboard.init();
+                }
+            } catch (error) {
+                console.error('대시보드 콘텐츠 로드 중 오류 발생:', error);
+            }
+        }
+
+        // 제안서 관리 콘텐츠 로드 함수
+        async function loadRequestContent() {
+            try {
+                const response = await fetch('src/pages/vendor/request.html');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const requestContent = doc.querySelector('.request-container');
+                
+                // 제안서 관리 컨테이너에 HTML 추가
+                const requestContainer = document.createElement('div');
+                requestContainer.className = 'request-container';
+                requestContainer.innerHTML = requestContent.innerHTML;
+                
+                // 기존 콘텐츠를 지우고 새 콘텐츠 추가
+                const contentDiv = document.getElementById('request-content');
+                // 브레드크럼 요소 유지
+                const breadcrumb = contentDiv.querySelector('.breadcrumb');
+                contentDiv.innerHTML = '';
+                contentDiv.appendChild(breadcrumb);
+                contentDiv.appendChild(requestContainer);
+                
+                // 제안서 관리 초기화
+                if (window.requestManager) {
+                    window.requestManager.init();
+                }
+            } catch (error) {
+                console.error('제안서 관리 콘텐츠 로드 중 오류 발생:', error);
+            }
+        }
 
         // 메뉴 토글 기능 구현
         document.querySelectorAll('.menu-header').forEach(header => {
@@ -164,10 +228,14 @@
                     showContent('home');
                 } else if (page === 'vendor/dashboard') {
                     showContent('dashboard');
+                    // 대시보드 콘텐츠 로드
+                    loadDashboardContent();
                 } else if (page === 'vendor/brandcontact') {
                     showContent('vendor');
-                } else if (page === 'vendor/testtab') {
-                    showContent('testtab');
+                } else if (page === 'vendor/request') {
+                    showContent('request');
+                    // 제안서 관리 콘텐츠 로드
+                    loadRequestContent();
                 }
             });
         });

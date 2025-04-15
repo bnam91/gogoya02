@@ -263,5 +263,6 @@ module.exports = {
     getLatestCallRecordByCardId,
     updateBrandInfo,
     updateCallRecord,
-    getCallRecordById
+    getCallRecordById,
+    getMongoClient
 }; 

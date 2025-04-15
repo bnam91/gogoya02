@@ -1,0 +1,373 @@
+/* 제안서 관리 컨테이너 스타일 */
+.request-container {
+    display: flex;
+    gap: 10px;
+    padding: 0px;
+    height: calc(100vh - 70px); /* 브레드크럼 높이를 제외 */
+}
+
+.request-panel {
+    flex: 1; /* 모든 패널이 동일한 너비를 가지도록 설정 */
+    min-width: 0; /* flex 아이템이 최소 너비를 가지도록 설정 */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 12px 0; /* 좌우 패딩 제거, 상하만 유지 */
+    overflow: hidden; /* 스크롤바 숨김 */
+}
+
+.card-container {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 10px; /* 좌우 패딩 감소 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    overflow: hidden; /* 기본적으로 스크롤 숨김 */
+}
+
+/* 패널 헤더 스타일 */
+.panel-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 10px;
+}
+
+/* 패널 제목 스타일 */
+.request-panel h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+/* 건수 배지 스타일 */
+.count-badge {
+    background-color: #f0f0f0;
+    color: #666;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* 테이블 행 높이 일정하게 설정 */
+.brand-table tr {
+    height: 40px; /* 모든 행의 높이를 고정 */
+    transition: background-color 0.2s;
+}
+
+.brand-table tbody tr {
+    cursor: pointer; /* 테이블 행에 클릭 가능한 커서 표시 */
+}
+
+.brand-table tr:hover {
+    background-color: #f0f0f0; /* 호버 효과 강화 */
+}
+
+.brand-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* 테이블 헤더 스타일 */
+.brand-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* 모든 셀에 공통 스타일 적용 */
+.brand-table td {
+    font-size: 0.8rem;
+    vertical-align: middle; /* 셀 내용 수직 가운데 정렬 */
+    padding: 8px 10px;
+    line-height: 1.4;
+    height: 40px; /* 셀 높이 고정 */
+    overflow: hidden; /* 넘치는 내용 숨김 */
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+/* 상태 표시 스타일 */
+.next-step-value {
+    display: inline-block;
+    padding: 3px 8px;
+    background-color: #eaf7ff;
+    color: #0078d4;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #c7e0f4;
+}
+
+/* 브랜드 열 너비 조정 */
+.brand-table td:nth-child(2) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 8px !important;
+}
+
+.brand-table th:nth-child(2) {
+    padding-left: 8px !important;
+}
+
+/* 메일주소 열 너비 조정 */
+.brand-table td:nth-child(3) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 120px;
+    white-space: nowrap;
+}
+
+/* 메모 열 너비 조정 - 좌측 패널과 중앙 패널 모두 적용 */
+.brand-table td:nth-child(4),
+.request-panel:nth-child(2) .brand-table td:nth-child(4) {
+    width: 170px;
+    min-width: 170px;
+    max-width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+/* 호버 시 툴팁으로 전체 내용 표시 - 좌측 패널과 중앙 패널 모두 적용 */
+.brand-table td:nth-child(4):hover::after,
+.request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    white-space: normal;
+    max-width: 400px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+/* 날짜 열 너비 조정 */
+.brand-table td:nth-child(5) {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    white-space: nowrap;
+}
+
+/* 상태 열 너비 조정 */
+.brand-table td:nth-child(6) {
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+    text-align: center;
+}
+
+/* 테이블 셀 패딩 조정 */
+.brand-table td, .brand-table th {
+    padding: 0;
+}
+
+/* 체크박스 열 스타일 */
+.checkbox-col, 
+.brand-table th:first-child,
+.brand-table td:first-child {
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    padding: 0 !important;
+    padding-left: 6px !important;
+    text-align: center;
+}
+
+.checkbox-col input[type="checkbox"] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+/* 체크박스가 체크된 행 스타일 */
+.brand-table tr:has(.brand-checkbox:checked) {
+    background-color: #f0f7ff;
+}
+
+/* 체크박스 선택 시 호버 효과 */
+.brand-table tr:has(.brand-checkbox:checked):hover {
+    background-color: #e0f0ff;
+}
+
+/* 데이터 없음 스타일 */
+.no-data {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px 0;
+}
+
+/* 스크롤바 스타일 커스터마이징 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* 테이블 스타일 */
+.brand-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px; /* 여백 감소 */
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: block; /* 테이블을 블록 요소로 변경 */
+    max-height: calc(100vh - 150px); /* 테이블에 최대 높이 제한 */
+    overflow-y: scroll; /* 세로 스크롤 허용 */
+    font-size: 0.85rem; /* 테이블 전체 글자 크기 감소 */
+    padding-right: 0; /* 우측 패딩 제거 */
+    table-layout: fixed;
+}
+
+/* 중앙 패널 안내 텍스트 */
+.center-panel-placeholder {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+/* 선택된 브랜드 테이블 스타일 - 원본 테이블과 동일 */
+.request-panel:nth-child(2) .brand-table {
+    max-height: calc(100vh - 170px); /* 테이블에 최대 높이 제한 */
+}
+
+/* 좌측과 중앙 패널의 패딩 조정 */
+.request-panel:nth-child(1) .card-container,
+.request-panel:nth-child(2) .card-container {
+    padding: 15px 0 15px 0;
+}
+
+/* 중앙 패널 테이블 열 너비도 동일하게 적용 */
+.request-panel:nth-child(2) .brand-table td:nth-child(1) {
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    padding: 0 !important;
+    padding-left: 6px !important;
+    text-align: center;
+}
+
+.request-panel:nth-child(2) .brand-table th:nth-child(1) {
+    width: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    padding: 0 !important;
+    padding-left: 6px !important;
+    text-align: center;
+}
+
+/* 브랜드 열 스타일 */
+.request-panel:nth-child(2) .brand-table td:nth-child(2) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 8px !important;
+}
+
+.request-panel:nth-child(2) .brand-table th:nth-child(2) {
+    padding-left: 8px !important;
+}
+
+/* 메일주소 열 스타일 */
+.request-panel:nth-child(2) .brand-table td:nth-child(3) {
+    width: 100px;
+    min-width: 100px;
+    max-width: 120px;
+    white-space: nowrap;
+}
+
+/* 메모 열 스타일 */
+.request-panel:nth-child(2) .brand-table td:nth-child(4) {
+    max-width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+/* 호버 시 툴팁 */
+.request-panel:nth-child(2) .brand-table td:nth-child(4):hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    white-space: normal;
+    max-width: 400px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+/* 날짜 열 스타일 */
+.request-panel:nth-child(2) .brand-table td:nth-child(5) {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    white-space: nowrap;
+}
+
+/* 상태 열 스타일 */
+.request-panel:nth-child(2) .brand-table td:nth-child(6) {
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+    text-align: center;
+}
+
+/* 메모 열 너비 조정 - 중앙 패널용 (이전 코드 제거) */
+/* 
+.request-panel:nth-child(2) .brand-table td:nth-child(2) {
+    max-width: 250px;
+}
+*/ 

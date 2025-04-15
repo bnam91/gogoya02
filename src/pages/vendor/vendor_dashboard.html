@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>대시보드탭</title>
+    <!-- Google Fonts - Noto Sans KR 폰트 로드 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <!-- 커스텀 스타일시트 -->
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/vendor.css">
+    <link rel="stylesheet" href="../../styles/toast.css">
+    <link rel="stylesheet" href="../../styles/vendor_dashboard/dashboard.css">
+</head>
+<body>
+    <!-- 브레드크럼 네비게이션 -->
+    <div class="breadcrumb">
+        <span class="breadcrumb-item">벤더</span>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-item current">대시보드</span>
+    </div>
+    <!-- 대시보드 컨테이너 (3단 레이아웃) -->
+    <div class="dashboard-container">
+        <!-- 좌측 패널 -->
+        <div class="dashboard-left">
+            <div id="dashboard-left-content" class="card-container">
+                <h3>좌측 패널</h3>
+                <p>여기에 좌측 패널 내용이 표시됩니다.</p>
+            </div>
+        </div>
+        <!-- 중앙 패널 -->
+        <div class="dashboard-center">
+            <div class="card-container">
+                <h3>중앙 패널</h3>
+                <p>여기에 중앙 패널 내용이 표시됩니다.</p>
+            </div>
+        </div>
+        <!-- 우측 패널 -->
+        <div class="dashboard-right">
+            <div class="card-container">
+                <h3>우측 패널</h3>
+                <p>여기에 우측 패널 내용이 표시됩니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 공통으로 사용할 모듈 선언
+        const mongo = require('../../js/mongo');
+        const phone = require('../../js/phone');
+        window.mongo = mongo;
+        window.phone = phone;
+    </script>
+
+    <!-- 필요한 스크립트 파일들 -->
+    <script src="../../js/vendor_dashboard/dashboard.js"></script>
+</body>
+</html> 
