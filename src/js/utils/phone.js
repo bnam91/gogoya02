@@ -1,3 +1,8 @@
+/**
+ * phone.js
+ * @fileoverview 전화 걸기 유틸리티 함수
+ */
+
 const { exec } = require('child_process');
 
 const ADB_PATH = "C:\\adb\\adb.exe";
@@ -44,6 +49,9 @@ function endCall() {
         });
     });
 }
+
+
+
 
 module.exports = {
     makeCall,

@@ -31,11 +31,23 @@
                 <!-- 벤더 메뉴 아이템 (하위 메뉴 포함) -->
                 <li class="menu-item">
                     <div class="menu-header">
-                        <span>벤더</span>
+                        <span>벤더1</span>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <ul class="submenu">
                         <li data-page="vendor/brandcontact">브랜드 컨택</li>
+                    </ul>
+                </li>
+                <!-- 벤더 메뉴 아이템 (하위 메뉴 포함) -->
+                <li class="menu-item">
+                    <div class="menu-header">
+                        <span>탭2</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <ul class="submenu">
+                        <li data-page="vendor/dashboard">대시보드</li>
+                        <li data-page="vendor/brandcontact">브랜드 컨택</li>
+                        <li data-page="vendor/testtab">테스트</li>
                     </ul>
                 </li>
             </ul>
@@ -46,7 +58,8 @@
             <div id="home-content" class="content-section active">
                 대기중입니다
             </div>
-            <!-- 벤더 페이지 콘텐츠 -->
+
+            <!-- tab1 : 벤더 페이지 콘텐츠 -->
             <div id="vendor-content" class="content-section">
                 <!-- 브레드크럼 네비게이션 -->
                 <div class="breadcrumb">
@@ -74,6 +87,11 @@
                     </div>
                 </div>
             </div>
+
+            <!-- tab2 : 페이지 콘텐츠 -->
+            <div id="tab2-content" class="content-section">
+                <h1>탭2 콘텐츠</h1>
+            </div>
         </div>
     </div>
     <!-- 전화 걸기 확인 모달 -->
@@ -88,80 +106,39 @@
             </div>
         </div>
     </div>
+
     <script>
         // 공통으로 사용할 모듈 선언
-        window.mongo = require('./src/js/mongo');
-        window.phone = require('./src/js/phone');
+        window.mongo = require('./src/js/databases/mongo');
+        window.phone = require('./src/js/utils/phone');
     </script>
 
     <!-- 그 다음 각 클래스 파일들을 로드 -->
-    <script src="src/js/vendorFilter.js"></script>
-    <script src="src/js/vendorCallManager.js"></script>
-    <script src="src/js/vendorInfoEditor.js"></script>
-    <script src="src/js/vendorCallHistory.js"></script>
+    <script src="src/js/classes/vendorCallHistory.js"></script>
+    <script src="src/js/classes/vendorCallManager.js"></script>
+    <script src="src/js/classes/vendorInfoEditor.js"></script>
+    <script src="src/js/classes/vendorFilter.js"></script>
+
+    <!-- 공통 유틸리티 함수 --> 
+    <script src="./src/js/utils/commonUtils.js"></script>
 
     <!-- 마지막으로 메인 로직을 로드 -->
     <script>
-        // 인스턴스 생성
-        window.vendorFilter = new VendorFilter();
-        window.vendorCallManager = new VendorCallManager();
-        window.vendorInfoEditor = new VendorInfoEditor();
-        
-        // vendor.js 로드
-        const vendor = require('./src/js/vendor');
 
-        // 메뉴 토글 기능 구현
-        document.querySelectorAll('.menu-header').forEach(header => {
-            header.addEventListener('click', function() {
-                const menuItem = this.parentElement;
-                const submenu = menuItem.querySelector('.submenu');
-                const toggleIcon = menuItem.querySelector('.toggle-icon');
-                
-                if (submenu) {
-                    const isExpanded = submenu.classList.contains('expanded');
-                    
-                    // 모든 서브메뉴 닫기
-                    document.querySelectorAll('.submenu').forEach(menu => {
-                        menu.classList.remove('expanded');
-                        const icon = menu.parentElement.querySelector('.toggle-icon');
-                        if (icon) icon.classList.remove('active');
-                    });
-
-                    // 선택된 메뉴만 확장
-                    if (!isExpanded) {
-                        submenu.classList.add('expanded');
-                        if (toggleIcon) toggleIcon.classList.add('active');
-                    }
-                }
-            });
-        });
-
-        // 페이지 전환 기능 구현
-        document.querySelectorAll('[data-page]').forEach(item => {
-            item.addEventListener('click', function() {
-                const page = this.dataset.page;
-                if (page === 'home') {
-                    showContent('home');
-                } else if (page === 'vendor/brandcontact') {
-                    showContent('vendor');
-                }
-            });
-        });
-
-        // 콘텐츠 표시 함수
-        function showContent(content) {
-            // 모든 콘텐츠 섹션 비활성화
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            // 선택된 콘텐츠 섹션 활성화
-            document.getElementById(content + '-content').classList.add('active');
+        window.onload = () => {
+            // 인스턴스 생성
+            window.vendorFilter = new VendorFilter();
+            window.vendorCallManager = new VendorCallManager();
+            window.vendorInfoEditor = new VendorInfoEditor();
             
-            // 벤더 페이지인 경우 초기화 함수 실행
-            if (content === 'vendor') {
-                vendor.initVendor();
-            }
+            // tab1.js (벤더) 로드
+            const vendor = require('./src/js/tabs/tab1');
+
+            // 페이지 초기화
+            commonUtils.initPage();
+            commonUtils.menuToggle();
         }
+            
     </script>
 </body>
 </html> 

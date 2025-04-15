@@ -1,3 +1,8 @@
+/**
+ * tab1.js
+ * @fileoverview vendor 탭 페이지 로직
+ */
+
 const mongo = window.mongo;
 const vendorCallManager = window.vendorCallManager;
 const vendorFilter = window.vendorFilter;
