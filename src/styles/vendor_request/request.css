@@ -12,14 +12,14 @@
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 12px 0; /* 좌우 패딩 제거, 상하만 유지 */
+    padding: 8px 0 12px; /* 상단 패딩 조정 */
     overflow: hidden; /* 스크롤바 숨김 */
 }
 
 #request-content .card-container {
     background: white;
     border-radius: 8px;
-    padding: 15px 10px; /* 좌우 패딩 감소 */
+    padding: 8px 10px 15px; /* 상단 패딩 감소 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     height: 100%;
     overflow: hidden; /* 기본적으로 스크롤 숨김 */
@@ -29,8 +29,8 @@
 #request-content .panel-header {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
-    padding: 0 10px;
+    margin-bottom: 6px; /* 마진 감소 */
+    padding: 6px 10px 0;
 }
 
 /* 패널 제목 스타일 */
@@ -38,6 +38,7 @@
     margin: 0;
     font-size: 0.95rem;
     color: #333;
+    line-height: 1.2;
 }
 
 /* 건수 배지 스타일 */
@@ -51,6 +52,33 @@
     margin-left: 8px;
     min-width: 20px;
     text-align: center;
+}
+
+/* 오늘 건수 배지 스타일 */
+#request-content .today-count-badge {
+    background-color: #fffacd; /* 연한 노란색 */
+    color: #b8860b; /* 황금색 텍스트 */
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    text-align: center;
+    border: 1px solid #f0e68c; /* 연한 황금색 테두리 */
+}
+
+/* 오늘 표시 마크 스타일 */
+#request-content .today-mark {
+    display: inline-block;
+    background-color: #fffacd;
+    color: #b8860b;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 4px;
+    margin-left: 4px;
+    border: 1px solid #f0e68c;
+    vertical-align: middle;
 }
 
 /* 테이블 행 높이 일정하게 설정 */
@@ -216,6 +244,26 @@
     background-color: #e0f0ff;
 }
 
+/* 오늘 추가된 항목 하이라이트 */
+#request-content .brand-table .today-row {
+    background-color: #ffffe0; /* 밝은 노란색 배경 */
+}
+
+#request-content .brand-table .today-row:hover {
+    background-color: #ffffb0; /* 호버 시 약간 진한 노란색 */
+}
+
+/* 체크박스가 체크된 오늘 추가된 항목 스타일 */
+#request-content .brand-table .today-row:has(.brand-checkbox:checked),
+#request-content .brand-table .today-row:has(.center-brand-checkbox:checked) {
+    background-color: #e0ffe0; /* 연한 녹색 배경 */
+}
+
+#request-content .brand-table .today-row:has(.brand-checkbox:checked):hover,
+#request-content .brand-table .today-row:has(.center-brand-checkbox:checked):hover {
+    background-color: #d0ffd0; /* 호버 시 약간 진한 녹색 */
+}
+
 /* 데이터 없음 스타일 */
 #request-content .no-data {
     text-align: center;
@@ -248,7 +296,7 @@
 #request-content .brand-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px; /* 여백 감소 */
+    margin-top: 2px; /* 여백 최소화 */
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -277,7 +325,7 @@
 /* 좌측과 중앙 패널의 패딩 조정 */
 #request-content .request-panel:nth-child(1) .card-container,
 #request-content .request-panel:nth-child(2) .card-container {
-    padding: 15px 0 15px 0;
+    padding: 8px 0 15px 0;
 }
 
 /* 중앙 패널 테이블 열 너비도 동일하게 적용 */

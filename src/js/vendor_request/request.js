@@ -148,10 +148,27 @@ class RequestManager {
             return;
         }
 
+        // 오늘 날짜 생성 (연, 월, 일만 비교하기 위해)
+        const today = new Date();
+        const todayString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        
+        // 오늘 추가된 항목 수 계산
+        let todayCount = 0;
+        for (const brand of brands) {
+            const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
+            const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
+            if (callDateString === todayString) {
+                todayCount++;
+            }
+        }
+        
+        console.log("오늘 추가된 항목 수:", todayCount);
+
         const brandListHTML = `
             <div class="panel-header">
                 <h3>제안서 요청 브랜드</h3>
                 <span class="count-badge">${brands.length}</span>
+                ${todayCount > 0 ? `<span class="today-count-badge">오늘 ${todayCount}</span>` : ''}
             </div>
             <table class="brand-table">
                 <thead>
@@ -171,13 +188,18 @@ class RequestManager {
                             `${(brand.call_date.getFullYear() % 100).toString().padStart(2, '0')}.${(brand.call_date.getMonth() + 1).toString().padStart(2, '0')}.${brand.call_date.getDate().toString().padStart(2, '0')}` 
                             : '정보 없음';
                         
+                        // 날짜 객체로 변환하여 오늘 날짜인지 확인
+                        const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
+                        const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
+                        const isToday = callDateString === todayString;
+                        
                         return `
-                            <tr>
+                            <tr class="${isToday ? 'today-row' : ''}">
                                 <td class="checkbox-col"><input type="checkbox" name="brand-checkbox" data-index="${index}" data-brand="${brand.brand_name}" class="brand-checkbox"></td>
                                 <td>${brand.brand_name || '이름 없음'}</td>
                                 <td>${brand.email || ''}</td>
                                 <td title="${brand.notes || '메모 없음'}">${brand.notes || '메모 없음'}</td>
-                                <td>${callDate}</td>
+                                <td>${callDate}${isToday ? ' <span class="today-mark">오늘</span>' : ''}</td>
                                 <td><span class="next-step-value">${brand.nextstep || '제안서 요청'}</span></td>
                             </tr>
                         `;
@@ -278,10 +300,27 @@ class RequestManager {
             return;
         }
         
+        // 오늘 날짜 생성 (연, 월, 일만 비교하기 위해)
+        const today = new Date();
+        const todayString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        
+        // 오늘 추가된 항목 수 계산
+        let todayCount = 0;
+        for (const brand of selectedBrands) {
+            const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
+            const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
+            if (callDateString === todayString) {
+                todayCount++;
+            }
+        }
+        
+        console.log("선택된 브랜드 중 오늘 추가된 항목 수:", todayCount);
+        
         const selectedBrandsHTML = `
             <div class="panel-header">
                 <h3>선택된 브랜드</h3>
                 <span class="count-badge">${selectedBrands.length}</span>
+                ${todayCount > 0 ? `<span class="today-count-badge">오늘 ${todayCount}</span>` : ''}
             </div>
             <table class="brand-table">
                 <thead>
@@ -300,14 +339,19 @@ class RequestManager {
                         const callDate = brand.call_date instanceof Date ? 
                             `${(brand.call_date.getFullYear() % 100).toString().padStart(2, '0')}.${(brand.call_date.getMonth() + 1).toString().padStart(2, '0')}.${brand.call_date.getDate().toString().padStart(2, '0')}` 
                             : '정보 없음';
+                            
+                        // 날짜 객체로 변환하여 오늘 날짜인지 확인
+                        const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
+                        const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
+                        const isToday = callDateString === todayString;
                         
                         return `
-                            <tr>
+                            <tr class="${isToday ? 'today-row' : ''}">
                                 <td class="checkbox-col"><input type="checkbox" name="center-brand-checkbox" data-index="${index}" data-brand="${brand.brand_name}" class="center-brand-checkbox" checked></td>
                                 <td>${brand.brand_name || '이름 없음'}</td>
                                 <td>${brand.email || ''}</td>
                                 <td title="${brand.notes || '메모 없음'}">${brand.notes || '메모 없음'}</td>
-                                <td>${callDate}</td>
+                                <td>${callDate}${isToday ? ' <span class="today-mark">오늘</span>' : ''}</td>
                                 <td><span class="next-step-value">${brand.nextstep || '제안서 요청'}</span></td>
                             </tr>
                         `;
