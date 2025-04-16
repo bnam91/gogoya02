@@ -200,7 +200,7 @@ class RequestManager {
                                 <td>${brand.email || ''}</td>
                                 <td title="${brand.notes || '메모 없음'}">${brand.notes || '메모 없음'}</td>
                                 <td>${callDate}${isToday ? ' <span class="today-mark">오늘</span>' : ''}</td>
-                                <td><span class="next-step-value">${brand.nextstep || '제안서 요청'}</span></td>
+                                <td><span class="next-step-value status-button" data-index="${index}">${brand.nextstep || '제안서 요청'}</span></td>
                             </tr>
                         `;
                     }).join('')}
@@ -212,6 +212,9 @@ class RequestManager {
         
         // 체크박스 이벤트 리스너 추가
         this.addCheckboxEventListeners();
+        
+        // 상태 버튼 이벤트 리스너 추가
+        this.addStatusButtonEventListeners();
         
         // 중앙 패널 초기화
         this.initCenterPanel();
@@ -273,6 +276,88 @@ class RequestManager {
                 // 중앙 패널 업데이트
                 self.updateCenterPanel(checkedBrands);
             });
+        }
+    }
+    
+    // 상태 버튼 이벤트 리스너 추가
+    addStatusButtonEventListeners() {
+        const self = this;
+        
+        // 상태 버튼 클릭 시
+        document.querySelectorAll('.status-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                self.toggleBrandStatus(index, this);
+            });
+        });
+    }
+    
+    // 브랜드 상태 토글 (제안서 요청 -> 협의대기 -> 메일제외 순환)
+    toggleBrandStatus(index, element) {
+        if (index < 0 || index >= this.brands.length) return;
+        
+        // 현재 상태 확인
+        const currentStatus = this.brands[index].nextstep || '제안서 요청';
+        const brandName = this.brands[index].brand_name;
+        
+        // 상태 순환 로직
+        if (currentStatus === '제안서 요청') {
+            this.brands[index].nextstep = '협의대기';
+        } else if (currentStatus === '협의대기') {
+            this.brands[index].nextstep = '메일제외';
+        } else if (currentStatus === '메일제외') {
+            this.brands[index].nextstep = '제안서 요청';
+        } else {
+            // 기타 상태인 경우 제안서 요청으로 리셋
+            this.brands[index].nextstep = '제안서 요청';
+        }
+        
+        // UI 업데이트
+        element.textContent = this.brands[index].nextstep;
+        
+        // MongoDB 업데이트
+        this.updateMongoDBStatus(brandName, this.brands[index].nextstep);
+        
+        // 중앙 패널 데이터도 업데이트 (체크된 브랜드가 있는 경우)
+        const checkedBrands = getCheckedBrandsData(this.brands);
+        if (checkedBrands.length > 0) {
+            this.updateCenterPanel(checkedBrands);
+        }
+        
+        console.log(`브랜드 "${brandName}"의 상태가 "${this.brands[index].nextstep}"로 변경되었습니다.`);
+    }
+    
+    // MongoDB 상태 업데이트 함수
+    async updateMongoDBStatus(brandName, newStatus) {
+        if (!this.mongo || !brandName) return;
+        
+        try {
+            console.log(`MongoDB에서 브랜드 "${brandName}"의 상태를 "${newStatus}"로 업데이트 중...`);
+            
+            // MongoDB 클라이언트 접근
+            if (typeof this.mongo.getMongoClient === 'function') {
+                const client = await this.mongo.getMongoClient();
+                const db = client.db("insta09_database");
+                const collection = db.collection("gogoya_vendor_CallRecords");
+                
+                // 브랜드 이름으로 문서 찾아 상태 업데이트
+                const result = await collection.updateMany(
+                    { brand_name: brandName },
+                    { $set: { nextstep: newStatus } }
+                );
+                
+                if (result.modifiedCount > 0) {
+                    console.log(`브랜드 "${brandName}"의 상태가 MongoDB에서 성공적으로 업데이트되었습니다.`);
+                } else if (result.matchedCount > 0) {
+                    console.log(`브랜드 "${brandName}"의 문서를 찾았지만 상태 변경 없음`);
+                } else {
+                    console.log(`브랜드 "${brandName}"의 문서를 MongoDB에서 찾을 수 없습니다.`);
+                }
+            } else {
+                console.error("MongoDB 클라이언트 접근 함수를 사용할 수 없습니다.");
+            }
+        } catch (error) {
+            console.error(`MongoDB 상태 업데이트 중 오류:`, error);
         }
     }
     
@@ -429,15 +514,17 @@ function toggleAllCenterBrands(checkbox) {
     });
 }
 
-// 체크된 브랜드 데이터 반환 함수
+// 체크된 브랜드 데이터 반환 함수 수정
 function getCheckedBrandsData(allBrands) {
     if (!allBrands || !allBrands.length) return [];
     
     const checkedBoxes = document.querySelectorAll('.brand-checkbox:checked');
     const checkedIndices = Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.index));
     
-    // 체크된 인덱스에 해당하는 브랜드 데이터 반환
-    return checkedIndices.map(index => allBrands[index]).filter(brand => brand);
+    // 체크된 인덱스에 해당하는 브랜드 데이터 반환 (제안서 요청 상태인 것만)
+    return checkedIndices
+        .map(index => allBrands[index])
+        .filter(brand => brand && brand.nextstep === '제안서 요청');
 }
 
 // 요청 관리자 인스턴스 생성

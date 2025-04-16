@@ -420,3 +420,44 @@
     max-width: 250px;
 }
 */
+
+/* 상태 버튼 스타일 */
+.status-button {
+    cursor: pointer;
+    padding: 3px 8px;
+    background-color: #e6f2ff;
+    border-radius: 4px;
+    display: inline-block;
+    transition: background-color 0.2s;
+    user-select: none;
+    border: 1px solid #c0d6e9;
+}
+
+.status-button:hover {
+    background-color: #d1e6fa;
+}
+
+.status-button:active {
+    background-color: #b8daff;
+}
+
+/* 협의대기 상태일 때 다른 색상 */
+.status-button:contains('협의대기') {
+    background-color: #fff1e6;
+    border-color: #f5d9c3;
+}
+
+.status-button:contains('협의대기'):hover {
+    background-color: #ffe8d1;
+}
+
+/* 메일제외 상태일 때 다른 색상 */
+.status-button:contains('메일제외') {
+    background-color: #f8f8f8;
+    border-color: #e0e0e0;
+    color: #777;
+}
+
+.status-button:contains('메일제외'):hover {
+    background-color: #f0f0f0;
+}
