@@ -50,11 +50,31 @@ class RequestManager {
                         // 필요한 데이터만 추출
                         const simplifiedData = proposalRequests.map(doc => ({
                             brand_name: doc.brand_name,
-                            email: "", // 이메일 필드는 일단 빈 값으로
+                            email: "", // 이메일 필드는 임시로 빈 값
                             notes: doc.notes,
                             call_date: doc.call_date,
                             nextstep: doc.nextstep || "제안서 요청" // nextstep 필드 추가
                         }));
+                        
+                        // 브랜드 이메일 정보 가져오기
+                        const brandInfoCollection = db.collection("gogoya_vendor_brand_info");
+                        
+                        // 각 브랜드에 대한 이메일 정보 조회
+                        for (const brand of simplifiedData) {
+                            if (brand.brand_name) {
+                                try {
+                                    const brandInfo = await brandInfoCollection.findOne({ brand_name: brand.brand_name });
+                                    if (brandInfo && brandInfo.email) {
+                                        brand.email = brandInfo.email;
+                                        console.log(`브랜드 "${brand.brand_name}"의 이메일 정보를 찾았습니다: ${brand.email}`);
+                                    } else {
+                                        console.log(`브랜드 "${brand.brand_name}"의 이메일 정보를 찾을 수 없습니다.`);
+                                    }
+                                } catch (err) {
+                                    console.error(`브랜드 "${brand.brand_name}" 정보 조회 중 오류:`, err);
+                                }
+                            }
+                        }
                         
                         // 최신 날짜순으로 정렬 (내림차순)
                         simplifiedData.sort((a, b) => {
@@ -90,21 +110,21 @@ class RequestManager {
         const fallbackBrands = [
             {
                 brand_name: "빠이염",
-                email: "",
+                email: "pyaeom@example.com", // 대체 데이터에도 임의의 이메일 추가
                 notes: "가을까지 풀이 다 차서 바로 진행은 어려우나 메일로 제안서 발송하면 일정 비었을때 연락 준다고 함",
                 call_date: new Date("2025-04-08T05:34:28.233Z"),
                 nextstep: "제안서 요청"
             },
             {
                 brand_name: "퓨어썸",
-                email: "",
+                email: "puresum@example.com", // 대체 데이터에도 임의의 이메일 추가
                 notes: "제안서 요청 받음. 마케팅 담당자에게 이메일로 전달 예정",
                 call_date: new Date("2025-04-07T10:15:00.000Z"),
                 nextstep: "제안서 요청"
             },
             {
                 brand_name: "코스닥브랜드",
-                email: "",
+                email: "kosdaq@example.com", // 대체 데이터에도 임의의 이메일 추가
                 notes: "신규 캠페인 관련 제안서 요청. 예산은 5천만원 수준",
                 call_date: new Date("2025-04-06T14:22:10.000Z"),
                 nextstep: "제안서 요청"

@@ -7,13 +7,27 @@
 }
 
 #request-content .request-panel {
-    flex: 1; /* 모든 패널이 동일한 너비를 가지도록 설정 */
     min-width: 0; /* flex 아이템이 최소 너비를 가지도록 설정 */
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 8px 0 12px; /* 상단 패딩 조정 */
     overflow: hidden; /* 스크롤바 숨김 */
+}
+
+/* 좌측 패널 - 약간 더 넓게 */
+#request-content .request-panel:nth-child(1) {
+    flex: 1.15;
+}
+
+/* 중앙 패널 - 약간 더 넓게 */
+#request-content .request-panel:nth-child(2) {
+    flex: 1.15;
+}
+
+/* 우측 패널 - 더 좁게 */
+#request-content .request-panel:nth-child(3) {
+    flex: 0.7;
 }
 
 #request-content .card-container {
@@ -154,10 +168,12 @@
 
 /* 메일주소 열 너비 조정 */
 #request-content .brand-table td:nth-child(3) {
-    width: 100px;
-    min-width: 100px;
-    max-width: 120px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* 메모 열 너비 조정 - 좌측 패널과 중앙 패널 모두 적용 */
@@ -364,10 +380,12 @@
 
 /* 메일주소 열 스타일 */
 #request-content .request-panel:nth-child(2) .brand-table td:nth-child(3) {
-    width: 100px;
-    min-width: 100px;
-    max-width: 120px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* 메모 열 스타일 */
@@ -413,13 +431,6 @@
     max-width: 85px;
     text-align: center;
 }
-
-/* 메모 열 너비 조정 - 중앙 패널용 (이전 코드 제거) */
-/* 
-.request-panel:nth-child(2) .brand-table td:nth-child(2) {
-    max-width: 250px;
-}
-*/
 
 /* 상태 버튼 스타일 */
 .status-button {
