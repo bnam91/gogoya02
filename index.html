@@ -231,6 +231,9 @@
         window.vendorCallManager = new VendorCallManager();
         window.vendorInfoEditor = new VendorInfoEditor();
         
+        // RequestManager 인스턴스는 생성만 하고 초기화는 하지 않음
+        window.requestManager = new RequestManager(); // init() 호출 제거
+        
         // vendor.js 로드
         const vendor = require('./src/js/vendor');
 
@@ -256,28 +259,24 @@
         // 제안서 관리 콘텐츠 로드 함수
         async function loadRequestContent() {
             try {
-                const response = await fetch('src/pages/vendor/request.html');
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const requestContent = doc.querySelector('.request-container');
-                
-                // 제안서 관리 컨테이너에 HTML 추가
-                const requestContainer = document.createElement('div');
-                requestContainer.className = 'request-container';
-                requestContainer.innerHTML = requestContent.innerHTML;
-                
-                // 기존 콘텐츠를 지우고 새 콘텐츠 추가
                 const contentDiv = document.getElementById('request-content');
-                // 브레드크럼 요소 유지
-                const breadcrumb = contentDiv.querySelector('.breadcrumb');
-                contentDiv.innerHTML = '';
-                contentDiv.appendChild(breadcrumb);
-                contentDiv.appendChild(requestContainer);
                 
-                // 제안서 관리 초기화
-                if (window.requestManager) {
-                    window.requestManager.init();
+                // request.html이 아직 로드되지 않은 경우에만 로드
+                if (!contentDiv.querySelector('.request-container')) {
+                    const response = await fetch('src/pages/vendor/request.html');
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const requestContent = doc.querySelector('.request-container');
+                    
+                    // 브레드크럼 유지하면서 콘텐츠 추가
+                    contentDiv.appendChild(requestContent);
+                }
+                
+                // RequestManager가 아직 초기화되지 않은 경우에만 초기화
+                if (window.requestManager && !window.requestManager.initialized) {
+                    await window.requestManager.init();
+                    window.requestManager.initialized = true;
                 }
             } catch (error) {
                 console.error('제안서 관리 콘텐츠 로드 중 오류 발생:', error);

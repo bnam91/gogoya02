@@ -5,9 +5,12 @@ class RequestManager {
         this.brands = []; // 브랜드 데이터 저장용 배열
         this.accounts = null; // 계정 정보를 저장할 변수
         this.mailCache = new Map(); // 브랜드별 메일 내용을 저장할 Map 추가
+        this.initialized = false; // 초기화 상태 추적
     }
 
     async init() {
+        if (this.initialized) return; // 이미 초기화된 경우 중복 실행 방지
+        
         console.log("제안서 관리 초기화 시작");
         console.log("MongoDB 객체:", this.mongo);
         console.log("MongoDB 함수 목록:", Object.keys(this.mongo));
@@ -17,24 +20,28 @@ class RequestManager {
         
         // 계정 정보 먼저 로드
         try {
-            // 동적 import 대신 require 사용
-            const accountsPath = path.join(__dirname, 'vendor_request', 'accounts.js');
+            // 상대 경로로 변경
+            const accountsPath = './vendor_request/accounts.js';
             console.log('계정 정보 경로:', accountsPath);
             
             try {
-                // 방법 1: require 사용
-                const accountsModule = require(accountsPath);
-                this.accounts = accountsModule.accounts;
-            } catch (requireError) {
-                console.error('require로 계정 정보 로드 실패:', requireError);
-                
-                // 방법 2: 전역 객체에서 계정 정보 가져오기
+                // window.accounts 확인을 먼저 시도
                 if (window.accounts) {
                     this.accounts = window.accounts;
+                    console.log("window.accounts에서 계정 정보 로드됨");
                 } else {
-                    // 기본 계정 정보 사용
-                    throw new Error('계정 정보를 찾을 수 없습니다.');
+                    // require 시도
+                    const accountsModule = require(accountsPath);
+                    this.accounts = accountsModule.accounts;
                 }
+            } catch (error) {
+                console.log('기본 계정 정보 사용');
+                // 기본 계정 정보 설정
+                this.accounts = [
+                    { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
+                    { id: "contant01", name: "박슬하(고야앤드미디어)", email: "contant01@goyamkt.com" },
+                    { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
+                ];
             }
             
             console.log("계정 정보 로드 완료", this.accounts);
@@ -56,90 +63,65 @@ class RequestManager {
             console.error("제안서 관리 초기화 중 오류:", error);
             this.loadFallbackData();
         }
+        
+        this.initialized = true;
     }
 
     async loadMongoData() {
         try {
-            console.log("MongoDB에서 데이터 로드 시도...");
-            
             if (!this.mongo) {
                 throw new Error("MongoDB 모듈이 로드되지 않았습니다.");
             }
             
-            // 정확한 컬렉션에서 직접 쿼리
             if (typeof this.mongo.getMongoClient === 'function') {
-                console.log("MongoDB 클라이언트 직접 접근 시도");
+                const client = await this.mongo.getMongoClient();
+                const db = client.db("insta09_database");
+                const collection = db.collection("gogoya_vendor_CallRecords");
                 
-                try {
-                    const client = await this.mongo.getMongoClient();
-                    const db = client.db("insta09_database");
-                    const collection = db.collection("gogoya_vendor_CallRecords");
+                const proposalRequests = await collection.find({ 
+                    nextstep: "제안서 요청" 
+                }).toArray();
+                
+                if (proposalRequests.length > 0) {
+                    const simplifiedData = proposalRequests.map(doc => ({
+                        brand_name: doc.brand_name,
+                        email: "",
+                        notes: doc.notes,
+                        call_date: doc.call_date,
+                        nextstep: doc.nextstep || "제안서 요청"
+                    }));
                     
-                    console.log("insta09_database.gogoya_vendor_CallRecords 컬렉션 접근 중");
+                    const brandInfoCollection = db.collection("gogoya_vendor_brand_info");
                     
-                    // nextstep이 '제안서 요청'인 문서 찾기
-                    const proposalRequests = await collection.find({ 
-                        nextstep: "제안서 요청" 
-                    }).toArray();
-                    
-                    console.log("제안서 요청 상태 레코드 수:", proposalRequests.length);
-                    
-                    if (proposalRequests.length > 0) {
-                        console.log("제안서 요청 레코드 샘플:", proposalRequests[0]);
-                        
-                        // 필요한 데이터만 추출
-                        const simplifiedData = proposalRequests.map(doc => ({
-                            brand_name: doc.brand_name,
-                            email: "", // 이메일 필드는 임시로 빈 값
-                            notes: doc.notes,
-                            call_date: doc.call_date,
-                            nextstep: doc.nextstep || "제안서 요청" // nextstep 필드 추가
-                        }));
-                        
-                        // 브랜드 이메일 정보 가져오기
-                        const brandInfoCollection = db.collection("gogoya_vendor_brand_info");
-                        
-                        // 각 브랜드에 대한 이메일 정보 조회
-                        for (const brand of simplifiedData) {
-                            if (brand.brand_name) {
-                                try {
-                                    const brandInfo = await brandInfoCollection.findOne({ brand_name: brand.brand_name });
-                                    if (brandInfo && brandInfo.email) {
-                                        brand.email = brandInfo.email;
-                                        console.log(`브랜드 "${brand.brand_name}"의 이메일 정보를 찾았습니다: ${brand.email}`);
-                                    } else {
-                                        console.log(`브랜드 "${brand.brand_name}"의 이메일 정보를 찾을 수 없습니다.`);
-                                    }
-                                } catch (err) {
-                                    console.error(`브랜드 "${brand.brand_name}" 정보 조회 중 오류:`, err);
+                    for (const brand of simplifiedData) {
+                        if (brand.brand_name) {
+                            try {
+                                const brandInfo = await brandInfoCollection.findOne({ brand_name: brand.brand_name });
+                                if (brandInfo && brandInfo.email) {
+                                    brand.email = brandInfo.email;
                                 }
+                            } catch (err) {
+                                // 에러 발생 시 조용히 처리
+                                brand.email = '';
                             }
                         }
-                        
-                        // 최신 날짜순으로 정렬 (내림차순)
-                        simplifiedData.sort((a, b) => {
-                            const dateA = a.call_date instanceof Date ? a.call_date : new Date(a.call_date);
-                            const dateB = b.call_date instanceof Date ? b.call_date : new Date(b.call_date);
-                            return dateB - dateA; // 내림차순 정렬 (최신이 위로)
-                        });
-                        
-                        // 브랜드 데이터 저장
-                        this.brands = simplifiedData;
-                        this.displayRequests(simplifiedData);
-                        return;
-                    } else {
-                        console.log("제안서 요청 상태인 문서를 찾을 수 없습니다.");
                     }
-                } catch (err) {
-                    console.error("직접 쿼리 오류:", err);
+                    
+                    simplifiedData.sort((a, b) => {
+                        const dateA = a.call_date instanceof Date ? a.call_date : new Date(a.call_date);
+                        const dateB = b.call_date instanceof Date ? b.call_date : new Date(b.call_date);
+                        return dateB - dateA;
+                    });
+                    
+                    this.brands = simplifiedData;
+                    this.displayRequests(simplifiedData);
+                    return;
                 }
             }
             
-            // 직접 쿼리가 실패하면 대체 데이터 사용
             this.loadFallbackData();
             
         } catch (error) {
-            console.error('MongoDB 데이터 로드 중 오류:', error);
             this.loadFallbackData();
         }
     }
@@ -284,19 +266,14 @@ class RequestManager {
     
     // 체크박스 이벤트 리스너 추가
     addCheckboxEventListeners() {
-        const self = this; // 클래스 인스턴스에 접근하기 위한 참조
+        const self = this;
         
-        // 개별 체크박스 변경 시
         document.querySelectorAll('.brand-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const allChecked = Array.from(document.querySelectorAll('.brand-checkbox')).every(cb => cb.checked);
                 document.getElementById('select-all-brands').checked = allChecked;
                 
-                // 체크된 브랜드 확인
                 const checkedBrands = getCheckedBrandsData(self.brands);
-                console.log('체크된 브랜드:', checkedBrands);
-                
-                // 중앙 패널 업데이트
                 self.updateCenterPanel(checkedBrands);
             });
         });
@@ -445,11 +422,9 @@ class RequestManager {
             return;
         }
         
-        // 오늘 날짜 생성 (연, 월, 일만 비교하기 위해)
         const today = new Date();
         const todayString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         
-        // 오늘 추가된 항목 수 계산
         let todayCount = 0;
         for (const brand of selectedBrands) {
             const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
@@ -458,8 +433,6 @@ class RequestManager {
                 todayCount++;
             }
         }
-        
-        console.log("선택된 브랜드 중 오늘 추가된 항목 수:", todayCount);
         
         const selectedBrandsHTML = `
             <div class="panel-header">
@@ -507,10 +480,7 @@ class RequestManager {
         
         centerPanel.innerHTML = selectedBrandsHTML;
         
-        // 중앙 패널 체크박스에 이벤트 리스너 추가
         this.addCenterCheckboxEventListeners();
-        
-        // 중앙 패널의 행 클릭 이벤트 추가
         this.addCenterRowClickEventListeners();
     }
     
@@ -569,7 +539,7 @@ class RequestManager {
                 // 메일 작성 폼의 받는 사람 필드 업데이트
                 const mailToInput = document.getElementById('mail-to');
                 if (mailToInput) {
-                    mailToInput.value = email;
+                    mailToInput.value = `${brandName} <${email}>`;
                 }
                 
                 // 저장된 메일 내용 복원
@@ -798,8 +768,8 @@ class RequestManager {
                                 
                                 console.log('메일 전송 옵션:', mailOptions);
                                 
-                                // credentials 파일 경로 설정 (json 확장자로 변경)
-                                const credentialsPath = path.join(__dirname, 'vendor_request', `credentials_${accountId}.json`);
+                                // credentials 파일 경로 설정 부분 수정
+                                const credentialsPath = path.join(__dirname, 'token', `credentials_${accountId}.js`);
                                 console.log('자격 증명 경로:', credentialsPath);
                                 
                                 // Gmail 인증 정보 가져오기
@@ -923,29 +893,32 @@ class RequestManager {
     
     // 메일 전송 후 브랜드 상태 업데이트 (제안서 요청 → 협의대기)
     updateSentBrandsStatus() {
-        // 중앙 패널에서 선택된 브랜드 가져오기
-        const selectedCheckboxes = document.querySelectorAll('.center-brand-checkbox:checked');
-        const brandNames = Array.from(selectedCheckboxes).map(cb => cb.dataset.brand);
+        // 현재 선택된 이메일 주소 가져오기
+        const toEmail = document.getElementById('mail-to').value;
         
-        if (brandNames.length === 0) return;
+        if (!toEmail) return;
         
-        console.log('상태 업데이트할 브랜드:', brandNames);
+        console.log('메일 전송된 이메일:', toEmail);
         
-        // 각 브랜드의 상태 업데이트
-        brandNames.forEach(brandName => {
-            // 브랜드 인덱스 찾기
-            const brandIndex = this.brands.findIndex(b => b.brand_name === brandName);
-            if (brandIndex >= 0) {
-                // 상태 업데이트 (제안서 요청 → 협의대기)
-                this.brands[brandIndex].nextstep = '협의대기';
-                
-                // MongoDB 업데이트
-                this.updateMongoDBStatus(brandName, '협의대기');
-            }
-        });
+        // 해당 이메일을 가진 브랜드 찾기
+        const brandIndex = this.brands.findIndex(b => b.email === toEmail);
         
-        // UI 다시 표시
-        this.displayRequests(this.brands);
+        if (brandIndex >= 0) {
+            console.log('상태 업데이트할 브랜드:', this.brands[brandIndex].brand_name);
+            
+            // 상태 업데이트 (제안서 요청 → 협의대기)
+            this.brands[brandIndex].nextstep = '협의대기';
+            
+            // MongoDB 업데이트
+            this.updateMongoDBStatus(this.brands[brandIndex].brand_name, '협의대기');
+            
+            // UI 다시 표시
+            this.displayRequests(this.brands);
+            
+            console.log('상태 업데이트 완료');
+        } else {
+            console.warn('해당 이메일 주소를 가진 브랜드를 찾을 수 없습니다:', toEmail);
+        }
     }
 }
 
@@ -1177,6 +1150,14 @@ function addModalStyles() {
             margin-bottom: 5px;
             color: #555;
             font-weight: 600;
+        }
+        
+        /* 받는 사람 입력 필드 스타일 */
+        #mail-to {
+            background-color: #f8f9fa;
+            color: #495057;
+            cursor: not-allowed;
+            font-family: 'Noto Sans KR', sans-serif;
         }
     `;
     document.head.appendChild(styleEl);
