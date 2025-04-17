@@ -5,37 +5,21 @@ class RequestManager {
         this.brands = []; // 브랜드 데이터 저장용 배열
         this.accounts = null; // 계정 정보를 저장할 변수
         this.mailCache = new Map(); // 브랜드별 메일 내용을 저장할 Map 추가
-        this.initialized = false; // 초기화 상태 추적
     }
 
     async init() {
-        if (this.initialized) return; // 이미 초기화된 경우 중복 실행 방지
-        
-        console.log("제안서 관리 초기화 시작");
-        console.log("MongoDB 객체:", this.mongo);
-        console.log("MongoDB 함수 목록:", Object.keys(this.mongo));
-        
-        // 모달 스타일 추가
-        addModalStyles();
-        
         // 계정 정보 먼저 로드
         try {
-            // 상대 경로로 변경
             const accountsPath = './vendor_request/accounts.js';
-            console.log('계정 정보 경로:', accountsPath);
             
             try {
-                // window.accounts 확인을 먼저 시도
                 if (window.accounts) {
                     this.accounts = window.accounts;
-                    console.log("window.accounts에서 계정 정보 로드됨");
                 } else {
-                    // require 시도
                     const accountsModule = require(accountsPath);
                     this.accounts = accountsModule.accounts;
                 }
             } catch (error) {
-                console.log('기본 계정 정보 사용');
                 // 기본 계정 정보 설정
                 this.accounts = [
                     { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
@@ -43,10 +27,7 @@ class RequestManager {
                     { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
                 ];
             }
-            
-            console.log("계정 정보 로드 완료", this.accounts);
         } catch (error) {
-            console.error("계정 정보 로드 실패:", error);
             // 기본 계정 정보 설정
             this.accounts = [
                 { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
@@ -57,14 +38,11 @@ class RequestManager {
         
         try {
             await this.loadMongoData();
-            this.initializeAccountSelect(); // 계정 선택 콤보박스 초기화
-            this.initializeMailForm(); // 메일 폼 초기화
+            this.initializeAccountSelect();
+            this.initializeMailForm();
         } catch (error) {
-            console.error("제안서 관리 초기화 중 오류:", error);
             this.loadFallbackData();
         }
-        
-        this.initialized = true;
     }
 
     async loadMongoData() {
@@ -230,7 +208,6 @@ class RequestManager {
                             `${(brand.call_date.getFullYear() % 100).toString().padStart(2, '0')}.${(brand.call_date.getMonth() + 1).toString().padStart(2, '0')}.${brand.call_date.getDate().toString().padStart(2, '0')}` 
                             : '정보 없음';
                         
-                        // 날짜 객체로 변환하여 오늘 날짜인지 확인
                         const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
                         const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
                         const isToday = callDateString === todayString;
@@ -241,7 +218,7 @@ class RequestManager {
                                 <td>${brand.brand_name || '이름 없음'}</td>
                                 <td>${brand.email || ''}</td>
                                 <td title="${brand.notes || '메모 없음'}">${brand.notes || '메모 없음'}</td>
-                                <td>${callDate}${isToday ? ' <span class="today-mark">오늘</span>' : ''}</td>
+                                <td>${callDate}</td>
                                 <td><span class="next-step-value status-button" data-index="${index}">${brand.nextstep || '제안서 요청'}</span></td>
                             </tr>
                         `;
@@ -453,12 +430,10 @@ class RequestManager {
                 </thead>
                 <tbody>
                     ${selectedBrands.map((brand, index) => {
-                        // 통화 날짜 형식화 - 'YY.MM.DD' 형식으로 변경
                         const callDate = brand.call_date instanceof Date ? 
                             `${(brand.call_date.getFullYear() % 100).toString().padStart(2, '0')}.${(brand.call_date.getMonth() + 1).toString().padStart(2, '0')}.${brand.call_date.getDate().toString().padStart(2, '0')}` 
                             : '정보 없음';
                             
-                        // 날짜 객체로 변환하여 오늘 날짜인지 확인
                         const callDateObj = brand.call_date instanceof Date ? brand.call_date : new Date(brand.call_date);
                         const callDateString = `${callDateObj.getFullYear()}-${callDateObj.getMonth() + 1}-${callDateObj.getDate()}`;
                         const isToday = callDateString === todayString;
@@ -469,7 +444,7 @@ class RequestManager {
                                 <td>${brand.brand_name || '이름 없음'}</td>
                                 <td>${brand.email || ''}</td>
                                 <td title="${brand.notes || '메모 없음'}">${brand.notes || '메모 없음'}</td>
-                                <td>${callDate}${isToday ? ' <span class="today-mark">오늘</span>' : ''}</td>
+                                <td>${callDate}</td>
                                 <td><span class="next-step-value">${brand.nextstep || '제안서 요청'}</span></td>
                             </tr>
                         `;
@@ -532,17 +507,17 @@ class RequestManager {
                 // 현재 선택된 브랜드의 메일 내용 저장
                 this.saveCurrentMailContent();
                 
-                // 클릭된 행에서 브랜드 정보 가져오기
-                const brandName = row.querySelector('td:nth-child(2)').textContent;
+                // 클릭된 행에서 이메일 주소만 가져오기
                 const email = row.dataset.email;
                 
                 // 메일 작성 폼의 받는 사람 필드 업데이트
                 const mailToInput = document.getElementById('mail-to');
                 if (mailToInput) {
-                    mailToInput.value = `${brandName} <${email}>`;
+                    mailToInput.value = email;
                 }
                 
                 // 저장된 메일 내용 복원
+                const brandName = row.querySelector('td:nth-child(2)').textContent;
                 this.restoreMailContent(brandName);
                 
                 // 시각적 피드백을 위해 선택된 행 하이라이트
@@ -664,30 +639,27 @@ class RequestManager {
                             <div class="modal-body">
                                 <p>다음 내용으로 메일을 전송하시겠습니까?</p>
                                 <div class="mail-preview">
-                                    <div class="preview-item">
-                                        <span class="label">보내는 사람:</span>
-                                        <span id="preview-from"></span>
+                                    <div class="preview-row">
+                                        <span class="preview-label">보내는 사람:</span>
+                                        <span class="preview-value" id="preview-from"></span>
                                     </div>
-                                    <div class="preview-item">
-                                        <span class="label">받는 사람:</span>
-                                        <span id="preview-to"></span>
+                                    <div class="preview-row">
+                                        <span class="preview-label">받는 사람:</span>
+                                        <span class="preview-value" id="preview-to"></span>
                                     </div>
-                                    <div class="preview-item">
-                                        <span class="label">제목:</span>
-                                        <span id="preview-subject"></span>
+                                    <div class="preview-row">
+                                        <span class="preview-label">제목:</span>
+                                        <span class="preview-value" id="preview-subject"></span>
                                     </div>
-                                    <div class="preview-item">
-                                        <span class="label">내용:</span>
-                                        <div id="preview-content" class="preview-content"></div>
+                                    <div class="preview-row">
+                                        <span class="preview-label">내용:</span>
+                                        <div class="preview-value" id="preview-content"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
                                 <button class="modal-button cancel">취소</button>
                                 <button class="modal-button confirm">전송</button>
-                                <div class="sending-indicator" style="display:none;">
-                                    <span class="spinner"></span> 메일 전송 중...
-                                </div>
                             </div>
                         </div>
                     `;
@@ -867,6 +839,10 @@ class RequestManager {
 
                 // 모달 표시
                 modal.style.display = 'block';
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.margin = '-5% 0 0 0%'; // 상단 -5%, 좌측 0이 중앙 
+                }
                 console.log('모달 표시됨');
             });
         }
@@ -959,208 +935,6 @@ function getCheckedBrandsData(allBrands) {
     return checkedIndices
         .map(index => allBrands[index])
         .filter(brand => brand && brand.nextstep === '제안서 요청');
-}
-
-// CSS 스타일 동적 추가
-function addModalStyles() {
-    const styleEl = document.createElement('style');
-    styleEl.textContent = `
-        /* 모달 스타일 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            position: relative;
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 0;
-            width: 500px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: left;
-        }
-        
-        .modal-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: left;
-        }
-        
-        .modal-header h4 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: #333;
-            text-align: left;
-        }
-        
-        .close-modal {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #777;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-        
-        .close-modal:hover {
-            color: #333;
-        }
-        
-        .modal-body {
-            padding: 20px;
-            text-align: left;
-        }
-        
-        .modal-body p {
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        
-        .mail-preview {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            padding: 15px;
-            margin-top: 10px;
-            text-align: left;
-        }
-        
-        .preview-item {
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            text-align: left;
-            display: flex;
-            align-items: flex-start;
-        }
-        
-        .preview-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .preview-item .label {
-            font-weight: 600;
-            color: #555;
-            margin-right: 8px;
-            min-width: 100px;
-            display: inline-block;
-            text-align: left;
-        }
-        
-        .preview-item span:not(.label) {
-            flex: 1;
-            text-align: left;
-            word-break: break-all;
-        }
-        
-        .modal-footer {
-            padding: 15px 20px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            text-align: right;
-        }
-        
-        .modal-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .modal-button.cancel {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        
-        .modal-button.cancel:hover {
-            background-color: #e0e0e0;
-        }
-        
-        .modal-button.confirm {
-            background-color: #0078d4;
-            color: white;
-        }
-        
-        .modal-button.confirm:hover {
-            background-color: #006cbd;
-        }
-        
-        /* 로딩 스피너 스타일 */
-        .sending-indicator {
-            display: inline-flex;
-            align-items: center;
-            margin-right: 10px;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(0, 0, 0, 0.1);
-            border-top-color: #0078d4;
-            border-radius: 50%;
-            margin-right: 6px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .preview-content {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-top: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        .preview-item {
-            margin-bottom: 15px;
-        }
-        
-        .preview-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .preview-item .label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 600;
-        }
-        
-        /* 받는 사람 입력 필드 스타일 */
-        #mail-to {
-            background-color: #f8f9fa;
-            color: #495057;
-            cursor: not-allowed;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-    `;
-    document.head.appendChild(styleEl);
 }
 
 // 메일 내용을 클립보드에 복사하는 함수

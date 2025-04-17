@@ -11,14 +11,16 @@
 }
 
 .modal-content {
-    position: relative;
+    position: absolute;
+    top: 20%;
+    left: 100%;
+    transform: translateX(-50%);
     background-color: #fff;
-    margin: 15% auto;
+    margin: 0;
     padding: 0;
     width: 500px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: left;
 }
 
 .modal-header {
@@ -51,83 +53,78 @@
 
 .modal-body {
     padding: 20px;
-    text-align: left;
 }
 
 .modal-body p {
-    text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .mail-preview {
     background-color: #f8f9fa;
     border-radius: 4px;
     padding: 15px;
-    margin-top: 10px;
-    text-align: left;
 }
 
 .preview-item {
+    display: block;
     margin-bottom: 10px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    text-align: left;
-    display: flex;
-    align-items: flex-start;
-}
-
-.preview-item:last-child {
-    margin-bottom: 0;
-}
-
-.preview-item .label {
-    font-weight: 600;
-    color: #555;
-    margin-right: 8px;
-    min-width: 100px;
-    display: inline-block;
+    font-size: 14px;
+    line-height: 1.5;
     text-align: left;
 }
 
-.preview-item span:not(.label) {
-    flex: 1;
-    text-align: left;
-    word-break: break-all;
+.preview-item > div:first-child {
+    display: inline;
+    color: #666;
+}
+
+.preview-item > div:last-child {
+    display: inline;
+}
+
+#preview-content {
+    margin-top: 5px;
+    white-space: pre-wrap;
 }
 
 .modal-footer {
     padding: 15px 20px;
     border-top: 1px solid #eee;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
     text-align: right;
 }
 
 .modal-button {
-    padding: 8px 16px;
+    margin-left: 10px;
+}
+
+/* 메일 폼 관련 스타일 */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.mail-button {
+    padding: 8px 20px;
     border: none;
     border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.modal-button.cancel {
+.mail-button.preview {
     background-color: #f0f0f0;
     color: #333;
 }
 
-.modal-button.cancel:hover {
+.mail-button.preview:hover {
     background-color: #e0e0e0;
 }
 
-.modal-button.confirm {
+.mail-button.send {
     background-color: #0078d4;
     color: white;
-}
-
-.modal-button.confirm:hover {
-    background-color: #006cbd;
 } 

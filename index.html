@@ -2,7 +2,7 @@
 <html>
 <head>
     <!-- 기본 메타데이터 및 스타일시트 -->
-    <title>gogoya v0.5.6</title>
+    <title>gogoya v0.5.8</title>
     <!-- Google Fonts - Noto Sans KR 폰트 로드 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -196,13 +196,11 @@
         const fs = require('fs');
         const path = require('path');
         
-        // 추가: gmailAuth 모듈 로드 시도
         try {
             const gmailAuth = require('./src/js/vendor_request/gmailAuth');
             window.getGmailCredentials = gmailAuth.getGmailCredentials;
-            console.log('Gmail 인증 모듈 로드 성공');
         } catch (error) {
-            console.error('Gmail 인증 모듈 로드 오류:', error);
+            // 에러 발생 시 조용히 처리
         }
         
         window.mongo = mongo;
@@ -210,10 +208,6 @@
         window.google = googleapis.google;
         window.fs = fs;
         window.path = path;
-        
-        // 몽고 객체 디버깅
-        console.log('MongoDB 모듈 로드:', window.mongo);
-        console.log('MongoDB 함수 목록:', Object.keys(window.mongo));
     </script>
 
     <!-- 그 다음 각 클래스 파일들을 로드 -->
@@ -382,10 +376,6 @@
     <!-- 관리자 관련 JS 파일 추가 -->
     <script src="src/js/admin_users/users.js"></script>
     <script src="src/js/admin_settings/settings.js"></script>
-    <!-- 먼저 필요한 모듈들을 로드 -->
-    <script src="src/js/vendor_request/gmailAuth.js"></script>
-    <script src="src/js/vendor_request/sendMail.js"></script>
-
     <!-- 계정 정보를 전역 객체에 추가 -->
     <script>
         window.accounts = [
@@ -393,30 +383,6 @@
             { id: "contant01", name: "박슬하(고야앤드미디어)", email: "contant01@goyamkt.com" },
             { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
         ];
-        
-        // sendMail 모듈이 로드되었는지 확인
-        if (typeof window.sendMailWithAccount !== 'function') {
-            console.warn('sendMailWithAccount 함수가 전역 객체에 없습니다. 수동으로 추가합니다.');
-            window.sendMailWithAccount = async function(accountId, mailOptions, credentialsPath) {
-                console.log('메일 전송 요청:', { accountId, mailOptions, credentialsPath });
-                // 기본 구현 또는 에러 처리
-                throw new Error('메일 전송 기능이 아직 구현되지 않았습니다.');
-            };
-        }
-    </script>
-
-    <!-- Gmail API 관련 스크립트 추가 -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        // Gmail API 초기화
-        gapi.load('client:auth2', () => {
-            gapi.client.init({
-                apiKey: 'YOUR_API_KEY',
-                clientId: 'YOUR_CLIENT_ID',
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
-                scope: 'https://www.googleapis.com/auth/gmail.send'
-            });
-        });
     </script>
 </body>
 </html> 
