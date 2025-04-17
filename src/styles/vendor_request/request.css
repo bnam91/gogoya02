@@ -472,3 +472,246 @@
 .status-button:contains('메일제외'):hover {
     background-color: #f0f0f0;
 }
+
+/* 메일 폼 스타일 */
+.mail-form {
+    padding: 15px;
+}
+
+/* 보내는 사람 선택 콤보박스 스타일 */
+#mail-from {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 30px;
+    color: #333;
+}
+
+#mail-from option {
+    color: #333;
+    padding: 8px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.mail-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background-color: #fff;
+}
+
+.mail-input:focus {
+    outline: none;
+    border-color: #0078d4;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+/* readonly 스타일을 #mail-to 입력 필드에만 적용 */
+#mail-to.mail-input {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+#mail-content {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.mail-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.mail-button.preview {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.mail-button.preview:hover {
+    background-color: #e0e0e0;
+}
+
+.mail-button.send {
+    background-color: #0078d4;
+    color: white;
+}
+
+.mail-button.send:hover {
+    background-color: #006cbd;
+}
+
+/* 메일 폼이 있는 우측 패널의 너비 조정 */
+#request-content .request-panel:nth-child(3) {
+    flex: 1; /* 우측 패널 너비 증가 */
+}
+
+/* 템플릿 선택 드롭다운 스타일 */
+#mail-template {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 30px;
+}
+
+/* 선택된 행 스타일 */
+#request-content .brand-table tr.selected-row {
+    background-color: #e6f3ff !important;
+    border-left: 3px solid #0078d4;
+}
+
+#request-content .brand-table tr.selected-row:hover {
+    background-color: #d1e9ff !important;
+}
+
+/* 중앙 패널 행 호버 효과 개선 */
+#request-content .request-panel:nth-child(2) .brand-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s, border-left 0.2s;
+}
+
+#request-content .request-panel:nth-child(2) .brand-table tbody tr:hover {
+    background-color: #f5f9ff;
+    border-left: 3px solid #cce4ff;
+}
+
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 0;
+    width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.close-modal {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #777;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.mail-preview {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.preview-item {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.preview-item:last-child {
+    margin-bottom: 0;
+}
+
+.preview-item .label {
+    font-weight: 600;
+    color: #555;
+    margin-right: 8px;
+    min-width: 100px;
+    display: inline-block;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modal-button.cancel {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modal-button.cancel:hover {
+    background-color: #e0e0e0;
+}
+
+.modal-button.confirm {
+    background-color: #0078d4;
+    color: white;
+}
+
+.modal-button.confirm:hover {
+    background-color: #006cbd;
+}

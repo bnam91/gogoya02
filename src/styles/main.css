@@ -118,7 +118,7 @@ body {
 }
 
 .submenu.expanded {
-    max-height: 200px;
+    max-height: 300px;
 }
 
 .submenu li {

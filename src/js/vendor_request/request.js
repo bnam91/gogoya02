@@ -3,6 +3,8 @@ class RequestManager {
     constructor() {
         this.mongo = window.mongo;
         this.brands = []; // 브랜드 데이터 저장용 배열
+        this.accounts = null; // 계정 정보를 저장할 변수
+        this.mailCache = new Map(); // 브랜드별 메일 내용을 저장할 Map 추가
     }
 
     async init() {
@@ -10,8 +12,46 @@ class RequestManager {
         console.log("MongoDB 객체:", this.mongo);
         console.log("MongoDB 함수 목록:", Object.keys(this.mongo));
         
+        // 모달 스타일 추가
+        addModalStyles();
+        
+        // 계정 정보 먼저 로드
+        try {
+            // 동적 import 대신 require 사용
+            const accountsPath = path.join(__dirname, 'vendor_request', 'accounts.js');
+            console.log('계정 정보 경로:', accountsPath);
+            
+            try {
+                // 방법 1: require 사용
+                const accountsModule = require(accountsPath);
+                this.accounts = accountsModule.accounts;
+            } catch (requireError) {
+                console.error('require로 계정 정보 로드 실패:', requireError);
+                
+                // 방법 2: 전역 객체에서 계정 정보 가져오기
+                if (window.accounts) {
+                    this.accounts = window.accounts;
+                } else {
+                    // 기본 계정 정보 사용
+                    throw new Error('계정 정보를 찾을 수 없습니다.');
+                }
+            }
+            
+            console.log("계정 정보 로드 완료", this.accounts);
+        } catch (error) {
+            console.error("계정 정보 로드 실패:", error);
+            // 기본 계정 정보 설정
+            this.accounts = [
+                { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
+                { id: "contant01", name: "박슬하(고야앤드미디어)", email: "contant01@goyamkt.com" },
+                { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
+            ];
+        }
+        
         try {
             await this.loadMongoData();
+            this.initializeAccountSelect(); // 계정 선택 콤보박스 초기화
+            this.initializeMailForm(); // 메일 폼 초기화
         } catch (error) {
             console.error("제안서 관리 초기화 중 오류:", error);
             this.loadFallbackData();
@@ -451,7 +491,7 @@ class RequestManager {
                         const isToday = callDateString === todayString;
                         
                         return `
-                            <tr class="${isToday ? 'today-row' : ''}">
+                            <tr class="${isToday ? 'today-row' : ''}" data-email="${brand.email || ''}" style="cursor: pointer;">
                                 <td class="checkbox-col"><input type="checkbox" name="center-brand-checkbox" data-index="${index}" data-brand="${brand.brand_name}" class="center-brand-checkbox" checked></td>
                                 <td>${brand.brand_name || '이름 없음'}</td>
                                 <td>${brand.email || ''}</td>
@@ -469,6 +509,9 @@ class RequestManager {
         
         // 중앙 패널 체크박스에 이벤트 리스너 추가
         this.addCenterCheckboxEventListeners();
+        
+        // 중앙 패널의 행 클릭 이벤트 추가
+        this.addCenterRowClickEventListeners();
     }
     
     // 중앙 패널 체크박스 이벤트 리스너 추가
@@ -505,6 +548,404 @@ class RequestManager {
                 }
             });
         });
+    }
+
+    // 중앙 패널 행 클릭 이벤트 리스너 추가 (수정)
+    addCenterRowClickEventListeners() {
+        const rows = document.querySelectorAll('.request-panel:nth-child(2) .brand-table tbody tr');
+        
+        rows.forEach(row => {
+            row.addEventListener('click', (event) => {
+                // 체크박스 클릭은 무시 (기존 체크박스 이벤트가 처리)
+                if (event.target.type === 'checkbox') return;
+                
+                // 현재 선택된 브랜드의 메일 내용 저장
+                this.saveCurrentMailContent();
+                
+                // 클릭된 행에서 브랜드 정보 가져오기
+                const brandName = row.querySelector('td:nth-child(2)').textContent;
+                const email = row.dataset.email;
+                
+                // 메일 작성 폼의 받는 사람 필드 업데이트
+                const mailToInput = document.getElementById('mail-to');
+                if (mailToInput) {
+                    mailToInput.value = email;
+                }
+                
+                // 저장된 메일 내용 복원
+                this.restoreMailContent(brandName);
+                
+                // 시각적 피드백을 위해 선택된 행 하이라이트
+                rows.forEach(r => r.classList.remove('selected-row'));
+                row.classList.add('selected-row');
+            });
+        });
+    }
+
+    // 현재 메일 내용 저장
+    saveCurrentMailContent() {
+        const mailToInput = document.getElementById('mail-to');
+        if (!mailToInput || !mailToInput.value) return; // 선택된 브랜드가 없으면 리턴
+
+        const currentBrandEmail = mailToInput.value;
+        const currentBrand = this.brands.find(b => b.email === currentBrandEmail);
+        if (!currentBrand) return;
+
+        const mailContent = {
+            subject: document.getElementById('mail-subject').value,
+            body: document.getElementById('mail-content').value
+        };
+
+        this.mailCache.set(currentBrand.brand_name, mailContent);
+        console.log(`${currentBrand.brand_name}의 메일 내용 저장:`, mailContent);
+    }
+
+    // 저장된 메일 내용 복원
+    restoreMailContent(brandName) {
+        const savedContent = this.mailCache.get(brandName);
+        const subjectInput = document.getElementById('mail-subject');
+        const contentInput = document.getElementById('mail-content');
+
+        if (savedContent) {
+            // 저장된 내용이 있으면 복원
+            subjectInput.value = savedContent.subject;
+            contentInput.value = savedContent.body;
+            console.log(`${brandName}의 저장된 메일 내용 복원:`, savedContent);
+        } else {
+            // 저장된 내용이 없으면 초기화
+            subjectInput.value = '';
+            contentInput.value = '';
+            console.log(`${brandName}의 저장된 메일 내용 없음, 폼 초기화`);
+        }
+    }
+
+    // 계정 선택 콤보박스 초기화 함수 수정
+    async initializeAccountSelect() {
+        try {
+            // 이미 로드된 계정 정보 사용
+            const accounts = this.accounts;
+            
+            const mailFromSelect = document.getElementById('mail-from');
+            if (mailFromSelect) {
+                // 기존 옵션들 제거
+                mailFromSelect.innerHTML = '<option value="">계정을 선택하세요</option>';
+                
+                // 계정 옵션 추가
+                accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.email;
+                    option.textContent = `${account.name} (${account.email})`;
+                    
+                    // 박슬하 계정인 경우 selected 속성 추가
+                    if (account.id === 'contant01') {
+                        option.selected = true;
+                    }
+                    
+                    mailFromSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('계정 정보 로드 중 오류:', error);
+        }
+    }
+
+    // 메일 폼 초기화
+    initializeMailForm() {
+        console.log('메일 폼 초기화 시작');
+        
+        const sendButton = document.querySelector('.mail-button.send');
+
+        if (sendButton) {
+            sendButton.addEventListener('click', () => {
+                console.log('보내기 버튼 클릭됨');
+                const fromSelect = document.getElementById('mail-from');
+                const toInput = document.getElementById('mail-to');
+                const subjectInput = document.getElementById('mail-subject');
+                const bodyEditor = document.querySelector('.mail-body-editor'); // 메일 본문 에디터
+
+                // 필수 필드 검증
+                if (!fromSelect.value) {
+                    alert('보내는 사람을 선택해주세요.');
+                    return;
+                }
+                if (!toInput.value) {
+                    alert('받는 사람을 선택해주세요.');
+                    return;
+                }
+                if (!subjectInput.value.trim()) {
+                    alert('제목을 입력해주세요.');
+                    return;
+                }
+
+                // 모달 요소 확인 및 생성
+                let modal = document.getElementById('send-mail-modal');
+                if (!modal) {
+                    console.log('모달 요소가 없어서 동적으로 생성합니다.');
+                    // 모달 동적 생성
+                    modal = document.createElement('div');
+                    modal.id = 'send-mail-modal';
+                    modal.className = 'modal';
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4>메일 전송 확인</h4>
+                                <span class="close-modal">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <p>다음 내용으로 메일을 전송하시겠습니까?</p>
+                                <div class="mail-preview">
+                                    <div class="preview-item">
+                                        <span class="label">보내는 사람:</span>
+                                        <span id="preview-from"></span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="label">받는 사람:</span>
+                                        <span id="preview-to"></span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="label">제목:</span>
+                                        <span id="preview-subject"></span>
+                                    </div>
+                                    <div class="preview-item">
+                                        <span class="label">내용:</span>
+                                        <div id="preview-content" class="preview-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="modal-button cancel">취소</button>
+                                <button class="modal-button confirm">전송</button>
+                                <div class="sending-indicator" style="display:none;">
+                                    <span class="spinner"></span> 메일 전송 중...
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                    
+                    // 닫기 버튼 이벤트 추가
+                    const closeModal = modal.querySelector('.close-modal');
+                    if (closeModal) {
+                        closeModal.addEventListener('click', () => {
+                            modal.style.display = 'none';
+                        });
+                    }
+                    
+                    // 취소 버튼 이벤트 추가
+                    const cancelButton = modal.querySelector('.modal-button.cancel');
+                    if (cancelButton) {
+                        cancelButton.addEventListener('click', () => {
+                            modal.style.display = 'none';
+                        });
+                    }
+                    
+                    // 전송 확인 버튼 이벤트 추가
+                    const confirmButton = modal.querySelector('.modal-button.confirm');
+                    if (confirmButton) {
+                        confirmButton.addEventListener('click', async () => {
+                            // 버튼 비활성화 및 로딩 표시
+                            confirmButton.disabled = true;
+                            cancelButton.disabled = true;
+                            const sendingIndicator = modal.querySelector('.sending-indicator');
+                            if (sendingIndicator) sendingIndicator.style.display = 'inline-block';
+                            
+                            try {
+                                // 선택된 계정 ID 가져오기
+                                const accountId = this.getAccountIdFromEmail(fromSelect.value);
+                                
+                                if (!accountId) {
+                                    throw new Error('계정 ID를 찾을 수 없습니다.');
+                                }
+                                
+                                // 본문 내용 가져오기 (수정된 부분)
+                                const mailContent = document.getElementById('mail-content');
+                                // 줄바꿈을 <br> 태그로 변환
+                                const bodyContent = mailContent ? mailContent.value.replace(/\n/g, '<br>') : '<p>제안서를 첨부합니다.</p>';
+                                
+                                // 계정별 서명 설정
+                                const signatures = {
+                                    'bnam91': `
+                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                                            <img src="https://i.ibb.co/QZn65VY/image.png" alt="고야앤드미디어 명함" style="margin-top: 10px; max-width: 300px;">
+                                        </div>
+                                    `,
+                                    'contant01': `
+                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                                            <img src="https://i.ibb.co/YTRgN6fp/image.png" alt="박슬하 명함" style="margin-top: 10px; max-width: 300px;">
+                                        </div>
+                                    `,
+                                    'jisu04': `
+                                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                                            <img src="https://i.ibb.co/RG93mR7S/2.png" alt="김지수 명함" style="margin-top: 10px; max-width: 300px;">
+                                        </div>
+                                    `
+                                };
+
+                                const signature = signatures[accountId] || '';
+                                
+                                // 이메일 내용 준비
+                                const mailOptions = {
+                                    from: fromSelect.value,
+                                    to: toInput.value,
+                                    subject: subjectInput.value,
+                                    body: `
+                                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+                                            ${bodyContent}
+                                            ${signature}
+                                        </div>
+                                    `
+                                };
+                                
+                                console.log('메일 전송 옵션:', mailOptions);
+                                
+                                // credentials 파일 경로 설정 (json 확장자로 변경)
+                                const credentialsPath = path.join(__dirname, 'vendor_request', `credentials_${accountId}.json`);
+                                console.log('자격 증명 경로:', credentialsPath);
+                                
+                                // Gmail 인증 정보 가져오기
+                                const auth = await window.getGmailCredentials(accountId, credentialsPath);
+                                
+                                // Gmail API 초기화
+                                const gmail = google.gmail({ version: 'v1', auth });
+                                
+                                // 이메일 헤더 설정
+                                const headers = {
+                                    'MIME-Version': '1.0',
+                                    'From': mailOptions.from,
+                                    'To': mailOptions.to,
+                                    'Subject': '=?UTF-8?B?' + Buffer.from(mailOptions.subject).toString('base64') + '?=',
+                                    'Content-Type': 'text/html; charset=UTF-8',
+                                    'Content-Transfer-Encoding': 'base64'
+                                };
+                                
+                                // 이메일 본문 생성
+                                const emailLines = [
+                                    Object.keys(headers).map(key => `${key}: ${headers[key]}`).join('\r\n'),
+                                    '',
+                                    Buffer.from(mailOptions.body).toString('base64')
+                                ].join('\r\n');
+                                
+                                // Base64 인코딩
+                                const encodedEmail = Buffer.from(emailLines)
+                                    .toString('base64')
+                                    .replace(/\+/g, '-')
+                                    .replace(/\//g, '_')
+                                    .replace(/=+$/, '');
+                                
+                                // 이메일 전송
+                                const response = await gmail.users.messages.send({
+                                    userId: 'me',
+                                    requestBody: {
+                                        raw: encodedEmail
+                                    }
+                                });
+                                
+                                if (response.data.id) {
+                                    alert('메일이 성공적으로 전송되었습니다.');
+                                    
+                                    // 전송 성공 시 상태 업데이트 (제안서 요청 → 협의대기)
+                                    this.updateSentBrandsStatus();
+                                    
+                                    // 모달 닫기
+                                    modal.style.display = 'none';
+                                } else {
+                                    throw new Error('메일 전송에 실패했습니다.');
+                                }
+                            } catch (error) {
+                                console.error('메일 전송 오류:', error);
+                                
+                                // 클립보드 복사 기능 제안
+                                if (confirm(`메일 전송 중 오류가 발생했습니다: ${error.message}\n메일 내용을 클립보드에 복사하시겠습니까?`)) {
+                                    copyMailToClipboard({
+                                        to: toInput.value,
+                                        subject: subjectInput.value,
+                                        body: bodyEditor ? bodyEditor.innerHTML : '<p>제안서를 첨부합니다.</p>'
+                                    });
+                                }
+                            } finally {
+                                // 버튼 활성화 및 로딩 표시 제거
+                                confirmButton.disabled = false;
+                                cancelButton.disabled = false;
+                                const sendingIndicator = modal.querySelector('.sending-indicator');
+                                if (sendingIndicator) sendingIndicator.style.display = 'none';
+                            }
+                        });
+                    }
+                    
+                    // 모달 외부 클릭 시 닫기
+                    window.addEventListener('click', (event) => {
+                        if (event.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                }
+
+                // 모달에 미리보기 정보 설정
+                const previewFrom = document.getElementById('preview-from');
+                const previewTo = document.getElementById('preview-to');
+                const previewSubject = document.getElementById('preview-subject');
+                const previewContent = document.getElementById('preview-content');
+                
+                const mailContent = document.getElementById('mail-content');
+                
+                if (previewFrom) previewFrom.textContent = fromSelect.options[fromSelect.selectedIndex].text;
+                if (previewTo) previewTo.textContent = toInput.value;
+                if (previewSubject) previewSubject.textContent = subjectInput.value;
+                if (previewContent && mailContent) {
+                    previewContent.innerHTML = mailContent.value.replace(/\n/g, '<br>');
+                }
+
+                // 모달 표시
+                modal.style.display = 'block';
+                console.log('모달 표시됨');
+            });
+        }
+    }
+    
+    // 이메일 주소로부터 계정 ID 추출 (클래스 멤버 변수 사용)
+    getAccountIdFromEmail(email) {
+        if (!email || !this.accounts) return null;
+        
+        try {
+            const account = this.accounts.find(acc => acc.email === email);
+            
+            if (account && account.id) {
+                return account.id;
+            }
+            
+            console.warn(`${email}에 해당하는 계정 ID를 찾을 수 없습니다.`);
+            return null;
+        } catch (error) {
+            console.error('계정 ID 추출 중 오류:', error);
+            return null;
+        }
+    }
+    
+    // 메일 전송 후 브랜드 상태 업데이트 (제안서 요청 → 협의대기)
+    updateSentBrandsStatus() {
+        // 중앙 패널에서 선택된 브랜드 가져오기
+        const selectedCheckboxes = document.querySelectorAll('.center-brand-checkbox:checked');
+        const brandNames = Array.from(selectedCheckboxes).map(cb => cb.dataset.brand);
+        
+        if (brandNames.length === 0) return;
+        
+        console.log('상태 업데이트할 브랜드:', brandNames);
+        
+        // 각 브랜드의 상태 업데이트
+        brandNames.forEach(brandName => {
+            // 브랜드 인덱스 찾기
+            const brandIndex = this.brands.findIndex(b => b.brand_name === brandName);
+            if (brandIndex >= 0) {
+                // 상태 업데이트 (제안서 요청 → 협의대기)
+                this.brands[brandIndex].nextstep = '협의대기';
+                
+                // MongoDB 업데이트
+                this.updateMongoDBStatus(brandName, '협의대기');
+            }
+        });
+        
+        // UI 다시 표시
+        this.displayRequests(this.brands);
     }
 }
 
@@ -547,5 +988,219 @@ function getCheckedBrandsData(allBrands) {
         .filter(brand => brand && brand.nextstep === '제안서 요청');
 }
 
-// 요청 관리자 인스턴스 생성
-window.requestManager = new RequestManager(); 
+// CSS 스타일 동적 추가
+function addModalStyles() {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 0;
+            width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+        }
+        
+        .modal-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+            text-align: left;
+        }
+        
+        .close-modal {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #777;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .modal-body p {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        
+        .mail-preview {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        
+        .preview-item {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            text-align: left;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .preview-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .preview-item .label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 8px;
+            min-width: 100px;
+            display: inline-block;
+            text-align: left;
+        }
+        
+        .preview-item span:not(.label) {
+            flex: 1;
+            text-align: left;
+            word-break: break-all;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            text-align: right;
+        }
+        
+        .modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .modal-button.cancel {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .modal-button.cancel:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .modal-button.confirm {
+            background-color: #0078d4;
+            color: white;
+        }
+        
+        .modal-button.confirm:hover {
+            background-color: #006cbd;
+        }
+        
+        /* 로딩 스피너 스타일 */
+        .sending-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .preview-content {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .preview-item {
+            margin-bottom: 15px;
+        }
+        
+        .preview-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .preview-item .label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+    `;
+    document.head.appendChild(styleEl);
+}
+
+// 메일 내용을 클립보드에 복사하는 함수
+function copyMailToClipboard(mailOptions) {
+    const mailContent = `
+받는 사람: ${mailOptions.to}
+제목: ${mailOptions.subject}
+
+${mailOptions.body.replace(/<[^>]*>/g, '')}
+    `;
+    
+    navigator.clipboard.writeText(mailContent)
+        .then(() => {
+            alert('메일 내용이 클립보드에 복사되었습니다. 직접 메일 클라이언트에 붙여넣기 해주세요.');
+        })
+        .catch(err => {
+            console.error('클립보드 복사 실패:', err);
+            alert('클립보드 복사에 실패했습니다.');
+        });
+}
+
+// 인스턴스 생성 및 초기화
+window.requestManager = new RequestManager();
+window.requestManager.init(); // init() 메서드 명시적 호출 

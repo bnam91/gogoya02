@@ -2,7 +2,7 @@
 <html>
 <head>
     <!-- 기본 메타데이터 및 스타일시트 -->
-    <title>gogoya v0.4.6</title>
+    <title>gogoya v0.5.6</title>
     <!-- Google Fonts - Noto Sans KR 폰트 로드 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="src/styles/toast.css">
     <link rel="stylesheet" href="src/styles/vendor_dashboard/dashboard.css">
     <link rel="stylesheet" href="src/styles/vendor_request/request.css">
+    <link rel="stylesheet" href="src/styles/vendor_campaign/campaign.css">
 </head>
 <body>
     <!-- 메인 컨테이너 -->
@@ -40,6 +41,20 @@
                         <li data-page="vendor/dashboard">대시보드</li>
                         <li data-page="vendor/brandcontact">브랜드 컨택</li>
                         <li data-page="vendor/request">제안서 관리</li>
+                        <li data-page="vendor/supplytab">공급가 관리</li>
+                        <li data-page="vendor/sellerMatch">셀러매칭</li>
+                        <li data-page="vendor/campaign">캠페인 관리</li>
+                    </ul>
+                </li>
+                <!-- 관리자 메뉴 아이템 (하위 메뉴 포함) -->
+                <li class="menu-item">
+                    <div class="menu-header">
+                        <span>관리자</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <ul class="submenu">
+                        <li data-page="admin/users">사용자 관리</li>
+                        <li data-page="admin/settings">시스템 설정</li>
                     </ul>
                 </li>
             </ul>
@@ -100,6 +115,65 @@
                     <span class="breadcrumb-item current">제안서 관리</span>
                 </div>
             </div>
+            <!-- 공급가 관리 콘텐츠 -->
+            <div id="supplytab-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">공급가 관리</span>
+                </div>
+                <div class="supplytab-container">
+                    대기중입니다
+                </div>
+            </div>
+            <!-- 셀러매칭 콘텐츠 추가 -->
+            <div id="sellerMatch-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">셀러매칭</span>
+                </div>
+                <div class="sellerMatch-container">
+                    대기중입니다
+                </div>
+            </div>
+            <!-- 캠페인 관리 콘텐츠 추가 -->
+            <div id="campaign-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">캠페인 관리</span>
+                </div>
+                <div class="campaign-container">
+                    대기중입니다
+                </div>
+            </div>
+            <!-- 관리자 콘텐츠 영역 추가 -->
+            <!-- 사용자 관리 콘텐츠 -->
+            <div id="users-content" class="content-section">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">관리자</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">사용자 관리</span>
+                </div>
+                <div class="users-container">
+                    대기중입니다
+                </div>
+            </div>
+            <!-- 시스템 설정 콘텐츠 -->
+            <div id="settings-content" class="content-section">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">관리자</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">시스템 설정</span>
+                </div>
+                <div class="settings-container">
+                    대기중입니다
+                </div>
+            </div>
         </div>
     </div>
     <!-- 전화 걸기 확인 모달 -->
@@ -118,8 +192,24 @@
         // 공통으로 사용할 모듈 선언
         const mongo = require('./src/js/mongo');
         const phone = require('./src/js/phone');
+        const googleapis = require('googleapis');
+        const fs = require('fs');
+        const path = require('path');
+        
+        // 추가: gmailAuth 모듈 로드 시도
+        try {
+            const gmailAuth = require('./src/js/vendor_request/gmailAuth');
+            window.getGmailCredentials = gmailAuth.getGmailCredentials;
+            console.log('Gmail 인증 모듈 로드 성공');
+        } catch (error) {
+            console.error('Gmail 인증 모듈 로드 오류:', error);
+        }
+        
         window.mongo = mongo;
         window.phone = phone;
+        window.google = googleapis.google;
+        window.fs = fs;
+        window.path = path;
         
         // 몽고 객체 디버깅
         console.log('MongoDB 모듈 로드:', window.mongo);
@@ -228,14 +318,37 @@
                     showContent('home');
                 } else if (page === 'vendor/dashboard') {
                     showContent('dashboard');
-                    // 대시보드 콘텐츠 로드
                     loadDashboardContent();
                 } else if (page === 'vendor/brandcontact') {
                     showContent('vendor');
                 } else if (page === 'vendor/request') {
                     showContent('request');
-                    // 제안서 관리 콘텐츠 로드
                     loadRequestContent();
+                } else if (page === 'vendor/supplytab') {
+                    showContent('supplytab');
+                    if (window.supplyTabManager) {
+                        window.supplyTabManager.init();
+                    }
+                } else if (page === 'vendor/sellerMatch') {
+                    showContent('sellerMatch');
+                    if (window.sellerMatchManager) {
+                        window.sellerMatchManager.init();
+                    }
+                } else if (page === 'vendor/campaign') {
+                    showContent('campaign');
+                    if (window.campaignManager) {
+                        window.campaignManager.init();
+                    }
+                } else if (page === 'admin/users') {
+                    showContent('users');
+                    if (window.usersManager) {
+                        window.usersManager.init();
+                    }
+                } else if (page === 'admin/settings') {
+                    showContent('settings');
+                    if (window.settingsManager) {
+                        window.settingsManager.init();
+                    }
                 }
             });
         });
@@ -260,6 +373,51 @@
                 vendorFilter.init();
             }
         }
+    </script>
+    <!-- 공급가 관리 JS 파일 추가 -->
+    <script src="src/js/vendor_supplytab/supplytab.js"></script>
+    <!-- 셀러매칭 JS 파일 추가 -->
+    <script src="src/js/vendor_sellerMatch/sellerMatch.js"></script>
+    <!-- 캠페인 관리 JS 파일 추가 -->
+    <script src="src/js/vendor_campaign/campaign.js"></script>
+    <!-- 관리자 관련 JS 파일 추가 -->
+    <script src="src/js/admin_users/users.js"></script>
+    <script src="src/js/admin_settings/settings.js"></script>
+    <!-- 먼저 필요한 모듈들을 로드 -->
+    <script src="src/js/vendor_request/gmailAuth.js"></script>
+    <script src="src/js/vendor_request/sendMail.js"></script>
+
+    <!-- 계정 정보를 전역 객체에 추가 -->
+    <script>
+        window.accounts = [
+            { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
+            { id: "contant01", name: "박슬하(고야앤드미디어)", email: "contant01@goyamkt.com" },
+            { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
+        ];
+        
+        // sendMail 모듈이 로드되었는지 확인
+        if (typeof window.sendMailWithAccount !== 'function') {
+            console.warn('sendMailWithAccount 함수가 전역 객체에 없습니다. 수동으로 추가합니다.');
+            window.sendMailWithAccount = async function(accountId, mailOptions, credentialsPath) {
+                console.log('메일 전송 요청:', { accountId, mailOptions, credentialsPath });
+                // 기본 구현 또는 에러 처리
+                throw new Error('메일 전송 기능이 아직 구현되지 않았습니다.');
+            };
+        }
+    </script>
+
+    <!-- Gmail API 관련 스크립트 추가 -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // Gmail API 초기화
+        gapi.load('client:auth2', () => {
+            gapi.client.init({
+                apiKey: 'YOUR_API_KEY',
+                clientId: 'YOUR_CLIENT_ID',
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
+                scope: 'https://www.googleapis.com/auth/gmail.send'
+            });
+        });
     </script>
 </body>
 </html> 
