@@ -2,7 +2,7 @@
  * tab1.js
  * @fileoverview vendor 탭 페이지 로직
  */
-
+console.log('tab1.js');
 const mongo = window.mongo;
 const vendorCallManager = window.vendorCallManager;
 const vendorFilter = window.vendorFilter;
@@ -854,6 +854,7 @@ function handleScroll(e) {
 }
 
 async function initVendor() {
+    console.log('initVendor');
     // 데이터 초기화
     currentSkip = 0;
     hasMoreData = true;

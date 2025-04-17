@@ -41,11 +41,26 @@ const commonUtils = {
       document.querySelectorAll('[data-page]').forEach(item => {
         item.addEventListener('click', function () {
           const page = this.dataset.page;
+          let content = '';
           if (page === 'home') {
-            commonUtils.showContent('home');
-          } else if (page === 'vendor/brandcontact') {
-            commonUtils.showContent('vendor');
+            content = 'home';
+          } 
+          // tab1
+          else if (page === 'vendor/brandcontact') {
+            content = 'vendor';
           }
+          // tab2
+          else if (page === 'vendor/dashboard') {
+            content = 'dashboard';
+          }
+          else if (page === 'vendor/brandstatus') {
+            content = 'brandstatus';
+          }
+          else if (page === 'vendor/testtab') {
+            content = 'testtab';
+          }
+
+          commonUtils.showContent(content);
         });
       });
     },
@@ -55,6 +70,7 @@ const commonUtils = {
      * @param {string} content - 보여줄 콘텐츠 키
      */
     showContent: (content) => {
+      console.log('showContent:', content);
       // 모든 콘텐츠 비활성화
       document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
@@ -65,8 +81,34 @@ const commonUtils = {
       if (target) target.classList.add('active');
   
       // 벤더 콘텐츠일 경우 추가 초기화
-      if (content === 'vendor' && window.vendor?.initVendor) {
+      if (content === 'vendor') {
+        try {
+        const vendor = require('../tabs/tab1');
+        if(window.vendor?.initVendor) {
+        
+          const vendor = require('../tabs/tab1');
+          window.vendor = vendor;
+          window.vendor.initVendor();
+        }
+        } catch (e) {
+          console.error('❌ tab1 require 실패:', e);
+        }
         window.vendor.initVendor();
+      
+      }
+      // 대시보드 콘텐츠일 경우 추가 초기화
+      else if (content === 'dashboard' && window.dashboard?.initDashboard) {
+        const dashboard = require('../tabs/tab2');
+        console.log('dashboard:', dashboard);
+        window.dashboard.initDashboard();
+      }
+      // 브랜드 현황 콘텐츠일 경우 추가 초기화
+      else if (content === 'brandstatus' && window.brandstatus?.initBrandstatus) {
+        window.brandstatus.initBrandstatus();
+      } 
+      // 테스트 콘텐츠일 경우 추가 초기화
+      else if (content === 'testtab' && window.testtab?.initTesttab) {
+        window.testtab.initTesttab();
       }
     }
   };
