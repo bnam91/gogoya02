@@ -163,18 +163,19 @@ class SellerAnalysisManager {
                             const followers = influencer.followers_num || 0;
                             const reelsViews = influencer.reels_views_num || 0;
                             const viewsToFollowers = followers > 0 ? ((reelsViews / followers) * 100).toFixed(2) : '0.00';
+                            const isHighViews = parseFloat(viewsToFollowers) > 100;
                             
                             return `
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${influencer.username || '-'}</td>
                                     <td>${influencer.clean_name || '-'}</td>
-                                    <td>${influencer.category || '-'}</td>
+                                    <td>${createCategoryBar(influencer.category).outerHTML}</td>
                                     <td>${followers.toLocaleString()}</td>
                                     <td>${influencer.grade || '-'}</td>
                                     <td>${reelsViews.toLocaleString()}</td>
-                                    <td>${viewsToFollowers}%</td>
-                                    <td><a href="${influencer.profile_link}" target="_blank">프로필 보기</a></td>
+                                    <td class="${isHighViews ? 'high-views' : ''}">${viewsToFollowers}%</td>
+                                    <td><a href="${influencer.profile_link}" target="_blank" class="profile-button">프로필 보기</a></td>
                                 </tr>
                             `;
                         }).join('')}
@@ -302,6 +303,82 @@ class SellerAnalysisManager {
             alert('파일 저장 중 오류가 발생했습니다.');
         }
     }
+}
+
+function createCategoryBar(categoryData) {
+    const categories = categoryData.split(',');
+    const container = document.createElement('div');
+    container.className = 'category-bar-container';
+    
+    // 카테고리 정보를 먼저 추가
+    const info = document.createElement('div');
+    info.className = 'category-info';
+    
+    // 전체 비율 계산
+    let totalPercentage = 0;
+    categories.forEach(cat => {
+        const [_, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        totalPercentage += percentage;
+    });
+    
+    categories.forEach(cat => {
+        const [category, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        const normalizedPercentage = (percentage / totalPercentage) * 100;
+        
+        const label = document.createElement('div');
+        label.className = 'category-label';
+        
+        const color = document.createElement('div');
+        color.className = 'category-color';
+        color.style.backgroundColor = getCategoryColor(category);
+        
+        const text = document.createElement('span');
+        text.textContent = `${category}(${percentage}%)`;
+        
+        label.appendChild(color);
+        label.appendChild(text);
+        info.appendChild(label);
+    });
+    
+    container.appendChild(info);
+    
+    // 바 추가
+    const bar = document.createElement('div');
+    bar.className = 'category-bar';
+    
+    categories.forEach(cat => {
+        const [category, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        const normalizedPercentage = (percentage / totalPercentage) * 100;
+        
+        const segment = document.createElement('div');
+        segment.className = 'category-segment';
+        segment.setAttribute('data-category', category);
+        segment.style.width = `${normalizedPercentage}%`;
+        segment.textContent = `${category}(${percentage}%)`;
+        bar.appendChild(segment);
+    });
+    
+    container.appendChild(bar);
+    return container;
+}
+
+function getCategoryColor(category) {
+    const colors = {
+        '뷰티': '#FFD1DC',
+        '패션': '#FFC1B6',
+        '홈/리빙': '#D1F0F0',
+        '푸드': '#FFE4C4',
+        '육아': '#E6D1FF',
+        '건강': '#a8e6c9',
+        '맛집탐방': '#FFE8C1',
+        '전시/공연': '#FFD1DC',
+        '반려동물': '#E6D1B8',
+        '기타': '#E0E0E0'
+    };
+    return colors[category] || '#E0E0E0';
 }
 
 // 전역 인스턴스 생성
