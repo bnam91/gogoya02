@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 커스텀 스타일시트 -->
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/vendor.css">
@@ -14,6 +16,7 @@
     <link rel="stylesheet" href="src/styles/vendor_dashboard/dashboard.css">
     <link rel="stylesheet" href="src/styles/vendor_request/request.css">
     <link rel="stylesheet" href="src/styles/vendor_campaign/campaign.css">
+    <link rel="stylesheet" href="src/styles/vendor_seller_analysis/seller_analysis.css">
 </head>
 <body>
     <!-- 메인 컨테이너 -->
@@ -44,6 +47,7 @@
                         <li data-page="vendor/supplytab">공급가 관리</li>
                         <li data-page="vendor/sellerMatch">셀러매칭</li>
                         <li data-page="vendor/campaign">캠페인 관리</li>
+                        <li data-page="vendor/sellerAnalysis">셀러분석</li>
                     </ul>
                 </li>
                 <!-- 관리자 메뉴 아이템 (하위 메뉴 포함) -->
@@ -149,6 +153,19 @@
                 </div>
                 <div class="campaign-container">
                     대기중입니다
+                </div>
+            </div>
+            <!-- 셀러분석 탭 콘텐츠 -->
+            <div id="sellerAnalysis-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">셀러분석</span>
+                </div>
+                <!-- 셀러분석 컨테이너 -->
+                <div class="seller-analysis-container">
+                    <!-- HTML이 동적으로 로드됩니다 -->
                 </div>
             </div>
             <!-- 관리자 콘텐츠 영역 추가 -->
@@ -327,6 +344,11 @@
                     if (window.sellerMatchManager) {
                         window.sellerMatchManager.init();
                     }
+                } else if (page === 'vendor/sellerAnalysis') {
+                    showContent('sellerAnalysis');
+                    if (window.sellerAnalysisManager) {
+                        window.sellerAnalysisManager.init();
+                    }
                 } else if (page === 'vendor/campaign') {
                     showContent('campaign');
                     if (window.campaignManager) {
@@ -371,6 +393,9 @@
     <script src="src/js/vendor_supplytab/supplytab.js"></script>
     <!-- 셀러매칭 JS 파일 추가 -->
     <script src="src/js/vendor_sellerMatch/sellerMatch.js"></script>
+    <!-- 셀러분석 JS 파일 추가 -->
+    <script src="src/js/vendor_seller_analysis/sellerAnalysisFilter.js"></script>
+    <script src="src/js/vendor_seller_analysis/sellerAnalysis.js"></script>
     <!-- 캠페인 관리 JS 파일 추가 -->
     <script src="src/js/vendor_campaign/campaign.js"></script>
     <!-- 관리자 관련 JS 파일 추가 -->

@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const ReleaseUpdater = require('./release_updater');
+const fs = require('fs');
 
 // 인코딩 설정
 process.env.CHARSET = 'UTF-8';
@@ -164,4 +165,20 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+ipcMain.handle('save-file', async (event, { defaultPath, content }) => {
+    const { filePath } = await dialog.showSaveDialog({
+        title: '엑셀 파일 저장',
+        defaultPath: defaultPath,
+        filters: [
+            { name: 'CSV 파일', extensions: ['csv'] }
+        ]
+    });
+
+    if (filePath) {
+        fs.writeFileSync(filePath, content, 'utf-8');
+        return filePath;
+    }
+    return null;
 }); 
