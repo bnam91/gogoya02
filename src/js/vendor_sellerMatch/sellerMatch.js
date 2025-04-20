@@ -117,27 +117,49 @@ class SellerMatchManager {
         if (this.leftContent) {
             const filterHTML = `
                 <div class="seller-match-filters">
-                    <div class="filter-group">
-                        <span class="filter-label">카테고리:</span>
-                        <select id="category-filter">
-                            <option value="">전체</option>
-                            <option value="뷰티">뷰티</option>
-                            <option value="패션">패션</option>
-                            <option value="홈/리빙">홈/리빙</option>
-                            <option value="푸드">푸드</option>
-                            <option value="육아">육아</option>
-                            <option value="건강">건강</option>
-                            <option value="맛집탐방">맛집탐방</option>
-                            <option value="전시/공연">전시/공연</option>
-                            <option value="반려동물">반려동물</option>
-                            <option value="기타">기타</option>
-                        </select>
-                        <input type="number" id="category-percentage" min="0" max="100" value="0">
-                        <span class="percentage-label">% 이상</span>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <span class="filter-label">카테고리:</span>
+                            <select id="category-filter">
+                                <option value="">전체</option>
+                                <option value="뷰티">뷰티</option>
+                                <option value="패션">패션</option>
+                                <option value="홈/리빙">홈/리빙</option>
+                                <option value="푸드">푸드</option>
+                                <option value="육아">육아</option>
+                                <option value="건강">건강</option>
+                                <option value="맛집탐방">맛집탐방</option>
+                                <option value="전시/공연">전시/공연</option>
+                                <option value="반려동물">반려동물</option>
+                                <option value="기타">기타</option>
+                            </select>
+                            <input type="number" id="category-percentage" min="0" max="100" value="0">
+                            <span class="percentage-label">% 이상</span>
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">이름검색:</span>
+                            <input type="text" id="name-search" placeholder="이름 또는 유저명으로 검색">
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <span class="filter-label">이름검색:</span>
-                        <input type="text" id="name-search" placeholder="이름 또는 유저명으로 검색">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <span class="filter-label">릴스뷰:</span>
+                            <select id="reels-views-filter">
+                                <option value="">전체</option>
+                                <option value="0-10000">1만 이하</option>
+                                <option value="10000-50000">1만-5만</option>
+                                <option value="50000-100000">5만-10만</option>
+                                <option value="100000-500000">10만-50만</option>
+                                <option value="500000-1000000">50만-100만</option>
+                                <option value="1000000-">100만 이상</option>
+                                <option value="custom">직접입력</option>
+                            </select>
+                            <div id="custom-reels-views" style="display: none;">
+                                <input type="number" id="reels-views-min" placeholder="최소값" min="0">
+                                <span>~</span>
+                                <input type="number" id="reels-views-max" placeholder="최대값" min="0">
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -145,19 +167,24 @@ class SellerMatchManager {
             const tableHTML = `
                 <style>
                     .seller-match-filters {
-                        margin-bottom: 15px;
+                        margin-bottom: 0px;
                         padding: 10px;
                         background: #f8f9fa;
                         border-radius: 4px;
+                    }
+                    .filter-row {
+                        display: flex;
+                        gap: 20px;
+                        margin-bottom: 10px;
+                    }
+                    .filter-row:last-child {
+                        margin-bottom: 0;
                     }
                     .filter-group {
                         display: flex;
                         align-items: center;
                         gap: 8px;
-                        margin-bottom: 8px;
-                    }
-                    .filter-group:last-child {
-                        margin-bottom: 0;
+                        flex: 1;
                     }
                     .filter-label {
                         font-size: 0.9rem;
@@ -182,6 +209,14 @@ class SellerMatchManager {
                     .filter-group input[type="text"] {
                         flex: 1;
                     }
+                    #custom-reels-views {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    #custom-reels-views input {
+                        width: 100px;
+                    }
                     .influencer-table {
                         width: 100%;
                         border-collapse: collapse;
@@ -190,7 +225,7 @@ class SellerMatchManager {
                     .influencer-table th {
                         background-color: #f8f9fa;
                         padding: 8px;
-                        text-align: left;
+                        text-align: center;
                         border-bottom: 1px solid #eee;
                         position: sticky;
                         top: 0;
@@ -353,7 +388,47 @@ class SellerMatchManager {
 
     renderRightPanel() {
         if (this.rightContent) {
-            this.rightContent.innerHTML = '오른쪽 패널';
+            this.rightContent.innerHTML = `
+                <div class="right-panel-top">
+                    <h3>상위 패널</h3>
+                    <div class="right-panel-content">
+                        <!-- 상위 패널 내용 -->
+                    </div>
+                </div>
+                <div class="right-panel-bottom">
+                    <h3>하위 패널</h3>
+                    <div class="right-panel-content">
+                        <!-- 하위 패널 내용 -->
+                    </div>
+                </div>
+                <style>
+                    #sellerMatch-right-content {
+                        background: none;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        padding: 0;
+                    }
+                    .right-panel-top,
+                    .right-panel-bottom {
+                        height: calc(50% - 5px);
+                        padding: 10px;
+                        box-sizing: border-box;
+                        background: #fff;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+                    .right-panel-content {
+                        height: calc(100% - 30px);
+                        overflow-y: auto;
+                    }
+                    h3 {
+                        margin: 0 0 10px 0;
+                        font-size: 1rem;
+                        color: #333;
+                    }
+                </style>
+            `;
         }
     }
 

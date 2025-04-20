@@ -36,11 +36,30 @@
 .sellerMatch-right-panel {
     flex: 0.8;
     min-width: 0;
+    background: none;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.right-panel-top,
+.right-panel-bottom {
+    height: calc(50% - 5px);
+    padding: 0 10px 10px 10px;
+    box-sizing: border-box;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 8px 0;
-    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.right-panel-content {
+    height: calc(100% - 30px);
+    overflow-y: auto;
+}
+
+h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #333;
 }
 
 #sellerMatch-left-content {
@@ -51,7 +70,7 @@
 }
 
 .seller-match-filters {
-    margin-bottom: 15px;
+    margin-bottom: 0px;
     padding: 10px;
     background: #f8f9fa;
     border-radius: 4px;
@@ -239,4 +258,18 @@
     text-overflow: ellipsis;
     color: #0066cc;
     cursor: pointer;
+}
+
+.influencer-table th {
+    background-color: #f8f9fa;
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.influencer-table th.checkbox-col {
+    text-align: center;
 } 
