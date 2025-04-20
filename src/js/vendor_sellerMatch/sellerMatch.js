@@ -263,10 +263,11 @@ class SellerMatchManager {
                                         <td>${index + 1}</td>
                                         <td class="name-username" 
                                             title="${influencer.clean_name || '-'} (${influencer.username || '-'})"
-                                            onclick="window.open('${influencer.profile_link}', '_blank')">
+                                            onclick="window.open('${influencer.profile_link}', '_blank')"
+                                            style="color: #0066cc;">
                                             ${influencer.clean_name || '-'} (${influencer.username || '-'})
                                         </td>
-                                        <td class="category" title="${influencer.category || '-'}">${influencer.category || '-'}</td>
+                                        <td class="category">${createCategoryBar(influencer.category).outerHTML}</td>
                                         <td class="reels-views">${influencer.reels_views_num.toLocaleString()}</td>
                                         <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                                     </tr>
@@ -317,10 +318,11 @@ class SellerMatchManager {
                         <td>${index + 1}</td>
                         <td class="name-username" 
                             title="${influencer.clean_name || '-'} (${influencer.username || '-'})"
-                            onclick="window.open('${influencer.profile_link}', '_blank')">
+                            onclick="window.open('${influencer.profile_link}', '_blank')"
+                            style="color: #0066cc;">
                             ${influencer.clean_name || '-'} (${influencer.username || '-'})
                         </td>
-                        <td class="category" title="${influencer.category || '-'}">${influencer.category || '-'}</td>
+                        <td class="category">${createCategoryBar(influencer.category).outerHTML}</td>
                         <td class="reels-views">${influencer.reels_views_num.toLocaleString()}</td>
                         <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                     </tr>
@@ -459,7 +461,7 @@ class SellerMatchManager {
                                     onclick="window.open('${influencer.profile_link || '#'}', '_blank')">
                                     ${name} (${username})
                                 </td>
-                                <td class="category" title="${category}">${category}</td>
+                                <td class="category">${createCategoryBar(category).outerHTML}</td>
                                 <td class="reels-views">${reelsViews}</td>
                                 <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                             </tr>
@@ -549,6 +551,82 @@ function getCheckedInfluencersData(allInfluencers) {
     return allInfluencers.filter(influencer => 
         sellerMatchManager.selectedInfluencerIds.has(`${influencer.username}_${influencer.clean_name}`)
     );
+}
+
+function createCategoryBar(categoryData) {
+    const categories = categoryData.split(',');
+    const container = document.createElement('div');
+    container.className = 'category-bar-container';
+    
+    // 카테고리 정보를 먼저 추가
+    const info = document.createElement('div');
+    info.className = 'category-info';
+    
+    // 전체 비율 계산
+    let totalPercentage = 0;
+    categories.forEach(cat => {
+        const [_, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        totalPercentage += percentage;
+    });
+    
+    categories.forEach(cat => {
+        const [category, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        const normalizedPercentage = (percentage / totalPercentage) * 100;
+        
+        const label = document.createElement('div');
+        label.className = 'category-label';
+        
+        const color = document.createElement('div');
+        color.className = 'category-color';
+        color.style.backgroundColor = getCategoryColor(category);
+        
+        const text = document.createElement('span');
+        text.textContent = `${category}(${percentage}%)`;
+        
+        label.appendChild(color);
+        label.appendChild(text);
+        info.appendChild(label);
+    });
+    
+    container.appendChild(info);
+    
+    // 바 추가
+    const bar = document.createElement('div');
+    bar.className = 'category-bar';
+    
+    categories.forEach(cat => {
+        const [category, percent] = cat.split('(');
+        const percentage = parseInt(percent);
+        const normalizedPercentage = (percentage / totalPercentage) * 100;
+        
+        const segment = document.createElement('div');
+        segment.className = 'category-segment';
+        segment.setAttribute('data-category', category);
+        segment.style.width = `${normalizedPercentage}%`;
+        segment.textContent = `${category}(${percentage}%)`;
+        bar.appendChild(segment);
+    });
+    
+    container.appendChild(bar);
+    return container;
+}
+
+function getCategoryColor(category) {
+    const colors = {
+        '뷰티': '#FFD1DC',
+        '패션': '#FFC1B6',
+        '홈/리빙': '#D1F0F0',
+        '푸드': '#FFE4C4',
+        '육아': '#E6D1FF',
+        '건강': '#a8e6c9',
+        '맛집탐방': '#FFE8C1',
+        '전시/공연': '#FFD1DC',
+        '반려동물': '#E6D1B8',
+        '기타': '#E0E0E0'
+    };
+    return colors[category] || '#E0E0E0';
 }
 
 // DOM이 완전히 로드된 후 초기화
