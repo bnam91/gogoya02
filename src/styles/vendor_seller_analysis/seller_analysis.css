@@ -253,7 +253,15 @@
 }
 
 .influencer-table td.high-views {
-    color: #12db00;
+    background-color: rgba(18, 219, 0, 0.1);
+    font-weight: 500;
+}
+
+.influencer-table td .high-views {
+    display: inline-block;
+    background-color: rgba(18, 219, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
     font-weight: 500;
 }
 
@@ -346,4 +354,39 @@
 .profile-button:hover {
     background-color: #e9ecef;
     border-color: #ced4da;
+}
+
+.recommended-tags {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+.recommended-tags h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.recommended-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recommended-tag {
+    padding: 4px 12px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.recommended-tag:hover {
+    background-color: #bbdefb;
 } 

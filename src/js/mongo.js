@@ -254,6 +254,35 @@ async function getCallRecordById(recordId) {
     });
 }
 
+async function saveInfluencerTags(username, tags) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db('insta09_database');
+        const collection = db.collection('02_main_influencer_data');
+        return await collection.updateOne(
+            { username: username },
+            { $set: { tags: tags } }
+        );
+    });
+}
+
+async function saveInfluencerContact(username, contactMethod, contactInfo, isExcluded, exclusionReason) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db('insta09_database');
+        const collection = db.collection('02_main_influencer_data');
+        return await collection.updateOne(
+            { username: username },
+            { $set: { 
+                contact_method: contactMethod,
+                contact_info: contactInfo,
+                is_contact_excluded: isExcluded,
+                contact_exclusion_reason: exclusionReason
+            } }
+        );
+    });
+}
+
 module.exports = {
     getMongoData,
     getVendorData,
@@ -264,5 +293,7 @@ module.exports = {
     updateBrandInfo,
     updateCallRecord,
     getCallRecordById,
-    getMongoClient
+    getMongoClient,
+    saveInfluencerTags,
+    saveInfluencerContact
 }; 
