@@ -272,4 +272,72 @@ h3 {
 
 .influencer-table th.checkbox-col {
     text-align: center;
+}
+
+.dm-records {
+    padding: 0;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.dm-record {
+    background: #1890ff;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+.dm-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+.dm-date {
+    color: #fff;
+}
+
+.dm-content {
+    font-size: 0.8rem;
+    color: #fff;
+}
+
+.dm-title {
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.dm-message {
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    cursor: pointer;
+}
+
+.dm-message:hover {
+    white-space: normal;
+    overflow: visible;
+    position: absolute;
+    background: #1890ff;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 100;
+    color: #fff;
+}
+
+.no-records {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-size: 0.9rem;
 } 

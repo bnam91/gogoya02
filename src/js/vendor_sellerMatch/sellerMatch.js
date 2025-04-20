@@ -396,7 +396,7 @@ class SellerMatchManager {
                     </div>
                 </div>
                 <div class="right-panel-bottom">
-                    <h3>하위 패널</h3>
+                    <h3>DM히스토리 <span class="dm-count">(0)</span></h3>
                     <div class="right-panel-content">
                         <!-- 하위 패널 내용 -->
                     </div>
@@ -525,7 +525,7 @@ class SellerMatchManager {
                         const influencerId = `${influencer.username}_${influencer.clean_name}`;
                         
                         return `
-                            <tr data-influencer-id="${influencerId}">
+                            <tr data-influencer-id="${influencerId}" data-clean-name="${name}">
                                 <td class="exclude-col">
                                     <button class="exclude-button" onclick="window.sellerMatchManager.excludeInfluencer('${influencerId}')">
                                         <i class="fas fa-times"></i>
@@ -547,6 +547,28 @@ class SellerMatchManager {
         `;
         
         centerPanel.innerHTML = selectedInfluencersHTML;
+
+        // 중앙 패널의 행 클릭 이벤트 추가
+        centerPanel.querySelectorAll('tr[data-clean-name]').forEach(row => {
+            row.addEventListener('click', async (event) => {
+                // 제외 버튼 클릭 시에는 이벤트 처리하지 않음
+                if (event.target.closest('.exclude-button')) return;
+
+                const cleanName = row.dataset.cleanName;
+                const records = await window.dmRecordsManager.getDmRecords(cleanName);
+                const rightPanelBottom = document.querySelector('.right-panel-bottom .right-panel-content');
+                const dmCount = document.querySelector('.dm-count');
+                
+                if (rightPanelBottom) {
+                    rightPanelBottom.innerHTML = `
+                        ${window.dmRecordsManager.renderDmRecords(records)}
+                    `;
+                    if (dmCount) {
+                        dmCount.textContent = `(${records.length})`;
+                    }
+                }
+            });
+        });
     }
 
     // 인플루언서 제외 함수 추가
