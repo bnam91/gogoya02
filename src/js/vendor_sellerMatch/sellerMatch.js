@@ -49,7 +49,8 @@ class SellerMatchManager {
             const pipeline = [
                 {
                     "$match": {
-                        "reels_views(15)": { "$exists": true, "$ne": "" }
+                        "reels_views(15)": { "$exists": true, "$ne": "" },
+                        "is_contact_excluded": { "$ne": true }
                     }
                 },
                 {
@@ -73,7 +74,8 @@ class SellerMatchManager {
                         "category": 1,
                         "profile_link": 1,
                         "reels_views": "$reels_views(15)",
-                        "reels_views_num": 1
+                        "reels_views_num": 1,
+                        "contact_method": 1
                     }
                 }
             ];
@@ -133,6 +135,10 @@ class SellerMatchManager {
                         <input type="number" id="category-percentage" min="0" max="100" value="0">
                         <span class="percentage-label">% 이상</span>
                     </div>
+                    <div class="filter-group">
+                        <span class="filter-label">이름검색:</span>
+                        <input type="text" id="name-search" placeholder="이름 또는 유저명으로 검색">
+                    </div>
                 </div>
             `;
 
@@ -148,10 +154,15 @@ class SellerMatchManager {
                         display: flex;
                         align-items: center;
                         gap: 8px;
+                        margin-bottom: 8px;
+                    }
+                    .filter-group:last-child {
+                        margin-bottom: 0;
                     }
                     .filter-label {
                         font-size: 0.9rem;
                         color: #666;
+                        min-width: 60px;
                     }
                     .percentage-label {
                         font-size: 0.9rem;
@@ -164,9 +175,12 @@ class SellerMatchManager {
                         border-radius: 4px;
                         font-size: 0.9rem;
                     }
-                    .filter-group input {
+                    .filter-group input[type="number"] {
                         width: 60px;
                         text-align: right;
+                    }
+                    .filter-group input[type="text"] {
+                        flex: 1;
                     }
                     .influencer-table {
                         width: 100%;
@@ -213,6 +227,12 @@ class SellerMatchManager {
                         width: 30px;
                         text-align: center;
                     }
+                    .contact-method {
+                        max-width: 100px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
                 </style>
                 ${filterHTML}
                 <div class="influencer-table-container">
@@ -224,6 +244,7 @@ class SellerMatchManager {
                                 <th>이름(유저명)</th>
                                 <th>카테고리</th>
                                 <th>릴스뷰</th>
+                                <th>컨택</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -247,6 +268,7 @@ class SellerMatchManager {
                                         </td>
                                         <td class="category" title="${influencer.category || '-'}">${influencer.category || '-'}</td>
                                         <td class="reels-views">${influencer.reels_views_num.toLocaleString()}</td>
+                                        <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                                     </tr>
                                 `;
                             }).join('')}
@@ -300,6 +322,7 @@ class SellerMatchManager {
                         </td>
                         <td class="category" title="${influencer.category || '-'}">${influencer.category || '-'}</td>
                         <td class="reels-views">${influencer.reels_views_num.toLocaleString()}</td>
+                        <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                     </tr>
                 `;
             }).join('');
@@ -412,6 +435,7 @@ class SellerMatchManager {
                         <th>이름(유저명)</th>
                         <th>카테고리</th>
                         <th>릴스뷰</th>
+                        <th>컨택</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -437,6 +461,7 @@ class SellerMatchManager {
                                 </td>
                                 <td class="category" title="${category}">${category}</td>
                                 <td class="reels-views">${reelsViews}</td>
+                                <td class="contact-method" title="${influencer.contact_method || '-'}">${influencer.contact_method || '-'}</td>
                             </tr>
                         `;
                     }).join('')}
