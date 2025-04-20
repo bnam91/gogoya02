@@ -1,0 +1,142 @@
+.sellerMatch-container {
+    display: flex;
+    gap: 10px;
+    padding: 0px;
+    height: calc(100vh - 100px); /* 브레드크럼 높이를 제외하고 여유 공간 추가 */
+    margin-top: 10px; /* 브레드크럼과의 간격 추가 */
+}
+
+.sellerMatch-content {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+.sellerMatch-left-panel,
+.sellerMatch-center-panel,
+.sellerMatch-right-panel {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 8px 0; /* 패딩 감소 */
+    overflow: hidden;
+}
+
+#sellerMatch-left-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 5px 10px 5px 10px;
+}
+
+.seller-match-filters {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.influencer-table-container {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+#sellerMatch-center-content,
+#sellerMatch-right-content {
+    height: 100%;
+    overflow: hidden;
+    padding: 5px 0 0 10px;
+}
+
+/* 스크롤바 스타일 커스터마이징 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* 선택된 로우 스타일 */
+.influencer-table tr.selected-row {
+    background-color: #e6f7ff !important;
+    border-left: 3px solid #1890ff;
+}
+
+.influencer-table tr.selected-row:hover {
+    background-color: #d4edff !important;
+}
+
+.exclude-col {
+    width: 50px;
+    text-align: center;
+}
+
+.exclude-button {
+    background: none;
+    border: none;
+    color: #ff4d4f;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.exclude-button:hover {
+    background-color: #ff4d4f;
+    color: white;
+}
+
+.exclude-button i {
+    font-size: 14px;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.exclude-all-button {
+    background: none;
+    border: 1px solid #d9d9d9;
+    color: #666;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.exclude-all-button:hover {
+    background-color: #f5f5f5;
+    color: #333;
+    border-color: #bfbfbf;
+}
+
+.exclude-all-button i {
+    font-size: 14px;
+    color: #999;
+} 
