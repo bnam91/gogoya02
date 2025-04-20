@@ -390,7 +390,7 @@ class SellerMatchManager {
         if (this.rightContent) {
             this.rightContent.innerHTML = `
                 <div class="right-panel-top">
-                    <h3>상위 패널</h3>
+                    <h3>브랜드 히스토리</h3>
                     <div class="right-panel-content">
                         <!-- 상위 패널 내용 -->
                     </div>
@@ -555,9 +555,15 @@ class SellerMatchManager {
                 if (event.target.closest('.exclude-button')) return;
 
                 const cleanName = row.dataset.cleanName;
+                const influencerId = row.dataset.influencerId;
+                const username = influencerId.split('_')[0] + '_' + influencerId.split('_')[1];
+                
+                console.log('선택된 인플루언서:', username);
+                
                 const records = await window.dmRecordsManager.getDmRecords(cleanName);
                 const rightPanelBottom = document.querySelector('.right-panel-bottom .right-panel-content');
                 const dmCount = document.querySelector('.dm-count');
+                const rightPanelTop = document.querySelector('.right-panel-top .right-panel-content');
                 
                 if (rightPanelBottom) {
                     rightPanelBottom.innerHTML = `
@@ -566,6 +572,13 @@ class SellerMatchManager {
                     if (dmCount) {
                         dmCount.textContent = `(${records.length})`;
                     }
+                }
+
+                if (rightPanelTop) {
+                    const brandRecords = await window.brandRecordsManager.getBrandRecords(username);
+                    rightPanelTop.innerHTML = `
+                        ${window.brandRecordsManager.renderBrandRecords(brandRecords)}
+                    `;
                 }
             });
         });
