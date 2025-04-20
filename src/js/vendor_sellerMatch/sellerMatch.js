@@ -501,9 +501,14 @@ class SellerMatchManager {
             <div class="panel-header">
                 <h3>선택된 인플루언서</h3>
                 <span class="count-badge">${selectedInfluencers.length}</span>
-                <button class="exclude-all-button" onclick="window.sellerMatchManager.excludeAllInfluencers()">
-                    <i class="fas fa-times-circle"></i> 전체 제외
-                </button>
+                <div class="panel-actions">
+                    <button class="exclude-all-button" onclick="window.sellerMatchManager.excludeAllInfluencers()">
+                        <i class="fas fa-times-circle"></i> 전체 제외
+                    </button>
+                    <button class="send-dm-button" onclick="window.sellerMatchManager.sendDm()">
+                        <i class="fas fa-paper-plane"></i> DM 보내기
+                    </button>
+                </div>
             </div>
             <table class="influencer-table">
                 <thead>
@@ -616,6 +621,10 @@ class SellerMatchManager {
         
         // 중앙 패널 업데이트
         this.updateCenterPanel([]);
+    }
+
+    sendDm() {
+        window.dmModal.open();
     }
 }
 

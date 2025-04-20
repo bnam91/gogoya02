@@ -420,4 +420,130 @@ h3 {
     font-size: 0.8rem;
     color: #333;
     margin-top: 8px;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    padding-right: 10px;
+}
+
+.send-dm-button {
+    background: #1890ff;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.send-dm-button:hover {
+    background: #40a9ff;
+}
+
+.send-dm-button i {
+    font-size: 14px;
+}
+
+#dm-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+#dm-modal .modal-content {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#dm-modal h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.modal-input-group {
+    margin-bottom: 15px;
+}
+
+.modal-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.modal-input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.sheet-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sheet-buttons-row .modal-button {
+    flex: 1;
+    min-width: 180px;
+}
+
+.sheet-button {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.sheet-button:hover {
+    background: #e0e0e0;
+    border-color: #ccc;
+}
+
+.upload-button {
+    background: #52c41a;
+    color: white;
+}
+
+.upload-button:hover {
+    background: #73d13d;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.modal-footer .modal-button {
+    flex: 1;
+    max-width: 150px;
+}
+
+.upload-button,
+.cancel {
+    width: 100%;
+    text-align: center;
 } 
