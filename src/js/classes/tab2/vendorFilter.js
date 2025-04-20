@@ -1,4 +1,4 @@
-class VendorFilter {
+export class VendorFilter {
     constructor() {
         this.selectedCategories = [];
         this.selectedGrades = [];
@@ -455,4 +455,5 @@ class VendorFilter {
 }
 
 // 클래스를 전역 스코프에 노출
-window.VendorFilter = VendorFilter; 
+//window.VendorFilter = VendorFilter; 
+

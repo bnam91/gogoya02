@@ -1,4 +1,4 @@
-class VendorInfoEditor {
+export class VendorInfoEditor {
     constructor() {
         this.currentBrandData = null;
         this.setupEventListeners();
@@ -44,7 +44,10 @@ class VendorInfoEditor {
         if (newValue !== parentSpan.textContent.trim()) {
             try {
                 // MongoDB 업데이트
-                await mongo.updateBrandInfo(this.currentBrandData.brand_name, {
+                //await mongo.updateBrandInfo(this.currentBrandData.brand_name, {
+                //    [fieldName]: newValue
+                //});
+                await window.api.updateBrandInfo(this.currentBrandData.brand_name, {
                     [fieldName]: newValue
                 });
                 
@@ -89,6 +92,6 @@ class VendorInfoEditor {
 }
 
 // 전역 인스턴스 생성
-const vendorInfoEditor = new VendorInfoEditor();
+//const vendorInfoEditor = new VendorInfoEditor();
 
-module.exports = VendorInfoEditor;  // 클래스 자체를 내보냄 
+//module.exports = VendorInfoEditor;  // 클래스 자체를 내보냄 

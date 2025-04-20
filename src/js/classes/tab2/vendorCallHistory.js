@@ -2,7 +2,7 @@
  * 통화기록 관리 클래스
  * 통화기록 조회 및 수기 입력 기능 제공
  */
-class VendorCallHistory {
+export class VendorCallHistory {
     constructor() {
         this.mongo = window.mongo;
         this.currentBrandName = '';
@@ -19,7 +19,8 @@ class VendorCallHistory {
             const extraContent = document.querySelector('.extra-content');
             extraContent.innerHTML = '<h3>통화 기록</h3><p>기록을 불러오는 중...</p>';
 
-            const records = await this.mongo.getCallRecords(brandName);
+            //const records = await this.mongo.getCallRecords(brandName);
+            const records = await window.api.fetchCallRecords(brandName);
 
             if (!records || records.length === 0) {
                 extraContent.innerHTML = `
@@ -46,16 +47,18 @@ class VendorCallHistory {
             html += '<div class="call-history">';
             
             records.forEach(record => {
+                console.log('✅ record:', record);
+                
                 const callDate = new Date(record.call_date);
                 const duration = record.call_duration_sec;
                 const minutes = Math.floor(duration / 60);
                 const seconds = duration % 60;
 
                 html += `
-                    <div class="call-record" data-record-id="${record._id}">
+                    <div class="call-record" data-record-id="${record._id.toString()}">
                         <div class="call-record-header">
                             <span class="call-date">${callDate.toLocaleString()}</span>
-                            <span class="call-duration">${minutes}분 ${seconds}초</span>
+                            <span class="call-duration">${minutes}분 ${seconds}초</span>    
                             ${record.is_manual ? '<span class="manual-indicator">수기입력</span>' : ''}
                         </div>
                         <div class="call-record-details">
@@ -65,11 +68,11 @@ class VendorCallHistory {
                             </div>
                             <div class="record-item">
                                 <label>다음 단계</label>
-                                <span class="nextstep" data-record-id="${record._id}" data-nextstep="${record.nextstep || ''}">${record.nextstep || '미설정'}</span>
+                                <span class="nextstep" data-record-id="${record._id.toString()}" data-nextstep="${record.nextstep || ''}">${record.nextstep || '미설정'}</span>
                             </div>
                             <div class="record-item">
                                 <label>메모</label>
-                                <span class="notes" data-record-id="${record._id}">${record.notes || ''}</span>
+                                <span class="notes" data-record-id="${record._id.toString()}">${record.notes || ''}</span>
                             </div>
                         </div>
                     </div>
@@ -230,7 +233,8 @@ class VendorCallHistory {
         
         try {
             // 브랜드 정보 가져오기
-            const brandPhoneData = await this.mongo.getBrandPhoneData(this.currentBrandName);
+            //const brandPhoneData = await this.mongo.getBrandPhoneData(this.currentBrandName);
+            const brandPhoneData = await window.api.fetchBrandPhoneData(this.currentBrandName);
             
             // 통화 기록 생성
             const callRecord = {
@@ -252,7 +256,8 @@ class VendorCallHistory {
             }
             
             // 통화 기록 저장
-            await this.mongo.saveCallRecord(callRecord);
+            //await this.mongo.saveCallRecord(callRecord);
+            await window.api.saveCallRecord(callRecord);
             
             // 성공 메시지 표시
             this.showToast('통화 기록이 저장되었습니다.', 'success');
@@ -350,7 +355,8 @@ class VendorCallHistory {
             const newNextStep = nextstepSelect.value;
             try {
                 // MongoDB 업데이트
-                await this.mongo.updateCallRecord(recordId, { nextstep: newNextStep });
+                //await this.mongo.updateCallRecord(recordId, { nextstep: newNextStep });
+                await window.api.updateCallRecord(recordId, { nextstep: newNextStep });
                 
                 // UI 업데이트
                 nextstepElement.textContent = newNextStep || '미설정';
@@ -417,7 +423,10 @@ class VendorCallHistory {
             const newNotes = notesInput.value.trim();
             try {
                 // MongoDB 업데이트
-                await this.mongo.updateCallRecord(recordId, { notes: newNotes });
+                //await this.mongo.updateCallRecord(recordId, { notes: newNotes });
+                console.log('✅ 저장할 recordId:', recordId.toString());
+                console.log('✅ 저장할 notes:', newNotes);  
+                await window.api.updateCallRecord(recordId, { notes: newNotes });
                 
                 // UI 업데이트
                 notesElement.textContent = newNotes || '메모 없음';
@@ -452,7 +461,8 @@ class VendorCallHistory {
     async updateCardNextStep(recordId, newNextStep) {
         try {
             // 해당 기록 조회
-            const record = await this.mongo.getCallRecordById(recordId);
+            // const record = await this.mongo.getCallRecordById(recordId);
+            const record = await window.api.fetchCallRecordById(recordId);
             if (!record || !record.card_id) return;
             
             // 선택된 카드 찾기
@@ -510,4 +520,4 @@ class VendorCallHistory {
 }
 
 // 전역 인스턴스 생성
-window.vendorCallHistory = new VendorCallHistory(); 
+//window.vendorCallHistory = new VendorCallHistory(); 

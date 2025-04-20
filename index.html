@@ -9,137 +9,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
     <!-- 커스텀 스타일시트 -->
     <link rel="stylesheet" href="src/styles/main.css">
-    <link rel="stylesheet" href="src/styles/vendor.css">
     <link rel="stylesheet" href="src/styles/toast.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab1/home.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab2/vendor.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab3/test.css">
 </head>
 <body>
     <!-- 메인 컨테이너 -->
     <div class="container">
+
         <!-- 좌측 사이드바 메뉴 -->
         <div class="sidebar">
             <!-- 로고 버튼 -->
             <div class="logo-container">
-                <img src="src/images/logo.svg" alt="로고" class="logo" data-page="home">
+                <img src="src/images/logo.svg" alt="로고" class="logo" data-page="tab1/home">
             </div>
+
+            <!-- 메뉴 영역 -->
             <ul class="menu-list">
-                <!-- 홈 메뉴 아이템 -->
-                <li class="menu-item" data-page="home">
-                    <div class="menu-header">
-                        <span>홈</span>
-                    </div>
-                </li>
-                <!-- 벤더 메뉴 아이템 (하위 메뉴 포함) -->
-                <li class="menu-item">
-                    <div class="menu-header">
-                        <span>벤더1</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <ul class="submenu">
-                        <li data-page="vendor/brandcontact">브랜드 컨택</li>
-                    </ul>
-                </li>
-                <!-- 벤더 메뉴 아이템 (하위 메뉴 포함) -->
-                <li class="menu-item">
-                    <div class="menu-header">
-                        <span>탭2</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <ul class="submenu">
-                        <li data-page="vendor/dashboard">대시보드</li>
-                        <li data-page="vendor/brandstatus">브랜드 현황</li>
-                        <li data-page="vendor/testtab">테스트</li>
-                    </ul>
-                </li>
+                <!-- 메뉴 데이터 로드 : renderMenu.js 참고-->
             </ul>
         </div>
+
         <!-- 메인 콘텐츠 영역 -->
         <div class="content" id="content">
-            <!-- 홈 페이지 콘텐츠 -->
-            <div id="home-content" class="content-section active">
-                대기중입니다
-            </div>
-
-            <!-- tab1 : 벤더 페이지 콘텐츠 -->
-            <div id="vendor-content" class="content-section">
-                <!-- 브레드크럼 네비게이션 -->
-                <div class="breadcrumb">
-                    <span class="breadcrumb-item">벤더</span>
-                    <span class="breadcrumb-separator">/</span>
-                    <span class="breadcrumb-item current">브랜드 컨택</span>
-                </div>
-                <!-- 벤더 컨테이너 (3단 레이아웃) -->
-                <div class="vendor-container">
-                    <!-- 좌측: 데이터 리스트 -->
-                    <div class="vendor-left">
-                        <div id="vendor-data-list" class="card-container">
-                        </div>
-                    </div>
-                    <!-- 우측: 상세 정보 -->
-                    <div class="vendor-right">
-                        <p>상세 정보가 여기에 표시됩니다.</p>
-                    </div>
-                    <!-- 하단: 추가 정보 -->
-                    <div class="vendor-extra">
-                        <div class="extra-content">
-                            <h3>추가 정보</h3>
-                            <p>여기에 추가 정보가 표시됩니다.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- tab2 : 페이지 콘텐츠 -->
-            <div id="tab2-content" class="content-section">
-                <h1>탭2 콘텐츠</h1>
-            </div>
-        </div>
-    </div>
-    <!-- 전화 걸기 확인 모달 -->
-    <div id="call-confirm-modal" class="modal">
-        <div class="modal-content">
-            <h3>전화 걸기</h3>
-            <p>전화를 걸까요?</p>
-            <p class="phone-number"></p>
-            <div class="modal-buttons">
-                <button class="modal-button confirm">확인</button>
-                <button class="modal-button cancel">취소</button>
-            </div>
+            <!-- 페이지 데이터 로드 : renderPage.js 참고-->
         </div>
     </div>
 
-    <script>
-        // 공통으로 사용할 모듈 선언
-        window.mongo = require('./src/js/databases/mongo');
-        window.phone = require('./src/js/utils/phone');
-    </script>
-
-    <!-- 그 다음 각 클래스 파일들을 로드 -->
-    <script src="src/js/classes/vendorCallHistory.js"></script>
-    <script src="src/js/classes/vendorCallManager.js"></script>
-    <script src="src/js/classes/vendorInfoEditor.js"></script>
-    <script src="src/js/classes/vendorFilter.js"></script>
-
-    <!-- 공통 유틸리티 함수 --> 
-    <script src="./src/js/utils/commonUtils.js"></script>
-
-    <!-- 마지막으로 메인 로직을 로드 -->
-    <script>
-
-        window.onload = () => {
-            // 인스턴스 생성
-            window.vendorFilter = new VendorFilter();
-            window.vendorCallManager = new VendorCallManager();
-            window.vendorInfoEditor = new VendorInfoEditor();
-            
-            // tab1.js (벤더) 로드
-            //const vendor = require('./src/js/tabs/tab1');
-            //const dashboard = require('./src/js/tabs/tab2');
-
-            // 페이지 초기화
-            commonUtils.initPage();
-            commonUtils.menuToggle();
-        }
-            
-    </script>
 </body>
+<!-- 메인 모듈 로드 -->
+<script type="module" src="./src/js/mainRender.js">
+</script>
+<script>
+    console.log('window.api:', window.api);
+</script>
 </html> 

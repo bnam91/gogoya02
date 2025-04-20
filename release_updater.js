@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const axios = require('axios');
+import fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import axios from 'axios';
 
 class ReleaseUpdater {
     constructor(owner, repo, versionFile = "VERSION.txt") {
@@ -123,4 +123,4 @@ class ReleaseUpdater {
     }
 }
 
-module.exports = ReleaseUpdater; 
+export default ReleaseUpdater;

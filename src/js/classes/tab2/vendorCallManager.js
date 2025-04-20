@@ -2,7 +2,7 @@
 // const phone = require('./phone'); 삭제
 // 대신 window.mongo와 window.phone 사용
 
-class VendorCallManager {
+export class VendorCallManager {
     constructor() {
         this.isCalling = false;
         this.callStartTime = null;
@@ -54,7 +54,8 @@ class VendorCallManager {
 
     async startCall(phoneNumber) {
         try {
-            await window.phone.call(phoneNumber);
+            //await window.phone.call(phoneNumber);
+            await window.api.callPhone(phoneNumber);
             this.isCalling = true;
             this.callStartTime = new Date();
             
@@ -89,7 +90,8 @@ class VendorCallManager {
         };
         
         try {
-            await window.mongo.saveCallRecord(callRecord);
+            //await window.mongo.saveCallRecord(callRecord);
+            await window.api.saveCallRecord(callRecord);
             return true;
         } catch (error) {
             console.error('통화 기록 저장 중 오류:', error);
@@ -103,7 +105,8 @@ class VendorCallManager {
 
     async getCallHistory(brandName) {
         try {
-            return await window.mongo.getCallRecords(brandName);
+            //return await window.mongo.getCallRecords(brandName);
+            return await window.api.fetchCallRecords(brandName);
         } catch (error) {
             console.error('통화 기록 조회 중 오류:', error);
             throw error;
@@ -111,4 +114,4 @@ class VendorCallManager {
     }
 }
 
-module.exports = VendorCallManager; 
+//module.exports = VendorCallManager; 

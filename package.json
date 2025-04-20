@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "일렉트론 앱",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "start": "chcp 65001 && cross-env NODE_ENV=production CHARSET=UTF-8 LANG=ko_KR.UTF-8 electron .",
     "dev": "chcp 65001 && cross-env NODE_ENV=development CHARSET=UTF-8 LANG=ko_KR.UTF-8 electron .",
@@ -30,8 +31,8 @@
     "axios": "^1.8.4",
     "electron": "^28.0.0",
     "electron-updater": "^6.6.2",
-    "mongodb": "^6.15.0",
-    "iconv-lite": "^0.6.3"
+    "iconv-lite": "^0.6.3",
+    "mongodb": "^6.15.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

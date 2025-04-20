@@ -3,11 +3,12 @@
  * @fileoverview 전화 걸기 유틸리티 함수
  */
 
-const { exec } = require('child_process');
+//const { exec } = require('child_process');
+import { exec } from 'child_process';
 
 const ADB_PATH = "C:\\adb\\adb.exe";
 
-function makeCall(phoneNumber) {
+export function makeCall(phoneNumber) {
     return new Promise((resolve, reject) => {
         if (!phoneNumber) {
             reject(new Error('전화번호가 제공되지 않았습니다.'));
@@ -31,7 +32,7 @@ function makeCall(phoneNumber) {
     });
 }
 
-function endCall() {
+export function endCall() {
     return new Promise((resolve, reject) => {
         const command = `"${ADB_PATH}" shell input keyevent KEYCODE_ENDCALL`;
         
@@ -52,9 +53,10 @@ function endCall() {
 
 
 
-
+/*
 module.exports = {
     makeCall,
     call: makeCall,
     endCall
-}; 
+};
+*/ 

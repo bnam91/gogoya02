@@ -1,12 +1,53 @@
 /**
- * tab1.js
- * @fileoverview vendor 탭 페이지 로직
+ * vendor.js
+ * @fileoverview 벤더 탭 초기화
  */
-console.log('tab1.js');
-const mongo = window.mongo;
-const vendorCallManager = window.vendorCallManager;
-const vendorFilter = window.vendorFilter;
-const vendorInfoEditor = window.vendorInfoEditor;
+
+// 필요한 클래스 import
+import { VendorCallHistory, VendorCallManager, VendorFilter, VendorInfoEditor } from '../../classes/tab2/index.js';
+
+// 인스턴스 생성
+const vendorCallManager = new VendorCallManager();
+const vendorFilter = new VendorFilter();
+const vendorInfoEditor = new VendorInfoEditor();
+const vendorCallHistory = new VendorCallHistory();
+
+export function initPage() {
+    console.log('initPage Vendor');
+  
+    // 인스턴스 생성
+    /*
+    window.vendorFilter = new VendorFilter();
+    window.vendorCallManager = new VendorCallManager();
+    window.vendorInfoEditor = new VendorInfoEditor();
+    window.vendorCallHistory = new VendorCallHistory();
+    */
+
+    // 데이터 초기화
+    currentSkip = 0;
+    hasMoreData = true;
+    selectedCardIndex = -1;
+    cardData = []; // 데이터 초기화
+    loadVendorData(true);
+    
+    const vendorLeft = document.querySelector('.vendor-left');
+    vendorLeft.addEventListener('scroll', handleScroll);
+    
+    // 우측 패널 초기화
+    const rightPanel = document.querySelector('.vendor-right');
+    rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
+
+    // 필터 초기화
+    /*
+    if (window.vendorFilter && typeof window.vendorFilter.init === 'function') {
+        window.vendorFilter.init();
+        */
+    if (vendorFilter && typeof vendorFilter.init === 'function') {
+        vendorFilter.init();
+    } else {
+        console.error('vendorFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
+    }
+}
 
 let isLoading = false;
 let currentSkip = 0;
@@ -27,6 +68,7 @@ window.vendor = {
 };
 
 function updateCallDuration() {
+    console.log('updateCallDuration');
     if (!vendorCallManager.callStartTime || !vendorCallManager.isCalling) return;
     
     const now = new Date();
@@ -42,6 +84,7 @@ function updateCallDuration() {
 }
 
 async function handleCall(phoneNumber) {
+    console.log('handleCall');
     try {
         if (vendorCallManager.isCalling) {
             await vendorCallManager.endCall();
@@ -200,10 +243,15 @@ async function handleCall(phoneNumber) {
 }
 
 async function updateCallHistory(brandName) {
+    console.log('updateCallHistory');
     try {
         // vendorCallHistory 모듈을 사용하여 통화 기록 렌더링
+        /*
         if (window.vendorCallHistory) {
             await window.vendorCallHistory.renderCallHistory(brandName);
+        */
+        if (vendorCallHistory) {
+                await vendorCallHistory.renderCallHistory(brandName);
         } else {
             console.error('vendorCallHistory 모듈을 찾을 수 없습니다.');
             throw new Error('vendorCallHistory 모듈을 찾을 수 없습니다.');
@@ -220,18 +268,27 @@ async function updateCallHistory(brandName) {
 
 // 선택된 카드의 통화 상태 업데이트 (다음 단계 포함)
 async function updateCardCallStatus(recordId, newNextStep) {
+    console.log('updateCardCallStatus');
     try {
         // 일반적으로 vendorCallHistory 모듈을 사용하지만, 
         // 호환성을 위해 기존 코드도 유지합니다.
+        /*
         if (window.vendorCallHistory) {
             // vendorCallHistory 모듈의 메서드 호출
             await window.vendorCallHistory.updateCardNextStep(recordId, newNextStep);
             return;
         }
+        */
+        if (vendorCallHistory) {
+            // vendorCallHistory 모듈의 메서드 호출
+            await vendorCallHistory.updateCardNextStep(recordId, newNextStep);
+            return;
+        }
         
         // 기존 코드 (이전 버전 호환성을 위해 유지)
         // 해당 기록 조회
-        const record = await mongo.getCallRecordById(recordId);
+        //const record = await mongo.getCallRecordById(recordId);
+        const record = await window.api.fetchgetCallRecordById(recordId);
         if (!record || !record.card_id) return;
         
         // 선택된 카드 찾기
@@ -261,7 +318,10 @@ async function updateCardCallStatus(recordId, newNextStep) {
     }
 }
 
-async function updateRightPanel(item) {
+// 브랜드 정보 패널
+//async function updateRightPanel(item) {
+async function updateBrandInfoPanel(item) {
+    console.log('updateRightPanel');
     const rightPanel = document.querySelector('.vendor-right');
     const extraContent = document.querySelector('.extra-content');
     
@@ -277,7 +337,8 @@ async function updateRightPanel(item) {
 
     try {
         const brandName = item.brand;
-        const brandPhoneData = await mongo.getBrandPhoneData(brandName);
+        //const brandPhoneData = await mongo.getBrandPhoneData(brandName);
+        const brandPhoneData = await window.api.fetchBrandPhoneData(brandName);
         
         // 현재 브랜드 데이터 저장
         currentBrandData = {
@@ -453,7 +514,10 @@ async function updateRightPanel(item) {
                 
                 try {
                     // MongoDB 업데이트
-                    await mongo.updateBrandInfo(brandPhoneData.brand_name, {
+                    //await mongo.updateBrandInfo(brandPhoneData.brand_name, {
+                    //    is_verified: newStatus
+                    //});
+                    await window.api.updateBrandInfo(brandPhoneData.brand_name, {
                         is_verified: newStatus
                     });
                     
@@ -503,6 +567,7 @@ async function updateRightPanel(item) {
 }
 
 async function selectCard(index) {
+    console.log('selectCard');
     // 통화 중일 때는 카드 선택 방지
     if (vendorCallManager.isCalling) {
         alert('통화 중에는 다른 카드를 선택할 수 없습니다.');
@@ -528,12 +593,14 @@ async function selectCard(index) {
         currentBrandData = cardData[index];
         
         // 우측 패널 업데이트
-        await updateRightPanel(currentBrandData);
+        //await updateRightPanel(currentBrandData);
+        await updateBrandInfoPanel(currentBrandData);
     }
 }
 
 // 키보드 이벤트 핸들러 추가
 document.addEventListener('keydown', async (event) => {
+    console.log('keydown', event);
     const modal = document.getElementById('call-confirm-modal');
     
     // ESC 키로 모달창 닫기
@@ -578,6 +645,7 @@ document.addEventListener('keydown', async (event) => {
 });
 
 async function handleKeyDown(e) {
+    console.log('handleKeyDown');
     if (!document.getElementById('vendor-content').classList.contains('active')) {
         return;
     }
@@ -663,13 +731,15 @@ async function handleKeyDown(e) {
 }
 
 async function createCard(item, index, startIndex) {
+    console.log('createCard');
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.id = item._id;
     
     // 브랜드 정보 유무 확인
     try {
-        const brandPhoneData = await mongo.getBrandPhoneData(item.brand);
+        //const brandPhoneData = await mongo.getBrandPhoneData(item.brand);
+        const brandPhoneData = await window.api.fetchBrandPhoneData(item.brand);
         const hasBrandInfo = brandPhoneData && brandPhoneData.brand_name ? 'true' : 'false';
         card.dataset.hasBrandInfo = hasBrandInfo;
     } catch (error) {
@@ -700,7 +770,8 @@ async function createCard(item, index, startIndex) {
     callStatus.className = 'call-status';
     
     try {
-        const latestCall = await mongo.getLatestCallRecordByCardId(item._id);
+        //const latestCall = await mongo.getLatestCallRecordByCardId(item._id);
+        const latestCall = await window.api.fetchLatestCallRecordByCardId(item._id);
         if (latestCall) {
             const callDate = new Date(latestCall.call_date);
             const formattedDate = callDate.toLocaleDateString('ko-KR', {
@@ -782,6 +853,7 @@ async function createCard(item, index, startIndex) {
 }
 
 async function loadVendorData(isInitialLoad = true, filters = {}) {
+    console.log('loadVendorData');
     if (isLoading || (!isInitialLoad && !hasMoreData)) return;
     
     try {
@@ -798,8 +870,14 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
             };
         }
         
-        const result = await mongo.getVendorData(currentSkip, 20, filters);
+        //const result = await mongo.getVendorData(currentSkip, 20, filters);
+        const result = await window.api.fetchVendorData({
+            ...filters,
+            skip: currentSkip,
+            limit: 20
+        });
         const { data, hasMore } = result;
+          
         hasMoreData = hasMore;
         
         const dataList = document.getElementById('vendor-data-list');
@@ -847,6 +925,7 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
 }
 
 function handleScroll(e) {
+    console.log('handleScroll');
     const element = e.target;
     if (element.scrollHeight - element.scrollTop <= element.clientHeight + 100) {
         loadVendorData(false);
@@ -870,16 +949,20 @@ async function initVendor() {
     rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
 
     // 필터 초기화
+    /*
     if (window.vendorFilter && typeof window.vendorFilter.init === 'function') {
         window.vendorFilter.init();
+    } 
+    */
+    if (vendorFilter && typeof vendorFilter.init === 'function') {
+        vendorFilter.init();
     } else {
         console.error('vendorFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
     }
 }
 
-document.addEventListener('keydown', handleKeyDown);
-
 async function saveCallRecord() {
+
     try {
         const callStatus = document.getElementById('call-status').value;
         const nextStep = document.getElementById('next-step').value;
@@ -905,7 +988,8 @@ async function saveCallRecord() {
             card_id: currentBrandData._id  // 선택된 카드의 ID 추가
         };
 
-        await mongo.saveCallRecord(callRecord);
+        //await mongo.saveCallRecord(callRecord);
+        await window.api.saveCallRecord(callRecord);
         console.log('통화 기록 저장 완료:', callRecord);
         
         // 통화 기록 저장 후 모달 닫기
@@ -913,8 +997,12 @@ async function saveCallRecord() {
         modal.style.display = 'none';
         
         // vendorCallHistory 모듈을 사용하여 통화 기록 업데이트
+        /*
         if (window.vendorCallHistory) {
             await window.vendorCallHistory.renderCallHistory(currentBrandData.brand_name);
+        */
+        if (vendorCallHistory) {
+            await vendorCallHistory.renderCallHistory(currentBrandData.brand_name);
         } else {
             // 이전 방식으로 통화 기록 업데이트
             await updateCallHistory(currentBrandData.brand_name);
@@ -961,7 +1049,3 @@ async function saveCallRecord() {
         alert('통화 기록 저장 중 오류가 발생했습니다.');
     }
 }
-
-module.exports = {
-    initVendor
-}; 

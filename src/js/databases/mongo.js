@@ -1,6 +1,5 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const config = require('../config/config');
-const { ObjectId } = require('mongodb');
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
+import { config } from '../config/config.js';
 
 const uri = "mongodb+srv://coq3820:JmbIOcaEOrvkpQo1@cluster0.qj1ty.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const ITEMS_PER_PAGE = 20;
@@ -9,7 +8,7 @@ const ITEMS_PER_PAGE = 20;
 let client = null;
 
 // MongoDB 클라이언트 연결 함수
-async function getMongoClient() {
+export async function getMongoClient() {
     if (!client) {
         client = new MongoClient(uri, {
             serverApi: {
@@ -30,7 +29,7 @@ async function getMongoClient() {
 }
 
 // 재시도 로직을 포함한 함수 실행
-async function withRetry(operation, maxRetries = 3, delay = 1000) {
+export async function withRetry(operation, maxRetries = 3, delay = 1000) {
     let lastError;
     for (let i = 0; i < maxRetries; i++) {
         try {
@@ -46,7 +45,7 @@ async function withRetry(operation, maxRetries = 3, delay = 1000) {
     throw lastError;
 }
 
-async function getMongoData() {
+export async function getMongoData() {
     try {
         const client = new MongoClient(uri, {
             serverApi: {
@@ -73,7 +72,7 @@ async function getMongoData() {
     }
 }
 
-async function getVendorData(skip = 0, limit = 20, filters = {}) {
+export async function getVendorData(skip = 0, limit = 20, filters = {}) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -177,7 +176,7 @@ async function getVendorData(skip = 0, limit = 20, filters = {}) {
     });
 }
 
-async function getBrandPhoneData(brandName) {
+export async function getBrandPhoneData(brandName) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -186,7 +185,7 @@ async function getBrandPhoneData(brandName) {
     });
 }
 
-async function saveCallRecord(callData) {
+export async function saveCallRecord(callData) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -195,7 +194,8 @@ async function saveCallRecord(callData) {
     });
 }
 
-async function getCallRecords(brandName) {
+export async function getCallRecords(brandName) {
+    /*
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -204,9 +204,27 @@ async function getCallRecords(brandName) {
             .sort({ call_date: -1 })
             .toArray();
     });
+    */
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
+        
+        const records = await collection.find({ brand_name: brandName })
+            .sort({ call_date: -1 })
+            .toArray();
+
+        // _id를 문자열로 변환
+        const convertedRecords = records.map(record => ({
+            ...record,
+            _id: record._id.toHexString()
+        }));
+
+        return convertedRecords;
+    });
 }
 
-async function getLatestCallRecordByCardId(cardId) {
+export async function getLatestCallRecordByCardId(cardId) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -221,7 +239,7 @@ async function getLatestCallRecordByCardId(cardId) {
     });
 }
 
-async function updateBrandInfo(brandName, updateData) {
+export async function updateBrandInfo(brandName, updateData) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -233,7 +251,8 @@ async function updateBrandInfo(brandName, updateData) {
     });
 }
 
-async function updateCallRecord(recordId, updateData) {
+export async function updateCallRecord(recordId, updateData) {
+    console.log('updateCallRecord', recordId, updateData);
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -245,7 +264,7 @@ async function updateCallRecord(recordId, updateData) {
     });
 }
 
-async function getCallRecordById(recordId) {
+export async function getCallRecordById(recordId) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
@@ -254,14 +273,16 @@ async function getCallRecordById(recordId) {
     });
 }
 
+/*
 module.exports = {
     getMongoData,
     getVendorData,
     getBrandPhoneData,
-    saveCallRecord,
+    saveCallRecordDB,
     getCallRecords,
     getLatestCallRecordByCardId,
     updateBrandInfo,
     updateCallRecord,
     getCallRecordById
 }; 
+*/
