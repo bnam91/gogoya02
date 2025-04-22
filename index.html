@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="src/styles/vendor_campaign/campaign.css">
     <link rel="stylesheet" href="src/styles/vendor_seller_analysis/seller_analysis.css">
     <link rel="stylesheet" href="src/css/vendor_sellerMatch/sellerMatch.css">
+    <link rel="stylesheet" href="src/styles/vendor_screening/screening.css">
 </head>
 <body>
     <!-- 메인 컨테이너 -->
@@ -43,6 +44,7 @@
                     </div>
                     <ul class="submenu">
                         <li data-page="vendor/dashboard">대시보드</li>
+                        <li data-page="vendor/screening">스크리닝</li>
                         <li data-page="vendor/brandcontact">브랜드 컨택</li>
                         <li data-page="vendor/request">제안서 관리</li>
                         <li data-page="vendor/supplytab">공급가 관리</li>
@@ -81,6 +83,172 @@
                 <!-- 대시보드 컨테이너 (3단 레이아웃) -->
                 <div class="dashboard-container" id="dashboard-container">
                     <!-- 여기에 vendor_dashboard.html의 내용이 동적으로 로드됩니다 -->
+                </div>
+            </div>
+            <!-- 스크리닝 콘텐츠 -->
+            <div id="screening-content" class="content-section">
+                <!-- 브레드크럼 네비게이션 -->
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">벤더</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item current">스크리닝</span>
+                </div>
+                <!-- 스크리닝 컨테이너 -->
+                <div class="screening-container">
+                    <!-- 헤더 -->
+                    <header class="bg-white shadow-sm rounded-lg p-4 mb-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button
+                                data-mode="brand"
+                                class="view-mode-btn active px-3 py-1.5 rounded-md text-sm font-medium bg-blue-100 text-blue-700"
+                            >
+                                <i class="fas fa-shopping-bag mr-1"></i>
+                                브랜드별 보기
+                            </button>
+                            <button
+                                data-mode="item"
+                                class="view-mode-btn px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            >
+                                <i class="fas fa-box mr-1"></i>
+                                상품별 보기
+                            </button>
+                            <button
+                                data-mode="influencer"
+                                class="view-mode-btn px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            >
+                                <i class="fas fa-users mr-1"></i>
+                                인플루언서별 보기
+                            </button>
+                        </div>
+                    </header>
+                    
+                    <!-- 필터 -->
+                    <div class="bg-white shadow-sm rounded-lg p-4 mb-6">
+                        <div class="flex flex-wrap gap-4">
+                            <div class="w-full md:w-64">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        id="screening-search"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5"
+                                        placeholder="브랜드, 상품, 인플루언서 검색..."
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div class="w-full md:w-auto">
+                                <div class="filter-dropdown">
+                                    <div class="filter-select">
+                                        <div class="selected-items">카테고리 선택</div>
+                                        <div class="dropdown-arrow">▼</div>
+                                    </div>
+                                    <div class="filter-options">
+                                        <div class="filter-option" data-category="🍽주방용품&식기">
+                                            <input type="checkbox" id="category-1" value="🍽주방용품&식기">
+                                            <label for="category-1">🍽주방용품&식기</label>
+                                        </div>
+                                        <div class="filter-option" data-category="🛋생활용품&가전">
+                                            <input type="checkbox" id="category-2" value="🛋생활용품&가전">
+                                            <label for="category-2">🛋생활용품&가전</label>
+                                        </div>
+                                        <div class="filter-option" data-category="🥦식품&건강식품">
+                                            <input type="checkbox" id="category-3" value="🥦식품&건강식품">
+                                            <label for="category-3">🥦식품&건강식품</label>
+                                        </div>
+                                        <div class="filter-option" data-category="🧴뷰티&헬스">
+                                            <input type="checkbox" id="category-4" value="🧴뷰티&헬스">
+                                            <label for="category-4">🧴뷰티&헬스</label>
+                                        </div>
+                                        <div class="filter-option" data-category="👶유아&교육">
+                                            <input type="checkbox" id="category-5" value="👶유아&교육">
+                                            <label for="category-5">👶유아&교육</label>
+                                        </div>
+                                        <div class="filter-option" data-category="👗의류&잡화">
+                                            <input type="checkbox" id="category-6" value="👗의류&잡화">
+                                            <label for="category-6">👗의류&잡화</label>
+                                        </div>
+                                        <div class="filter-option" data-category="🚗기타">
+                                            <input type="checkbox" id="category-7" value="🚗기타">
+                                            <label for="category-7">🚗기타</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="w-full md:w-auto">
+                                <div class="filter-dropdown">
+                                    <div class="filter-select">
+                                        <div class="selected-items">릴스뷰 선택</div>
+                                        <div class="dropdown-arrow">▼</div>
+                                    </div>
+                                    <div class="filter-options">
+                                        <div class="filter-option" data-views="0-10000">
+                                            <input type="radio" name="views" id="views-1" value="0-10000">
+                                            <label for="views-1">1만 미만</label>
+                                        </div>
+                                        <div class="filter-option" data-views="10000-50000">
+                                            <input type="radio" name="views" id="views-2" value="10000-50000">
+                                            <label for="views-2">1만 ~ 5만</label>
+                                        </div>
+                                        <div class="filter-option" data-views="50000-100000">
+                                            <input type="radio" name="views" id="views-3" value="50000-100000">
+                                            <label for="views-3">5만 ~ 10만</label>
+                                        </div>
+                                        <div class="filter-option" data-views="100000-500000">
+                                            <input type="radio" name="views" id="views-4" value="100000-500000">
+                                            <label for="views-4">10만 ~ 50만</label>
+                                        </div>
+                                        <div class="filter-option" data-views="500000-1000000">
+                                            <input type="radio" name="views" id="views-5" value="500000-1000000">
+                                            <label for="views-5">50만 ~ 100만</label>
+                                        </div>
+                                        <div class="filter-option" data-views="1000000">
+                                            <input type="radio" name="views" id="views-6" value="1000000">
+                                            <label for="views-6">100만 이상</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button
+                                    id="screening-apply"
+                                    class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5"
+                                >
+                                    확인
+                                </button>
+                                <button
+                                    id="screening-reset"
+                                    class="text-white bg-gray-600 hover:bg-gray-700 font-medium rounded-lg text-sm px-5 py-2.5"
+                                >
+                                    초기화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>
+                                <i class="fas fa-filter mr-1"></i>
+                                총 <span id="screening-total-count">0</span>개 데이터 중 
+                                <span id="screening-filtered-count">0</span>개 필터링됨
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- 콘텐츠 -->
+                    <div id="screening-content-container" class="bg-white shadow-sm rounded-lg p-4">
+                        <div class="text-center text-gray-500">
+                            데이터를 불러오는 중입니다...
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- 벤더 페이지 콘텐츠 -->
@@ -311,6 +479,40 @@
             }
         }
 
+        // 스크리닝 콘텐츠 로드 함수
+        async function loadScreeningContent() {
+            try {
+                console.log("스크리닝 콘텐츠 로드 시작");
+                const contentDiv = document.getElementById('screening-content');
+                
+                // screening.html이 아직 로드되지 않은 경우에만 로드
+                if (!contentDiv.querySelector('.screening-container')) {
+                    console.log("screening.html 로드 시작");
+                    const response = await fetch('src/pages/vendor/screening.html');
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const screeningContent = doc.querySelector('.screening-container');
+                    
+                    // 브레드크럼 유지하면서 콘텐츠 추가
+                    contentDiv.appendChild(screeningContent);
+                    console.log("screening.html 로드 완료");
+                }
+                
+                // ScreeningManager 초기화
+                console.log("ScreeningManager 초기화 시작");
+                if (window.screeningManager) {
+                    await window.screeningManager.init();
+                    window.screeningManager.initialized = true;
+                    console.log("ScreeningManager 초기화 완료");
+                } else {
+                    console.error("ScreeningManager를 찾을 수 없습니다.");
+                }
+            } catch (error) {
+                console.error('스크리닝 콘텐츠 로드 중 오류 발생:', error);
+            }
+        }
+
         // 메뉴 토글 기능 구현
         document.querySelectorAll('.menu-header').forEach(header => {
             header.addEventListener('click', function() {
@@ -346,6 +548,9 @@
                 } else if (page === 'vendor/dashboard') {
                     showContent('dashboard');
                     loadDashboardContent();
+                } else if (page === 'vendor/screening') {
+                    showContent('screening');
+                    loadScreeningContent();
                 } else if (page === 'vendor/brandcontact') {
                     showContent('vendor');
                 } else if (page === 'vendor/request') {
@@ -419,6 +624,8 @@
     <script src="src/js/vendor_seller_analysis/sellerAnalysis.js"></script>
     <!-- 캠페인 관리 JS 파일 추가 -->
     <script src="src/js/vendor_campaign/campaign.js"></script>
+    <!-- 스크리닝 JS 파일 추가 -->
+    <script src="src/js/vendor_screening/screening.js"></script>
     <!-- 관리자 관련 JS 파일 추가 -->
     <script src="src/js/admin_users/users.js"></script>
     <script src="src/js/admin_settings/settings.js"></script>
