@@ -160,6 +160,11 @@ class SellerMatchManager {
                                 <input type="number" id="reels-views-max" placeholder="최대값" min="0">
                             </div>
                         </div>
+                        <div class="filter-buttons">
+                            <button id="reset-filters" class="reset-filters-btn" title="필터 초기화">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;

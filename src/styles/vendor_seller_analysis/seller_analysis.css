@@ -188,6 +188,48 @@
     position: relative;
 }
 
+/* 필터 버튼 컨테이너 */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 초기화 버튼 스타일 */
+.reset-filters-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reset-filters-btn:hover {
+    opacity: 1;
+    background-color: #e3e3e3;
+}
+
+.reset-filters-btn i {
+    color: #666;
+    font-size: 16px;
+}
+
+.reset-filters-btn:hover i {
+    color: #333;
+    animation: spin 0.5s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 엑셀 다운로드 버튼 스타일 */
 .excel-download-btn {
     background: none;
     border: none;
