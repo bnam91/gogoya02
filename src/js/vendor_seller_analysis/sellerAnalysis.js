@@ -143,6 +143,24 @@ class SellerAnalysisManager {
                 .influencer-table th:nth-child(8) {
                     text-align: right;
                 }
+                .influencer-table th:nth-child(7) {
+                    text-align: center;
+                }
+                .views-box {
+                    display: inline-block;
+                    background-color: #e3f2fd;
+                    padding: 4px 12px;
+                    border-radius: 15px;
+                    color: #333;
+                    font-weight: 500;
+                    font-size: 13px;
+                }
+                .followers-box {
+                    font-size: 13px;
+                }
+                .views-to-followers-box {
+                    font-size: 13px;
+                }
                 .tag-modal {
                     display: none;
                     position: fixed;
@@ -360,10 +378,10 @@ class SellerAnalysisManager {
                                     <td>${influencer.username || '-'}</td>
                                     <td>${influencer.clean_name || '-'}</td>
                                     <td>${createCategoryBar(influencer.category).outerHTML}</td>
-                                    <td>${followers.toLocaleString()}</td>
+                                    <td><span class="followers-box">${followers.toLocaleString()}</span></td>
                                     <td>${influencer.grade || '-'}</td>
-                                    <td>${reelsViews.toLocaleString()}</td>
-                                    <td><span class="${isHighViews ? 'high-views' : ''}">${viewsToFollowers}%</span></td>
+                                    <td><span class="views-box">${reelsViews.toLocaleString()}</span></td>
+                                    <td><span class="views-to-followers-box ${isHighViews ? 'high-views' : ''}">${viewsToFollowers}%</span></td>
                                     <td><a href="${influencer.profile_link}" target="_blank" class="profile-button">프로필 보기</a></td>
                                     <td><button class="tag-input-btn ${hasTags ? 'has-tags' : ''}" data-username="${influencer.username}">태그입력</button></td>
                                 </tr>
@@ -387,11 +405,26 @@ class SellerAnalysisManager {
                         <h4>추천 태그</h4>
                         <div class="recommended-tags-container">
                             <button class="recommended-tag" data-tag="가성비">가성비</button>
-                            <button class="recommended-tag" data-tag="얼굴공개">얼굴공개</button>
-                            <button class="recommended-tag" data-tag="인테리어">인테리어</button>
-                            <button class="recommended-tag" data-tag="이케아">이케아</button>
                             <button class="recommended-tag" data-tag="브랜드">브랜드</button>
+                            <button class="recommended-tag" data-tag="친근">친근</button>
+                            <button class="recommended-tag" data-tag="고자세">고자세</button>      
+                            <button class="recommended-tag" data-tag="얼굴공개">얼굴공개</button>
+                            <button class="recommended-tag" data-tag="감성적">감성적</button>
+                            <button class="recommended-tag" data-tag="실용적">실용적</button>
+                            <button class="recommended-tag" data-tag="인테리어">인테리어</button>
+                            <button class="recommended-tag" data-tag="셀프인테리어">셀프인테리어</button>
+                            <button class="recommended-tag" data-tag="홈데코">홈데코</button>
+                            <button class="recommended-tag" data-tag="홈카페">홈카페</button>                                                  
                             <button class="recommended-tag" data-tag="꿀템">꿀템</button>
+                            <button class="recommended-tag" data-tag="꿀팁">꿀팁</button>
+                            <button class="recommended-tag" data-tag="정보성">정보성</button>                    
+                            <button class="recommended-tag" data-tag="이케아">이케아</button>
+                            <button class="recommended-tag" data-tag="쿠팡">쿠팡</button>                            
+                            <button class="recommended-tag" data-tag="신혼부부">신혼부부</button>       
+                            <button class="recommended-tag" data-tag="중등자녀">중등자녀</button>
+                            <button class="recommended-tag" data-tag="육아">육아</button>
+                            <button class="recommended-tag" data-tag="주부">주부</button>
+                            <button class="recommended-tag" data-tag="유튜브운영">유튜브운영</button>
                         </div>
                     </div>
                     <div class="contact-method-container">
