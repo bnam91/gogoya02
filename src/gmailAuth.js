@@ -2,6 +2,7 @@
 const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 require('dotenv').config();
 */
 import { google } from 'googleapis';
@@ -62,6 +63,15 @@ export async function getGmailCredentials(accountId, credentialsPath) {
         });
 
         console.log('다음 URL을 브라우저에서 열어 인증을 완료하세요:', authUrl);
+        
+        // 크롬 브라우저로 URL 열기
+        if (process.platform === 'win32') {
+            exec(`start chrome "${authUrl}"`);
+        } else if (process.platform === 'darwin') {
+            exec(`open -a "Google Chrome" "${authUrl}"`);
+        } else {
+            exec(`google-chrome "${authUrl}"`);
+        }
         
         const code = await new Promise((resolve) => {
             const readline = require('readline').createInterface({

@@ -570,7 +570,23 @@ export class ProposalManage {
     // 메일 폼 초기화
     initializeMailForm() {
         console.log('메일 폼 초기화 시작');
-
+        
+        // 템플릿 선택 드롭다운 초기화
+        const templateSelect = document.getElementById('mail-template');
+        if (templateSelect) {
+            templateSelect.innerHTML = `
+                <option value="">템플릿을 선택하세요</option>
+                <option value="greeting">안녕하세요 담당자님</option>
+            `;
+            
+            // 템플릿 선택 이벤트 리스너 추가
+            templateSelect.addEventListener('change', function() {
+                const mailContent = document.getElementById('mail-content');
+                if (this.value === 'greeting') {
+                    mailContent.value = '안녕하세요 담당자님\n\n제안서를 첨부합니다.\n\n감사합니다.';
+                }
+            });
+        }
         const sendButton = document.querySelector('.mail-button.send');
         if (sendButton) {
             sendButton.addEventListener('click', () => {
