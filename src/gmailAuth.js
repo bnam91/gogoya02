@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 require('dotenv').config();
 */
 import { google } from 'googleapis';
+import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';

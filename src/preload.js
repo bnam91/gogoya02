@@ -22,7 +22,11 @@ contextBridge.exposeInMainWorld('api', {
   getInfluencerInfo: (username) => ipcRenderer.invoke('get-influencer-info', username),
   saveFile: (options) => ipcRenderer.invoke('save-file', options),
   saveInfluencerTags: (username, tags) => ipcRenderer.invoke('save-influencer-tags', { username, tags }),
-  saveInfluencerContact: (username, method, info, excluded, reason) => ipcRenderer.invoke('save-influencer-contact', { username, method, info, excluded, reason })
+  saveInfluencerContact: (username, method, info, excluded, reason) => ipcRenderer.invoke('save-influencer-contact', { username, method, info, excluded, reason }),
+  fetchScreeningData: () => ipcRenderer.invoke('fetch-screening-data'),
+  fetchInfluencerData: (cleanName) => ipcRenderer.invoke('fetch-influencer-data', cleanName),
+  fetchItemDetails: (brandName, itemName) => ipcRenderer.invoke('fetch-item-details', { brandName, itemName }),
+  fetchInfluencerViews: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-views', cleanNameList)
 });
 
 contextBridge.exposeInMainWorld('googleSheetApi', {

@@ -398,6 +398,66 @@ ipcMain.handle('save-influencer-contact', async (event, { username, method, info
         { upsert: true }
     );
 });
+
+// 스크리닝 탭 데이터 조회
+ipcMain.handle('fetch-screening-data', async () => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.mainItemTodayData);
+
+    const twentyDaysAgo = new Date();
+    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 25);
+
+    const data = await collection.find({
+        crawl_date: { $gte: twentyDaysAgo },
+        brand: { $ne: '확인필요' }
+    })
+        .sort({ crawl_date: -1 })
+        .toArray();
+
+    return data;
+});
+
+// 스크리닝 탭 인플루언서 데이터 조회
+ipcMain.handle('fetch-influencer-data', async (event, cleanName) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);
+
+    const influencer = await collection.findOne(
+        { clean_name: cleanName },
+        { projection: { "reels_views(15)": 1, grade: 1 } }
+    );
+
+    return influencer || null;
+});
+
+ipcMain.handle('fetch-item-details', async (event, { brandName, itemName }) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.mainItemTodayData);
+
+    const data = await collection.find({
+        brand: brandName,
+        item: itemName
+    }).toArray();
+
+    return data;
+});
+
+ipcMain.handle('fetch-influencer-views', async (event, cleanNameList) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);
+
+    const data = await collection
+        .find({ clean_name: { $in: cleanNameList } })
+        .project({ "clean_name": 1, "reels_views(15)": 1 })
+        .toArray();
+
+    return data;
+});
+
 // ===========================================
 // Electron 앱 윈도우 생성
 // ===========================================
