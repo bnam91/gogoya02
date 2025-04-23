@@ -99,7 +99,17 @@ class DmModal {
             rows.forEach(row => {
                 const cleanName = row.dataset.cleanName;
                 const influencerId = row.dataset.influencerId;
-                const username = influencerId.split('_')[0];
+                
+                // username 추출 방법 개선
+                // username(사용자명)과 clean_name(이름)은 합쳐서 influencerId로 저장되어 있음
+                // influencerId 형식: username_clean_name 
+                // 사용자명에 언더스코어가 포함될 수 있으므로 마지막 언더스코어를 기준으로 분리
+                const lastUnderscoreIndex = influencerId.lastIndexOf('_');
+                const username = lastUnderscoreIndex !== -1 ? 
+                    influencerId.substring(0, lastUnderscoreIndex) : influencerId;
+                
+                // 로그 추가
+                console.log(`추출된 정보 - influencerId: ${influencerId}, username: ${username}, cleanName: ${cleanName}`);
                 
                 const nameCols = row.querySelectorAll('.name-username');
                 const nameText = nameCols.length > 0 ? nameCols[0].textContent : '';
@@ -172,17 +182,18 @@ class DmModal {
             
             // spreadsheetId 및 테스트 시트 설정
             const spreadsheetId = '1VhEWeQASyv02knIghpcccYLgWfJCe2ylUnPsQ_-KNAI';
-            const range = 'test!A:G';  // test 시트의 A-G 열 범위
+            const range = 'contact!A2:H';  // contact 시트의 A2-H 열 범위 (2행부터 시작)
             
             // 업로드할 데이터 구성
             const values = selectedInfluencers.map(influencer => [
-                dateStr,
-                timeStr,
-                brand,
-                item,
-                influencer.fullNameUsername,
-                influencer.reelsViews,
-                influencer.contactMethod
+                `https://www.instagram.com/${influencer.username}`,  // A열 - Instagram 프로필 URL
+                influencer.name,          // B열 - 이름 (clean_name)
+                '',                       // C열 - 빈값
+                '',                       // D열 - 빈값
+                brand,                    // E열 - 브랜드명
+                item,                     // F열 - 아이템명
+                `${dateStr} ${timeStr}`,  // G열 - 날짜와 시간
+                influencer.contactMethod  // H열 - 연락방법
             ]);
             
             // 데이터 추가 (append)
