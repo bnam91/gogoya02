@@ -511,7 +511,7 @@ class SellerMatchManager {
                         <i class="fas fa-times-circle"></i> 전체 제외
                     </button>
                     <button class="send-dm-button" onclick="window.sellerMatchManager.sendDm()">
-                        <i class="fas fa-paper-plane"></i> DM 보내기
+                        <i class="fas fa-paper-plane"></i> 컨택하기
                     </button>
                 </div>
             </div>

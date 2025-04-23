@@ -11,7 +11,7 @@ class DmModal {
         const modalHTML = `
             <div id="dm-modal" class="modal">
                 <div class="modal-content">
-                    <h3>DM 보내기</h3>
+                    <h3>컨택하기</h3>
                     <div class="modal-buttons">
                         <div class="sheet-buttons-row">
                             <button class="modal-button sheet-button" onclick="window.dmModal.openDmSheet()">
