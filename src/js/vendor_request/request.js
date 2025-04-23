@@ -598,6 +598,23 @@ class RequestManager {
     initializeMailForm() {
         console.log('메일 폼 초기화 시작');
         
+        // 템플릿 선택 드롭다운 초기화
+        const templateSelect = document.getElementById('mail-template');
+        if (templateSelect) {
+            templateSelect.innerHTML = `
+                <option value="">템플릿을 선택하세요</option>
+                <option value="greeting">안녕하세요 담당자님</option>
+            `;
+            
+            // 템플릿 선택 이벤트 리스너 추가
+            templateSelect.addEventListener('change', function() {
+                const mailContent = document.getElementById('mail-content');
+                if (this.value === 'greeting') {
+                    mailContent.value = '안녕하세요 담당자님\n\n제안서를 첨부합니다.\n\n감사합니다.';
+                }
+            });
+        }
+        
         const sendButton = document.querySelector('.mail-button.send');
 
         if (sendButton) {
@@ -741,7 +758,7 @@ class RequestManager {
                                 console.log('메일 전송 옵션:', mailOptions);
                                 
                                 // credentials 파일 경로 설정 부분 수정
-                                const credentialsPath = path.join(__dirname, 'token', `credentials_${accountId}.js`);
+                                const credentialsPath = path.join(process.cwd(), 'token', `credentials_${accountId}.js`);
                                 console.log('자격 증명 경로:', credentialsPath);
                                 
                                 // Gmail 인증 정보 가져오기

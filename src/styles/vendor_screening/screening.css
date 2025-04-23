@@ -471,23 +471,6 @@
     background: #aaa;
 }
 
-/* 로딩 스피너 스타일 */
-.loading-spinner {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top-color: #2563eb;
-    animation: spin 1s ease-in-out infinite;
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
 /* 뷰 모드 버튼 스타일 */
 .view-mode-btn {
     transition: all 0.2s ease;
