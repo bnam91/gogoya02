@@ -44,5 +44,16 @@ export const commonUtils = {
         }
       });
     });
+  },
+
+  /**
+   * 모든 토글 닫기
+   */
+  closeAllSubmenu: () => {
+    document.querySelectorAll('.submenu').forEach(menu => {
+      menu.classList.remove('expanded');
+      const icon = menu.parentElement.querySelector('.toggle-icon');
+      if (icon) icon.classList.remove('active');
+    });
   }
 };

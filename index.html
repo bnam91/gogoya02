@@ -1,19 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <!-- 기본 메타데이터 및 스타일시트 -->
-    <title>gogoya v0.4.6</title>
+    <title>gogoya v0.5.9</title>
     <!-- Google Fonts - Noto Sans KR 폰트 로드 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
-    <!-- 커스텀 스타일시트 -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 공통 스타일시트 -->
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/toast.css">
+    <link rel="stylesheet" href="src/styles/mail-modal.css">
+
+    <!-- 탭 1 스타일시트 -->
     <link rel="stylesheet" href="src/styles/tabs/tab1/home.css">
-    <link rel="stylesheet" href="src/styles/tabs/tab2/vendor.css">
-    <link rel="stylesheet" href="src/styles/tabs/tab3/test.css">
+
+    <!-- 탭 2 스타일시트 -->
+    <link rel="stylesheet" href="src/styles/tabs/tab2/dashboard.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab2/brand-contact.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab2/proposal-manage.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab2/campaign-manage.css">
+    <link rel="stylesheet" href="src/styles/tabs/tab2/seller-analysis.css">
+    <!-- <link rel="stylesheet" href="src/styles/tabs/tab2/seller-match.css"> -->
+    <!-- <link rel="stylesheet" href="src/styles/tabs/tab2/supply-prices-manage.css"> -->
+    
+
 </head>
+
 <body>
     <!-- 메인 컨테이너 -->
     <div class="container">
@@ -38,10 +54,241 @@
     </div>
 
 </body>
+<script>
+    /*
+    // 공통으로 사용할 모듈 선언
+    const mongo = require('./src/js/mongo');
+    const phone = require('./src/js/phone');
+    const googleapis = require('googleapis');
+    const fs = require('fs');
+    const path = require('path');
+
+    try {
+        const gmailAuth = require('./src/js/vendor_request/gmailAuth');
+        window.getGmailCredentials = gmailAuth.getGmailCredentials;
+    } catch (error) {
+        // 에러 발생 시 조용히 처리
+    }
+
+    window.mongo = mongo;
+    window.phone = phone;
+    window.google = googleapis.google;
+    window.fs = fs;
+    window.path = path;
+    */
+</script>
+
+<!-- 그 다음 각 클래스 파일들을 로드 -->
+<!--
+<script src="src/js/vendorFilter.js"></script>
+<script src="src/js/vendorCallManager.js"></script>
+<script src="src/js/vendorInfoEditor.js"></script>
+<script src="src/js/vendorCallHistory.js"></script>
+<script src="src/js/vendor_dashboard/dashboard.js"></script>
+<script src="src/js/vendor_request/request.js"></script>
+-->
+
+<!-- 마지막으로 메인 로직을 로드 -->
+<script>
+    /*
+    // 인스턴스 생성
+    window.vendorFilter = new VendorFilter();
+    window.vendorCallManager = new VendorCallManager();
+    window.vendorInfoEditor = new VendorInfoEditor();
+
+    // RequestManager 인스턴스는 생성만 하고 초기화는 하지 않음
+    window.requestManager = new RequestManager(); // init() 호출 제거
+
+    // vendor.js 로드
+    const vendor = require('./src/js/vendor');
+
+    // 대시보드 콘텐츠 로드 함수
+    async function loadDashboardContent() {
+        try {
+            const response = await fetch('src/pages/vendor/vendor_dashboard.html');
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const dashboardContent = doc.querySelector('.dashboard-container');
+            document.getElementById('dashboard-container').innerHTML = dashboardContent.innerHTML;
+
+            // 대시보드 초기화
+            if (window.dashboard) {
+                window.dashboard.init();
+            }
+        } catch (error) {
+            console.error('대시보드 콘텐츠 로드 중 오류 발생:', error);
+        }
+    }
+
+    // 제안서 관리 콘텐츠 로드 함수
+    async function loadRequestContent() {
+        try {
+            const contentDiv = document.getElementById('request-content');
+
+            // request.html이 아직 로드되지 않은 경우에만 로드
+            if (!contentDiv.querySelector('.request-container')) {
+                const response = await fetch('src/pages/vendor/request.html');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const requestContent = doc.querySelector('.request-container');
+
+                // 브레드크럼 유지하면서 콘텐츠 추가
+                contentDiv.appendChild(requestContent);
+            }
+
+            // RequestManager가 아직 초기화되지 않은 경우에만 초기화
+            if (window.requestManager && !window.requestManager.initialized) {
+                await window.requestManager.init();
+                window.requestManager.initialized = true;
+            }
+        } catch (error) {
+            console.error('제안서 관리 콘텐츠 로드 중 오류 발생:', error);
+        }
+    }
+
+    // 메뉴 토글 기능 구현
+    document.querySelectorAll('.menu-header').forEach(header => {
+        header.addEventListener('click', function () {
+            const menuItem = this.parentElement;
+            const submenu = menuItem.querySelector('.submenu');
+            const toggleIcon = menuItem.querySelector('.toggle-icon');
+
+            if (submenu) {
+                const isExpanded = submenu.classList.contains('expanded');
+
+                // 모든 서브메뉴 닫기
+                document.querySelectorAll('.submenu').forEach(menu => {
+                    menu.classList.remove('expanded');
+                    const icon = menu.parentElement.querySelector('.toggle-icon');
+                    if (icon) icon.classList.remove('active');
+                });
+
+                // 선택된 메뉴만 확장
+                if (!isExpanded) {
+                    submenu.classList.add('expanded');
+                    if (toggleIcon) toggleIcon.classList.add('active');
+                }
+            }
+        });
+    });
+
+    // 페이지 전환 기능 구현
+    document.querySelectorAll('[data-page]').forEach(item => {
+        item.addEventListener('click', function () {
+            const page = this.dataset.page;
+            if (page === 'home') {
+                showContent('home');
+            } else if (page === 'vendor/dashboard') {
+                showContent('dashboard');
+                loadDashboardContent();
+            } else if (page === 'vendor/brandcontact') {
+                showContent('vendor');
+            } else if (page === 'vendor/request') {
+                showContent('request');
+                loadRequestContent();
+            } else if (page === 'vendor/supplytab') {
+                showContent('supplytab');
+                if (window.supplyTabManager) {
+                    window.supplyTabManager.init();
+                }
+            } else if (page === 'vendor/sellerMatch') {
+                showContent('sellerMatch');
+                if (window.sellerMatchManager) {
+                    window.sellerMatchManager.init();
+                }
+            } else if (page === 'vendor/sellerAnalysis') {
+                showContent('sellerAnalysis');
+                if (window.sellerAnalysisManager) {
+                    window.sellerAnalysisManager.init();
+                }
+            } else if (page === 'vendor/campaign') {
+                showContent('campaign');
+                if (window.campaignManager) {
+                    window.campaignManager.init();
+                }
+            } else if (page === 'admin/users') {
+                showContent('users');
+                if (window.usersManager) {
+                    window.usersManager.init();
+                }
+            } else if (page === 'admin/settings') {
+                showContent('settings');
+                if (window.settingsManager) {
+                    window.settingsManager.init();
+                }
+            }
+        });
+    });
+
+    // 콘텐츠 표시 함수
+    function showContent(content) {
+        // 모든 콘텐츠 섹션 비활성화
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        // 선택된 콘텐츠 섹션 활성화
+        document.getElementById(content + '-content').classList.add('active');
+
+        // 모든 필터 컨테이너 제거
+        document.querySelectorAll('.filter-container').forEach(filter => {
+            filter.remove();
+        });
+
+        // 벤더 페이지인 경우 초기화 함수 실행
+        if (content === 'vendor') {
+            vendor.initVendor();
+            vendorFilter.init();
+        }
+    }
+    */
+</script>
+
+
+<!-- 공급가 관리 JS 파일 추가 -->
+<!--
+<script src="src/js/vendor_supplytab/supplytab.js"></script>
+-->
+<!-- 셀러매칭 JS 파일 추가 -->
+<!--
+<script src="src/js/vendor_sellerMatch/sellerMatch.js"></script>
+<script src="src/js/vendor_sellerMatch/sellerMatchFilter.js"></script>
+<script src="src/js/vendor_sellerMatch/dmRecords.js"></script>
+<script src="src/js/vendor_sellerMatch/brandRecords.js"></script>
+<script src="src/js/vendor_sellerMatch/sellerMatch.js"></script>
+-->
+<!-- 셀러분석 JS 파일 추가 -->
+<!--
+<script src="src/js/vendor_seller_analysis/sellerAnalysisFilter.js"></script>
+<script src="src/js/vendor_seller_analysis/sellerAnalysis.js"></script>
+-->
+<!-- 캠페인 관리 JS 파일 추가 -->
+<!--
+<script src="src/js/vendor_campaign/campaign.js"></script>
+-->
+<!-- 관리자 관련 JS 파일 추가 -->
+<!--
+<script src="src/js/admin_users/users.js"></script>
+<script src="src/js/admin_settings/settings.js"></script>
+-->
+<!-- 계정 정보를 전역 객체에 추가 -->
+<script>
+    /*
+    window.accounts = [
+        { id: "bnam91", name: "고야앤드미디어", email: "bnam91@goyamkt.com" },
+        { id: "contant01", name: "박슬하(고야앤드미디어)", email: "contant01@goyamkt.com" },
+        { id: "jisu04", name: "김지수(고야앤드미디어)", email: "jisu04@goyamkt.com" }
+    ];
+    */
+</script>
+
+
 <!-- 메인 모듈 로드 -->
 <script type="module" src="./src/js/mainRender.js">
 </script>
 <script>
     console.log('window.api:', window.api);
 </script>
-</html> 
+
+</html>

@@ -1,0 +1,100 @@
+<!-- 제안서 관리 페이지 -->
+<div id="proposal-manage-content" class="content-section">
+    <!-- 브레드크럼 네비게이션 -->
+    <div class="breadcrumb">
+        <span id="breadcrumb-main" class="breadcrumb-item"></span>
+        <span class="breadcrumb-separator">/</span>
+        <span id="breadcrumb-current" class="breadcrumb-item current"></span>
+    </div>
+
+    <!-- 대시보드 컨테이너 (3단 레이아웃) -->
+    <div class="request-container" id="request-content">
+
+        <!-- 좌측: 제안서 요청 브랜드 목록 -->
+        <div class="request-panel">
+            <div id="request-panel-content" class="card-container">
+                <!-- 여기에 제안서 요청 브랜드 목록이 동적으로 로드됩니다 -->
+            </div>
+        </div>
+
+        <!-- 중앙: 제안서 상세 정보 (향후 기능) -->
+        <div class="request-panel">
+            <div class="card-container">
+                <h3>제안서 상세 정보</h3>
+                <p>선택한 제안서의 상세 정보가 표시됩니다.</p>
+            </div>
+        </div>
+
+        <!-- 우측: 메일 작성 패널 -->
+        <div class="request-panel">
+            <div class="card-container">
+                <div class="panel-header">
+                    <h3>메일 작성</h3>
+                </div>
+                <div class="mail-form">
+                    <div class="form-group">
+                        <label for="mail-from">보내는 사람</label>
+                        <select id="mail-from" class="mail-input">
+                            <option value="">계정을 선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mail-to">받는 사람</label>
+                        <input type="text" id="mail-to" class="mail-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="mail-subject">제목</label>
+                        <input type="text" id="mail-subject" class="mail-input" placeholder="메일 제목을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label for="mail-template">템플릿 선택</label>
+                        <select id="mail-template" class="mail-input">
+                            <option value="">템플릿을 선택하세요</option>
+                            <option value="template1">기본 제안서</option>
+                            <option value="template2">프리미엄 제안서</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mail-content">내용</label>
+                        <textarea id="mail-content" class="mail-input" rows="10" placeholder="메일 내용을 입력하세요"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="mail-button preview">미리보기</button>
+                        <button class="mail-button send">보내기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 메일 전송 확인 모달 -->
+<div id="send-mail-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>메일 전송 확인</h4>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>다음 내용으로 메일을 전송하시겠습니까?</p>
+            <div class="mail-preview">
+                <div class="preview-item">
+                    <span class="label">보내는 사람:</span>
+                    <span id="preview-from"></span>
+                </div>
+                <div class="preview-item">
+                    <span class="label">받는 사람:</span>
+                    <span id="preview-to"></span>
+                </div>
+                <div class="preview-item">
+                    <span class="label">제목:</span>
+                    <span id="preview-subject"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-button cancel">취소</button>
+            <button class="modal-button confirm">전송</button>
+        </div>
+    </div>
+</div>

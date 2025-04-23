@@ -1,0 +1,392 @@
+/* 셀러분석 컨테이너 스타일 */
+.seller-analysis-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 좌측 셀러 목록 영역 */
+.seller-analysis-left {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+/* 우측 상세 정보 영역 */
+.seller-analysis-right {
+    flex: 2;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* 셀러 목록 아이템 스타일 */
+.seller-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.seller-item:hover {
+    background-color: #f5f5f5;
+}
+
+.seller-item.active {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+/* 셀러 상세 정보 스타일 */
+.seller-analysis-details {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.seller-info-section {
+    margin-bottom: 20px;
+}
+
+.seller-info-section h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.seller-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.info-card h4 {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.info-card p {
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* 인플루언서 테이블 컨테이너 */
+.influencer-table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* 테이블 스타일 */
+.influencer-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.influencer-table th,
+.influencer-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.influencer-table th {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    color: #333;
+}
+
+.influencer-table td:nth-child(1),
+.influencer-table td:nth-child(4) {
+    text-align: center;
+}
+
+.influencer-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.influencer-table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.influencer-table a:hover {
+    text-decoration: underline;
+}
+
+/* 스크롤바 스타일 */
+.influencer-table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.influencer-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.influencer-table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.influencer-table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.seller-analysis-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filter-group input[type="number"] {
+    width: 80px;
+}
+
+.filter-group span {
+    color: #666;
+    font-size: 14px;
+}
+
+.excel-download-container {
+    position: relative;
+}
+
+.excel-download-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.excel-download-btn:hover {
+    opacity: 1;
+    background-color: #e3e3e3;
+}
+
+.excel-download-btn i {
+    color: #217346;
+    font-size: 20px;
+}
+
+/* 기존 테이블 스타일 */
+.influencer-table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    width: 100%;
+}
+
+.influencer-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.influencer-table th,
+.influencer-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.influencer-table th {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    color: #333;
+}
+
+.influencer-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.influencer-table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.influencer-table a:hover {
+    text-decoration: underline;
+}
+
+.influencer-table td:nth-child(8) {
+    text-align: right;
+}
+
+.influencer-table td.high-views {
+    background-color: rgba(18, 219, 0, 0.1);
+    font-weight: 500;
+}
+
+.influencer-table td .high-views {
+    display: inline-block;
+    background-color: rgba(18, 219, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.category-bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.category-bar {
+    height: 100%;
+    display: flex;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.category-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 2px;
+    flex-shrink: 0;
+}
+
+/* 카테고리별 색상 정의 */
+.category-segment[data-category="뷰티"] { background-color: #FFD1DC; }
+.category-segment[data-category="패션"] { background-color: #FFC1B6; }
+.category-segment[data-category="홈/리빙"] { background-color: #D1F0F0; }
+.category-segment[data-category="푸드"] { background-color: #FFE4C4; }
+.category-segment[data-category="육아"] { background-color: #E6D1FF; }
+.category-segment[data-category="건강"] { background-color: #a8e6c9; }
+.category-segment[data-category="맛집탐방"] { background-color: #FFE8C1; }
+.category-segment[data-category="전시/공연"] { background-color: #FFD1DC; }
+.category-segment[data-category="반려동물"] { background-color: #E6D1B8; }
+.category-segment[data-category="기타"] { background-color: #E0E0E0; }
+
+.category-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.category-label {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+}
+
+.category-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    margin-right: 5px;
+}
+
+.profile-button {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f8f9fa;
+    color: #333;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-button:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.recommended-tags {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+.recommended-tags h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.recommended-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recommended-tag {
+    padding: 4px 12px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.recommended-tag:hover {
+    background-color: #bbdefb;
+} 

@@ -61,10 +61,10 @@ export async function getMongoData() {
 
         const db = client.db(config.database.name);
         const collection = db.collection(config.database.collections.vendorBrandInfo);
-        
+
         const data = await collection.find({}).toArray();
         await client.close();
-        
+
         return data;
     } catch (error) {
         console.error('MongoDB 연결 오류:', error);
@@ -77,23 +77,23 @@ export async function getVendorData(skip = 0, limit = 20, filters = {}) {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
         const collection = db.collection(config.database.collections.mainItemTodayData);
-        
+
         // 필터 쿼리 생성
         const query = {};
-        
+
         // 브랜드명 검색 필터
         if (filters.searchQuery) {
-            query.brand = { 
-                $regex: filters.searchQuery, 
+            query.brand = {
+                $regex: filters.searchQuery,
                 $options: 'i'  // 대소문자 구분 없이 검색
             };
         }
-        
+
         // 카테고리 필터
         if (filters.categories && filters.categories.length > 0) {
             query.item_category = { $in: filters.categories };
         }
-        
+
         // 등급 필터
         if (filters.grades && filters.grades.length > 0) {
             query.grade = { $in: filters.grades };
@@ -108,7 +108,7 @@ export async function getVendorData(skip = 0, limit = 20, filters = {}) {
             );
             const brandInfos = await brandInfoCursor.toArray();
             const brandNamesWithVerification = brandInfos.map(info => info.brand_name);
-            
+
             query.brand = { $in: brandNamesWithVerification };
         }
 
@@ -135,7 +135,7 @@ export async function getVendorData(skip = 0, limit = 20, filters = {}) {
             );
             const callRecords = await callRecordsCursor.toArray();
             const brandNamesWithNextStep = callRecords.map(record => record.brand_name);
-            
+
             if (brandNamesWithNextStep.length > 0) {
                 query.brand = { $in: brandNamesWithNextStep };
             } else {
@@ -143,7 +143,7 @@ export async function getVendorData(skip = 0, limit = 20, filters = {}) {
                 query.brand = { $in: [] };
             }
         }
-        
+
         // 필요한 필드만 프로젝션
         const cursor = collection.find(query, {
             projection: {
@@ -160,17 +160,17 @@ export async function getVendorData(skip = 0, limit = 20, filters = {}) {
                 item_feed_link: 1
             }
         })
-        .sort([
-            ['crawl_date', -1],  // 크롤링 날짜 기준 내림차순
-            ['brand', 1],        // 브랜드명 기준 오름차순
-            ['_id', 1]           // _id 기준 오름차순
-        ])
-        .skip(skip)
-        .limit(limit);
-            
+            .sort([
+                ['crawl_date', -1],  // 크롤링 날짜 기준 내림차순
+                ['brand', 1],        // 브랜드명 기준 오름차순
+                ['_id', 1]           // _id 기준 오름차순
+            ])
+            .skip(skip)
+            .limit(limit);
+
         const data = await cursor.toArray();
         console.log('조회된 데이터 수:', data.length);
-        
+
         const hasMore = data.length === limit;
         return { data, hasMore };
     });
@@ -209,7 +209,7 @@ export async function getCallRecords(brandName) {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
         const collection = db.collection(config.database.collections.callRecords);
-        
+
         const records = await collection.find({ brand_name: brandName })
             .sort({ call_date: -1 })
             .toArray();
@@ -229,12 +229,12 @@ export async function getLatestCallRecordByCardId(cardId) {
         const client = await getMongoClient();
         const db = client.db(config.database.name);
         const collection = db.collection(config.database.collections.callRecords);
-        
+
         const record = await collection.findOne(
             { card_id: cardId },
             { sort: { call_date: -1 } }
         );
-            
+
         return record;
     });
 }
@@ -273,16 +273,47 @@ export async function getCallRecordById(recordId) {
     });
 }
 
-/*
-module.exports = {
-    getMongoData,
-    getVendorData,
-    getBrandPhoneData,
-    saveCallRecordDB,
-    getCallRecords,
-    getLatestCallRecordByCardId,
-    updateBrandInfo,
-    updateCallRecord,
-    getCallRecordById
-}; 
-*/
+
+export async function saveInfluencerTags(username, tags) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db('insta09_database');
+        const collection = db.collection('02_main_influencer_data');
+        return await collection.updateOne(
+            { username: username },
+            { $set: { tags: tags } }
+        );
+    });
+}
+
+export async function saveInfluencerContact(username, contactMethod, contactInfo, isExcluded, exclusionReason) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db('insta09_database');
+        const collection = db.collection('02_main_influencer_data');
+        return await collection.updateOne(
+            { username: username },
+            {
+                $set: {
+                    contact_method: contactMethod,
+                    contact_info: contactInfo,
+                    is_contact_excluded: isExcluded,
+                    contact_exclusion_reason: exclusionReason
+                }
+            }
+        );
+    });
+}
+
+export async function updateNextStep(brandName, newStatus) {
+    return withRetry(async () => {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
+
+        return await collection.updateMany(
+            { brand_name: brandName },
+            { $set: { nextstep: newStatus } }
+        );
+    });
+}  

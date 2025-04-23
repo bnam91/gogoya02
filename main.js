@@ -1,22 +1,23 @@
 /*
 메인 프로세스 파일
 */
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
 import updater from 'electron-updater';
 import ReleaseUpdater from './release_updater.js';
 import path from 'path';
 const { autoUpdater } = updater;
-import {     getMongoData,
-    getVendorData,
-    getBrandPhoneData,
-    saveCallRecord,
-    getCallRecords,
-    getLatestCallRecordByCardId,
-    updateBrandInfo,
-    updateCallRecord,
-    getCallRecordById} from './src/js/databases/mongo.js'; // Electron Main 프로세스에서 연결
+import {
+    getVendorData, getBrandPhoneData, saveCallRecord,
+    getCallRecords, getLatestCallRecordByCardId, updateBrandInfo,
+    updateCallRecord, getCallRecordById, getMongoClient, updateNextStep
+} from './src/js/databases/mongo.js'; // Electron Main 프로세스에서 연결
 import { fileURLToPath } from 'url';
 import { makeCall, endCall } from './src/js/utils/phone.js';
+//const fs = require('fs');
+import fs from 'fs';
+import { config } from './src/js/config/config.js';
+import { getGmailCredentials } from './src/gmailAuth.js';
+import { google } from 'googleapis';
 
 // 인코딩 설정
 process.env.CHARSET = 'UTF-8';
@@ -52,14 +53,14 @@ console.log('현재 모드:', isDev ? '개발 모드' : '프로덕션 모드');
 ipcMain.handle('vendor-data-request', async (event, filters) => {
     console.log('📦 vendor-data-request 호출', filters);
     try {
-      const { skip = 0, limit = 20, ...otherFilters } = filters;
-      const result = await getVendorData(skip, limit, otherFilters);
-      return result;
+        const { skip = 0, limit = 20, ...otherFilters } = filters;
+        const result = await getVendorData(skip, limit, otherFilters);
+        return result;
     } catch (error) {
-      console.error('vendor-data-request 처리 중 오류 발생:', error);
-      throw error;
+        console.error('vendor-data-request 처리 중 오류 발생:', error);
+        throw error;
     }
-  });
+});
 ipcMain.handle('brand-phone-data-request', async (event, brandName) => {
     console.log('📦 brand-phone-data-request 호출', brandName);
     return await getBrandPhoneData(brandName);
@@ -105,27 +106,75 @@ ipcMain.handle('fetch-call-records-request', async (event, brandName) => {
     return await getCallRecords(brandName);
 });
 
+
 ipcMain.handle('call-phone-request', async (event, phoneNumber) => {
     try {
-      console.log('📞 전화 연결 시도:', phoneNumber);
-      const result = await makeCall(phoneNumber);
-      return result;
+        console.log('📞 전화 연결 시도:', phoneNumber);
+        const result = await makeCall(phoneNumber);
+        return result;
     } catch (error) {
-      console.error('전화 연결 실패:', error);
+        console.error('전화 연결 실패:', error);
+        throw error;
+    }
+});
+
+ipcMain.handle('end-call-request', async (event) => {
+    try {
+        console.log('📞 전화 종료 시도');
+        const result = await endCall();
+        return result;
+    } catch (error) {
+        console.error('전화 종료 실패:', error);
+        throw error;
+    }
+});
+
+ipcMain.handle('dashboard-proposal-request', async () => {
+    try {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.callRecords);
+
+        const proposalRequests = await collection.find({ nextstep: "제안서 요청" }).toArray();
+        return proposalRequests;
+    } catch (error) {
+        console.error('Dashboard proposal data fetch error:', error);
+        throw error;
+    }
+});
+
+ipcMain.handle('fetch-brand-email-request', async (event, brandName) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.vendorBrandInfo);
+    const brandInfo = await collection.findOne({ brand_name: brandName });
+    return brandInfo?.email || '';
+});
+
+ipcMain.handle('update-nextstep-request', async (event, brandName, newStatus) => {
+    try {
+        console.log(`📦 update-nextstep-request 호출 ${brandName} -> ${newStatus}`);
+        const result = await updateNextStep(brandName, newStatus);
+        return result;
+    } catch (error) {
+        console.error('updateNextStep 에러:', error);
+        throw error;
+    }
+});
+
+// Gmail 메일 보내기 IPC 핸들러
+ipcMain.handle('send-gmail', async (event, { accountId, credentialsPath, mailOptions }) => {
+    try {
+      const auth = await getGmailCredentials(accountId, credentialsPath);
+      const response = await sendGmail(auth, mailOptions);
+  
+      return { success: true, id: response.id };
+    } catch (error) {
+      console.error('Gmail 전송 실패:', error);
       throw error;
     }
   });
 
-ipcMain.handle('end-call-request', async (event) => {
-    try {
-      console.log('📞 전화 종료 시도');
-      const result = await endCall();
-      return result;
-    } catch (error) {
-      console.error('전화 종료 실패:', error);
-      throw error;
-    }
-  });
 
 // __dirname 직접 생성
 const __filename = fileURLToPath(import.meta.url);
@@ -213,23 +262,23 @@ autoUpdater.on('update-downloaded', (info) => {
 async function checkGitUpdate() {
     console.log('Git 업데이트 확인 시작...');
     const updater = new ReleaseUpdater(owner, repo);
-    
+
     try {
         console.log('현재 버전 확인 중...');
         const currentVersion = updater.getCurrentVersion();
         console.log('현재 버전:', currentVersion);
-        
+
         console.log('최신 릴리즈 확인 중...');
         const latestRelease = await updater.getLatestRelease();
         console.log('최신 릴리즈:', latestRelease);
-        
+
         const updateResult = await updater.updateToLatest();
         console.log('업데이트 결과:', updateResult);
-        
+
         if (updateResult) {
             const newVersion = updater.getCurrentVersion();
             console.log('업데이트 후 버전:', newVersion);
-            
+
             if (currentVersion !== newVersion) {
                 console.log('새로운 버전이 설치되었습니다.');
                 const result = await dialog.showMessageBox(mainWindow, {
@@ -238,7 +287,7 @@ async function checkGitUpdate() {
                     message: '새로운 버전이 설치되었습니다. 앱을 재시작하시겠습니까?',
                     buttons: ['예', '아니오']
                 });
-                
+
                 if (result.response === 0) {
                     app.relaunch();
                     app.quit();
@@ -256,7 +305,7 @@ async function checkGitUpdate() {
 app.whenReady().then(async () => {
     console.log('앱 시작...');
     createWindow();
-    
+
     // 개발 모드인 경우 Git 업데이트 확인
     if (isDev) {
         console.log('개발 모드에서 Git 업데이트 확인 시작');
@@ -280,4 +329,20 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+ipcMain.handle('save-file', async (event, { defaultPath, content }) => {
+    const { filePath } = await dialog.showSaveDialog({
+        title: '엑셀 파일 저장',
+        defaultPath: defaultPath,
+        filters: [
+            { name: 'CSV 파일', extensions: ['csv'] }
+        ]
+    });
+
+    if (filePath) {
+        fs.writeFileSync(filePath, content, 'utf-8');
+        return filePath;
+    }
+    return null;
 }); 

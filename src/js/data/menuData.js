@@ -15,25 +15,21 @@ export const menuData = [
       title: "벤더",
       tabClass: "tab2",
       children: [
-        { title: "브랜드 컨택", page: "tab2/vendor" }
+        { title: "대시보드", page: "tab2/dashboard" },
+        { title: "브랜드 컨택", page: "tab2/brand-contact" },
+        { title: "제안서 관리", page: "tab2/proposal-manage" },
+        { title: "공급가 관리", page: "tab2/supply-prices-manage" },
+        { title: "셀러매칭", page: "tab2/seller-match" },
+        { title: "캠페인 관리", page: "tab2/campaign-manage" },
+        { title: "셀러분석", page: "tab2/seller-analysis" }
       ]
     },
     {
-      title: "test",
+      title: "관리자",
       tabClass: "tab3",
       children: [
-        { title: "대시보드", page: "tab3/dashboard" },
-        { title: "브랜드 현황", page: "tab3/brandstatus" },
-        { title: "테스트", page: "tab3/test" }
+        { title: "사용자 관리", page: "tab3/user-manage" },
+        { title: "시스템 설정", page: "tab3/system-setting" }
       ]
-    },
-    {
-        title: "인증",
-        tabClass: "tab4",
-        children: [
-          { title: "대시보드", page: "tab4/dashboard" },
-          { title: "인증", page: "tab4/auth" },
-          { title: "정책", page: "tab4/policy" }
-        ]
-      }
+    }
   ];

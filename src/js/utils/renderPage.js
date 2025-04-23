@@ -2,6 +2,8 @@
  * renderPage.js
  * @fileoverview 페이지 fetch 및 동적 모듈 로딩 유틸리티
  */
+import { menuData } from '../data/menuData.js';
+
 export async function renderPage(pagePath) {
   const content = document.getElementById('content');
   console.log('pagePath:', pagePath);
@@ -25,6 +27,9 @@ export async function renderPage(pagePath) {
     // 페이지별 추가 로드
     await additionalPageLoad(pagePath, content);
 
+    // 브레드크럼 업데이트
+    updateBreadcrumbFromMenu(pagePath);
+
     // 2. JS 모듈 동적 import
     try {
       const module = await import(`../tabs/${folder}/${file}.js`);
@@ -46,10 +51,48 @@ export async function renderPage(pagePath) {
   }
 }
 
+/**
+ * 페이지 경로에 따라 브레드크럼을 업데이트 한다.
+ * @param {string} pagePath 현재 페이지 경로 (ex: 'tab2/brand-contact')
+ */
+export function updateBreadcrumbFromMenu(pagePath) {
+  const mainElement = document.getElementById('breadcrumb-main');
+  const currentElement = document.getElementById('breadcrumb-current');
+
+  let mainTitle = '';
+  let currentTitle = '';
+
+  for (const menu of menuData) {
+    // 메인 메뉴에 page가 직접 연결된 경우
+    if (menu.page && pagePath === menu.page) {
+      mainTitle = menu.title;
+      break;
+    }
+
+    // children 안에 연결된 경우
+    if (menu.children) {
+      const foundChild = menu.children.find(child => child.page === pagePath);
+      if (foundChild) {
+        mainTitle = menu.title;
+        currentTitle = foundChild.title;
+        break;
+      }
+    }
+  }
+
+  if (mainElement) {
+    mainElement.textContent = mainTitle || '홈';
+  }
+  if (currentElement) {
+    currentElement.textContent = currentTitle || '';
+  }
+}
+
+
 // 페이지별 추가 로드
 export async function additionalPageLoad(pagePath, content) {
-  // 벤더페이지일경우 페이지 로드 후 모달 추가
-  if (pagePath === 'tab2/vendor') {
+  // 브랜드 컨택 페이지일 경우 페이지 로드 후 모달 추가
+  if (pagePath === 'tab2/brand-contact') {
     try {
       const modalResponse = await fetch('./src/pages/components/call-modal.html');
       if (modalResponse.ok) {

@@ -12,5 +12,9 @@ contextBridge.exposeInMainWorld('api', {
   updateCallRecord: (recordId, updateData) => ipcRenderer.invoke('update-call-record-request', recordId, updateData),
   fetchCallRecords: (brandName) => ipcRenderer.invoke('fetch-call-records-request', brandName),
   callPhone: (phoneNumber) => ipcRenderer.invoke('call-phone-request', phoneNumber),
-  endCall: () => ipcRenderer.invoke('end-call-request')
+  endCall: () => ipcRenderer.invoke('end-call-request'),
+  fetchProposalRequests: () => ipcRenderer.invoke('dashboard-proposal-request'),
+  fetchBrandEmail: (brandName) => ipcRenderer.invoke('fetch-brand-email-request', brandName),
+  updateNextStep: (brandName, newStatus) => ipcRenderer.invoke('update-nextstep-request', brandName, newStatus),
+  sendGmail: (params) => ipcRenderer.invoke('send-gmail', params)
 });
