@@ -3,7 +3,7 @@
 
 <head>
     <!-- 기본 메타데이터 및 스타일시트 -->
-    <title>gogoya v0.5.9</title>
+    <title>gogoya v0.6.8</title>
     <!-- Google Fonts - Noto Sans KR 폰트 로드 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,7 @@
     <!-- 공통 스타일시트 -->
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/toast.css">
+
     <link rel="stylesheet" href="src/styles/mail-modal.css">
 
     <!-- 탭 1 스타일시트 -->
@@ -26,8 +27,12 @@
     <link rel="stylesheet" href="src/styles/tabs/tab2/seller-analysis.css">
     <!-- <link rel="stylesheet" href="src/styles/tabs/tab2/seller-match.css"> -->
     <!-- <link rel="stylesheet" href="src/styles/tabs/tab2/supply-prices-manage.css"> -->
-    
+    <link rel="stylesheet" href="src/styles/tabs/tab2/seller-match.css">
+    <link rel="stylesheet" href="src/styles/vendor_screening/screening.css">
 
+    <!-- 탭 3 스타일시트 -->
+    <!-- <link rel="stylesheet" href="src/styles/tabs/tab3/user-manage.css"> -->
+    <!-- <link rel="stylesheet" href="src/styles/tabs/tab3/system-setting.css"> -->
 </head>
 
 <body>
@@ -148,12 +153,64 @@
         }
     }
 
+//<<<<<<< HEAD
     // 메뉴 토글 기능 구현
     document.querySelectorAll('.menu-header').forEach(header => {
         header.addEventListener('click', function () {
             const menuItem = this.parentElement;
             const submenu = menuItem.querySelector('.submenu');
             const toggleIcon = menuItem.querySelector('.toggle-icon');
+//=======
+        // 스크리닝 콘텐츠 로드 함수
+        async function loadScreeningContent() {
+            try {
+                console.log("스크리닝 콘텐츠 로드 시작");
+                const contentDiv = document.getElementById('screening-content');
+                
+                // screening.html이 아직 로드되지 않은 경우에만 로드
+                if (!contentDiv.querySelector('.screening-container')) {
+                    console.log("screening.html 로드 시작");
+                    const response = await fetch('src/pages/vendor/screening.html');
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const screeningContent = doc.querySelector('.screening-container');
+                    
+                    // 브레드크럼 유지하면서 콘텐츠 추가
+                    contentDiv.appendChild(screeningContent);
+                    console.log("screening.html 로드 완료");
+                }
+                
+                // ScreeningManager 초기화
+                console.log("ScreeningManager 초기화 시작");
+                if (window.screeningManager) {
+                    await window.screeningManager.init();
+                    window.screeningManager.initialized = true;
+                    console.log("ScreeningManager 초기화 완료");
+                } else {
+                    console.error("ScreeningManager를 찾을 수 없습니다.");
+                }
+            } catch (error) {
+                console.error('스크리닝 콘텐츠 로드 중 오류 발생:', error);
+            }
+        }
+
+        // 메뉴 토글 기능 구현
+        document.querySelectorAll('.menu-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const menuItem = this.parentElement;
+                const submenu = menuItem.querySelector('.submenu');
+                const toggleIcon = menuItem.querySelector('.toggle-icon');
+                
+                if (submenu) {
+                    const isExpanded = submenu.classList.contains('expanded');
+                    
+                    // 모든 서브메뉴 닫기
+                    document.querySelectorAll('.submenu').forEach(menu => {
+                        menu.classList.remove('expanded');
+                        const icon = menu.parentElement.querySelector('.toggle-icon');
+                        if (icon) icon.classList.remove('active');
+                    });
 
             if (submenu) {
                 const isExpanded = submenu.classList.contains('expanded');
@@ -236,6 +293,7 @@
             filter.remove();
         });
 
+//<<<<<<< HEAD
         // 벤더 페이지인 경우 초기화 함수 실행
         if (content === 'vendor') {
             vendor.initVendor();
@@ -282,7 +340,6 @@
     ];
     */
 </script>
-
 
 <!-- 메인 모듈 로드 -->
 <script type="module" src="./src/js/mainRender.js">

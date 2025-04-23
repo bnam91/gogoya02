@@ -17,7 +17,9 @@ import { makeCall, endCall } from './src/js/utils/phone.js';
 import fs from 'fs';
 import { config } from './src/js/config/config.js';
 import { getGmailCredentials } from './src/gmailAuth.js';
+import os from 'os';
 import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 
 // 인코딩 설정
 process.env.CHARSET = 'UTF-8';
@@ -44,6 +46,10 @@ const repo = process.env.GITHUB_REPO || 'gogoya02';
 // 개발 모드 확인
 const isDev = process.env.NODE_ENV === 'development';
 console.log('현재 모드:', isDev ? '개발 모드' : '프로덕션 모드');
+
+// __dirname 직접 생성
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ===========================================
 // ipcMain 핸들러 등록
@@ -165,21 +171,233 @@ ipcMain.handle('update-nextstep-request', async (event, brandName, newStatus) =>
 // Gmail 메일 보내기 IPC 핸들러
 ipcMain.handle('send-gmail', async (event, { accountId, credentialsPath, mailOptions }) => {
     try {
-      const auth = await getGmailCredentials(accountId, credentialsPath);
-      const response = await sendGmail(auth, mailOptions);
-  
-      return { success: true, id: response.id };
+        const auth = await getGmailCredentials(accountId, credentialsPath);
+        const response = await sendGmail(auth, mailOptions);
+
+        return { success: true, id: response.id };
     } catch (error) {
-      console.error('Gmail 전송 실패:', error);
-      throw error;
+        console.error('Gmail 전송 실패:', error);
+        throw error;
     }
-  });
+});
 
+// 셀러매칭 탭 인플루언서 데이터 조회
+ipcMain.handle('fetch-influencer-data-for-seller-match', async () => {
+    try {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.influencerData);
 
-// __dirname 직접 생성
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+        const pipeline = [
+            {
+                "$match": {
+                    "reels_views(15)": { "$exists": true, "$ne": "" },
+                    "is_contact_excluded": { "$ne": true }
+                }
+            },
+            {
+                "$addFields": {
+                    "reels_views_num": {
+                        "$cond": {
+                            "if": { "$eq": ["$reels_views(15)", "-"] },
+                            "then": 0,
+                            "else": { "$toInt": "$reels_views(15)" }
+                        }
+                    }
+                }
+            },
+            {
+                "$sort": { "reels_views_num": -1 }
+            },
+            {
+                "$project": {
+                    "username": 1,
+                    "clean_name": 1,
+                    "category": 1,
+                    "profile_link": 1,
+                    "reels_views": "$reels_views(15)",
+                    "reels_views_num": 1,
+                    "contact_method": 1
+                }
+            }
+        ];
 
+        const results = await collection.aggregate(pipeline).toArray();
+        return results;
+    } catch (error) {
+        console.error("📦 인플루언서 데이터 fetch 실패:", error);
+        throw error;
+    }
+});
+
+// 셀러분석 탭 인플루언서 데이터 조회
+ipcMain.handle('fetch-influencer-data-for-seller-analysis', async () => {
+    try {
+        const client = await getMongoClient();
+        const db = client.db(config.database.name);
+        const collection = db.collection(config.database.collections.influencerData);
+
+        const pipeline = [
+            {
+                "$match": {
+                    "reels_views(15)": { "$exists": true, "$ne": "" }
+                }
+            },
+            {
+                "$addFields": {
+                    "reels_views_num": {
+                        "$cond": {
+                            "if": { "$eq": ["$reels_views(15)", "-"] },
+                            "then": 0,
+                            "else": { "$toInt": "$reels_views(15)" }
+                        }
+                    },
+                    "followers_num": {
+                        "$cond": {
+                            "if": { "$eq": ["$followers", "-"] },
+                            "then": 0,
+                            "else": { "$toInt": "$followers" }
+                        }
+                    }
+                }
+            },
+            {
+                "$sort": { "reels_views_num": -1 }
+            },
+            {
+                "$project": {
+                    "username": 1,
+                    "clean_name": 1,
+                    "category": 1,
+                    "followers": 1,
+                    "grade": 1,
+                    "reels_views": "$reels_views(15)",
+                    "profile_link": 1,
+                    "followers_num": 1,
+                    "reels_views_num": 1,
+                    "tags": 1
+                }
+            }
+        ];
+
+        const results = await collection.aggregate(pipeline).toArray();
+        return results;
+    } catch (error) {
+        console.error("📦 인플루언서 데이터 fetch 실패:", error);
+        throw error;
+    }
+});
+// 인플루언서 데이터 업로드
+ipcMain.handle('upload-influencer-data', async (event, payload) => {
+    try {
+        const { brand, item, selectedInfluencers } = payload;
+
+        // 토큰 경로
+        const tokenPath = process.platform === 'win32'
+            ? path.join(process.env.APPDATA, 'GoogleAPI', 'token.json')
+            : path.join(os.homedir(), '.config', 'GoogleAPI', 'token.json');
+
+        if (!fs.existsSync(tokenPath)) {
+            throw new Error('토큰 파일이 존재하지 않습니다.');
+        }
+
+        const credToken = JSON.parse(fs.readFileSync(tokenPath));
+        const credentials = await import(`file://${__dirname}/token/credentials_token.js`);
+        const { client_id, client_secret } = credentials.default.installed;
+
+        const oAuth2Client = new OAuth2Client(client_id, client_secret);
+        oAuth2Client.setCredentials(credToken);
+
+        const sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
+
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+        const values = selectedInfluencers.map(influencer => [
+            `https://www.instagram.com/${influencer.username}`,
+            influencer.name,
+            '',
+            '',
+            brand,
+            item,
+            `${dateStr} ${timeStr}`,
+            influencer.contactMethod
+        ]);
+
+        const spreadsheetId = '1VhEWeQASyv02knIghpcccYLgWfJCe2ylUnPsQ_-KNAI';
+        const range = 'contact!A2:H';
+
+        const response = await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range,
+            valueInputOption: 'USER_ENTERED',
+            resource: { values }
+        });
+
+        return { success: true, count: values.length };
+    } catch (err) {
+        console.error('Google Sheet 업로드 실패:', err);
+        throw err;
+    }
+});
+
+ipcMain.handle('get-influencer-info', async (event, username) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);
+    const influencer = await collection.findOne({ username });
+    return influencer;
+});
+
+ipcMain.handle('save-file', async (event, { defaultPath, content }) => {
+    const { filePath } = await dialog.showSaveDialog({
+        title: '엑셀 파일 저장',
+        defaultPath: defaultPath,
+        filters: [
+            { name: 'CSV 파일', extensions: ['csv'] }
+        ]
+    });
+
+    if (filePath) {
+        fs.writeFileSync(filePath, content, 'utf-8');
+        return filePath;
+    }
+    return null;
+});
+
+// 인플루언서 태그 저장
+ipcMain.handle('save-influencer-tags', async (event, { username, tags }) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);
+
+    return await collection.updateOne(
+        { username },
+        { $set: { tags } },
+        { upsert: true }
+    );
+});
+
+// 인플루언서 연락처 정보 저장
+ipcMain.handle('save-influencer-contact', async (event, { username, method, info, excluded, reason }) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);
+
+    return await collection.updateOne(
+        { username },
+        {
+            $set: {
+                contact_method: method,
+                contact_info: info,
+                is_contact_excluded: excluded,
+                exclusion_reason: reason
+            }
+        },
+        { upsert: true }
+    );
+});
 // ===========================================
 // Electron 앱 윈도우 생성
 // ===========================================
@@ -330,19 +548,3 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
-
-ipcMain.handle('save-file', async (event, { defaultPath, content }) => {
-    const { filePath } = await dialog.showSaveDialog({
-        title: '엑셀 파일 저장',
-        defaultPath: defaultPath,
-        filters: [
-            { name: 'CSV 파일', extensions: ['csv'] }
-        ]
-    });
-
-    if (filePath) {
-        fs.writeFileSync(filePath, content, 'utf-8');
-        return filePath;
-    }
-    return null;
-}); 

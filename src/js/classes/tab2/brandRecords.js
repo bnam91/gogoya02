@@ -1,4 +1,5 @@
 export class BrandRecordsManager {
+
     constructor() {
         this.records = [];
     }

@@ -1,5 +1,4 @@
 <!-- 셀러 분석 페이지 -->
- 
 <div id="seller-analysis-content" class="content-section">
     <!-- 브레드크럼 네비게이션 -->
     <div class="breadcrumb">
@@ -29,7 +28,35 @@
                 <input type="number" id="category-percentage" min="0" max="100" value="0">
                 <span>% 이상</span>
             </div>
-            <div class="excel-download-container">
+            <div class="filter-group">
+                <label for="reels-views-filter">릴스뷰:</label>
+                <select id="reels-views-filter">
+                    <option value="">전체</option>
+                    <option value="0-10000">1만 미만</option>
+                    <!-- <option value="10000-50000">1만~5만</option>
+                    <option value="50000-100000">5만~10만</option>
+                    <option value="100000-500000">10만~50만</option> -->
+                    <option value="10000-20000">1만~2만</option>
+                    <option value="20000-150000">2만~15만</option>
+                    <option value="150000-500000">15만~50만</option>
+                    <option value="500000-1000000">50만~100만</option>
+                    <option value="1000000">100만 이상</option>
+                    <option value="custom">직접입력</option>
+                </select>
+                <div id="custom-reels-views" style="display: none;">
+                    <input type="number" id="reels-views-min" placeholder="최소값" style="width: 100px;">
+                    <span>~</span>
+                    <input type="number" id="reels-views-max" placeholder="최대값" style="width: 100px;">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="name-search">이름 검색:</label>
+                <input type="text" id="name-search" placeholder="이름 또는 유저명으로 검색">
+            </div>
+            <div class="filter-buttons">
+                <button id="reset-filters" class="reset-filters-btn" title="필터 초기화">
+                    <i class="fas fa-redo"></i>
+                </button>
                 <button id="excel-download" class="excel-download-btn" title="엑셀 다운로드">
                     <i class="fas fa-file-excel"></i>
                 </button>

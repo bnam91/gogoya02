@@ -16,5 +16,16 @@ contextBridge.exposeInMainWorld('api', {
   fetchProposalRequests: () => ipcRenderer.invoke('dashboard-proposal-request'),
   fetchBrandEmail: (brandName) => ipcRenderer.invoke('fetch-brand-email-request', brandName),
   updateNextStep: (brandName, newStatus) => ipcRenderer.invoke('update-nextstep-request', brandName, newStatus),
-  sendGmail: (params) => ipcRenderer.invoke('send-gmail', params)
+  sendGmail: (params) => ipcRenderer.invoke('send-gmail', params),
+  fetchInfluencerDataForSellerMatch: () => ipcRenderer.invoke('fetch-influencer-data-for-seller-match'),
+  fetchInfluencerDataForSellerAnalysis: () => ipcRenderer.invoke('fetch-influencer-data-for-seller-analysis'),
+  getInfluencerInfo: (username) => ipcRenderer.invoke('get-influencer-info', username),
+  saveFile: (options) => ipcRenderer.invoke('save-file', options),
+  saveInfluencerTags: (username, tags) => ipcRenderer.invoke('save-influencer-tags', { username, tags }),
+  saveInfluencerContact: (username, method, info, excluded, reason) => ipcRenderer.invoke('save-influencer-contact', { username, method, info, excluded, reason })
+});
+
+contextBridge.exposeInMainWorld('googleSheetApi', {
+  uploadInfluencerData: (uploadPayload) =>
+    ipcRenderer.invoke('upload-influencer-data', uploadPayload)
 });

@@ -16,6 +16,7 @@ export const menuData = [
       tabClass: "tab2",
       children: [
         { title: "대시보드", page: "tab2/dashboard" },
+        { title: "스크리닝", page: "tab2/screening" },
         { title: "브랜드 컨택", page: "tab2/brand-contact" },
         { title: "제안서 관리", page: "tab2/proposal-manage" },
         { title: "공급가 관리", page: "tab2/supply-prices-manage" },
