@@ -200,42 +200,47 @@ class ScreeningManager {
 
             // 릴스뷰 필터
             if (this.selectedViews) {
-                const [min, max] = this.selectedViews.split('-').map(Number);
-                
-                // 02_main_influencer_data 컬렉션에서 조회수 데이터 가져오기
-                const client = await this.mongo.getMongoClient();
-                const db = client.db("insta09_database");
-                const influencerCollection = db.collection("02_main_influencer_data");
-                
-                // 각 아이템의 인플루언서 정보 가져오기
-                const itemsWithInfluencerInfo = await Promise.all(
-                    result.map(async (item) => {
-                        const cleanName = item.clean_name || item.author;
-                        const influencerData = await influencerCollection.findOne(
-                            { clean_name: cleanName },
-                            { projection: { "reels_views(15)": 1 } }
-                        );
-                        
-                        return {
-                            ...item,
-                            reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0
-                        };
-                    })
-                );
-                
-                // 조회수 기준으로 필터링
-                result = itemsWithInfluencerInfo.filter(item => {
-                    const views = item.reelsViews;
+                if (this.selectedViews === 'all') {
+                    // 전체 선택 시 필터링하지 않음
+                    console.log('릴스뷰 필터: 전체 선택됨');
+                } else {
+                    const [min, max] = this.selectedViews.split('-').map(Number);
                     
-                    if (max === undefined) {
-                        // "100만 이상" 케이스
-                        return views >= min;
-                    } else {
-                        // 일반 구간 케이스
-                        return views >= min && views < max;
-                    }
-                });
-        }
+                    // 02_main_influencer_data 컬렉션에서 조회수 데이터 가져오기
+                    const client = await this.mongo.getMongoClient();
+                    const db = client.db("insta09_database");
+                    const influencerCollection = db.collection("02_main_influencer_data");
+                    
+                    // 각 아이템의 인플루언서 정보 가져오기
+                    const itemsWithInfluencerInfo = await Promise.all(
+                        result.map(async (item) => {
+                            const cleanName = item.clean_name || item.author;
+                            const influencerData = await influencerCollection.findOne(
+                                { clean_name: cleanName },
+                                { projection: { "reels_views(15)": 1 } }
+                            );
+                            
+                            return {
+                                ...item,
+                                reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0
+                            };
+                        })
+                    );
+                    
+                    // 조회수 기준으로 필터링
+                    result = itemsWithInfluencerInfo.filter(item => {
+                        const views = item.reelsViews;
+                        
+                        if (max === undefined) {
+                            // "100만 이상" 케이스
+                            return views >= min;
+                        } else {
+                            // 일반 구간 케이스
+                            return views >= min && views < max;
+                        }
+                    });
+                }
+            }
         
         this.filteredData = result;
             
