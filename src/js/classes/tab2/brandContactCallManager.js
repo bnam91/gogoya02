@@ -2,7 +2,7 @@
 // const phone = require('./phone'); 삭제
 // 대신 window.mongo와 window.phone 사용
 
-export class VendorCallManager {
+export class BrandContactCallManager {
     constructor() {
         this.isCalling = false;
         this.callStartTime = null;
@@ -114,4 +114,4 @@ export class VendorCallManager {
     }
 }
 
-//module.exports = VendorCallManager; 
+//module.exports = BrandContactCallManager; 

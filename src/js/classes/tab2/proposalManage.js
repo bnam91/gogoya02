@@ -614,6 +614,7 @@ export class ProposalManage {
                 let modal = document.getElementById('send-mail-modal');
                 if (!modal) {
                     createMailModal();
+                    modal = document.getElementById('send-mail-modal');
                 }
                 // 닫기 버튼 이벤트 추가
                 const closeModal = modal.querySelector('.close-modal');
@@ -809,8 +810,16 @@ export class ProposalManage {
 
                             console.log('메일 전송 옵션 준비 완료:', mailOptions);
 
+                              // 1. 인증 시작
+                            await window.gmailAuthAPI.startAuth(accountId, credentialsPath);
+
+                            // 2. 인증 코드 사용자에게 입력받기
+                            const code = prompt('브라우저에서 인증 후 받은 코드를 입력하세요');
+
+                            // 3. 코드 제출하여 토큰 저장
+                            await window.gmailAuthAPI.sendAuthCode(code, accountId);
                             // 🔥 핵심: 메일 전송 요청
-                            const result = await window.api.sendGmail({
+                            const result = await window.gmailAuthAPI.sendGmail({
                                 accountId,
                                 credentialsPath,
                                 mailOptions
@@ -990,7 +999,7 @@ ${mailOptions.body.replace(/<[^>]*>/g, '')}
 function createMailModal() {
     console.log('모달 요소가 없어서 동적으로 생성합니다.');
     // 모달 동적 생성
-    modal = document.createElement('div');
+    let modal = document.createElement('div');
     modal.id = 'send-mail-modal';
     modal.className = 'modal';
     modal.innerHTML = `

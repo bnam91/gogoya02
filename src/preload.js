@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // 벤더 데이터 요청
 contextBridge.exposeInMainWorld('api', {
-  fetchVendorData: (filters) => ipcRenderer.invoke('vendor-data-request', filters),
+  fetchBrandContactData: (filters) => ipcRenderer.invoke('brand-contact-data-request', filters),
   fetchBrandPhoneData: (brandName) => ipcRenderer.invoke('brand-phone-data-request', brandName),
   fetchLatestCallRecordByCardId: (cardId) => ipcRenderer.invoke('latest-call-record-request', cardId),
   fetchCallRecordById: (recordId) => ipcRenderer.invoke('call-record-by-id-request', recordId),
@@ -16,7 +16,6 @@ contextBridge.exposeInMainWorld('api', {
   fetchProposalRequests: () => ipcRenderer.invoke('dashboard-proposal-request'),
   fetchBrandEmail: (brandName) => ipcRenderer.invoke('fetch-brand-email-request', brandName),
   updateNextStep: (brandName, newStatus) => ipcRenderer.invoke('update-nextstep-request', brandName, newStatus),
-  sendGmail: (params) => ipcRenderer.invoke('send-gmail', params),
   fetchInfluencerDataForSellerMatch: () => ipcRenderer.invoke('fetch-influencer-data-for-seller-match'),
   fetchInfluencerDataForSellerAnalysis: () => ipcRenderer.invoke('fetch-influencer-data-for-seller-analysis'),
   getInfluencerInfo: (username) => ipcRenderer.invoke('get-influencer-info', username),
@@ -32,4 +31,10 @@ contextBridge.exposeInMainWorld('api', {
 contextBridge.exposeInMainWorld('googleSheetApi', {
   uploadInfluencerData: (uploadPayload) =>
     ipcRenderer.invoke('upload-influencer-data', uploadPayload)
+});
+
+contextBridge.exposeInMainWorld('gmailAuthAPI', {
+  startAuth: (accountId, credentialsPath) => ipcRenderer.invoke('start-gmail-auth', { accountId, credentialsPath }),
+  sendAuthCode: (code) => ipcRenderer.invoke('send-auth-code', code),
+  sendGmail: (params) => ipcRenderer.invoke('send-gmail', params)
 });

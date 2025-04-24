@@ -1,4 +1,4 @@
-export class VendorFilter {
+export class BrandContactFilter {
     constructor() {
         this.selectedCategories = [];
         this.selectedGrades = [];
@@ -34,8 +34,8 @@ export class VendorFilter {
         
         // 현재 페이지가 브랜드 컨택 페이지인 경우에만 필터 생성
         const currentPage = document.querySelector('.content-section.active').id;
-        if (currentPage === 'vendor-content') {
-            const breadcrumb = document.querySelector('#vendor-content .breadcrumb');
+        if (currentPage === 'brand-contact-content') {
+            const breadcrumb = document.querySelector('#brand-contact-content .breadcrumb');
             if (breadcrumb) {
                 this.createFilterUI(breadcrumb);
                 this.setupEventListeners();
@@ -284,20 +284,20 @@ export class VendorFilter {
         }, 300);
 
         // 중앙 패널 초기화
-        const dataList = document.getElementById('vendor-data-list');
+        const dataList = document.getElementById('brand-contact-data-list');
         dataList.innerHTML = '<p>데이터를 불러오는 중...</p>';
 
         // 우측 패널 초기화
-        const rightPanel = document.querySelector('.vendor-right');
+        const rightPanel = document.querySelector('.brand-contact-right');
         rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
 
         // 데이터를 처음부터 다시 로드
-        window.vendor.currentSkip = 0;
-        window.vendor.hasMoreData = true;
-        window.vendor.cardData = [];
-        window.vendor.selectedCardIndex = -1;
-        window.vendor.currentBrandData = null;
-        window.vendor.loadVendorData(true);
+        window.brandContact.currentSkip = 0;
+        window.brandContact.hasMoreData = true;
+        window.brandContact.cardData = [];
+        window.brandContact.selectedCardIndex = -1;
+        window.brandContact.currentBrandData = null;
+        window.brandContact.loadBrandContactData(true);
     }
 
     updateSelectedCategories() {
@@ -369,16 +369,16 @@ export class VendorFilter {
         this.showToast('데이터를 필터링하는 중...', 'loading');
         
         // 필터링 시 스크롤 위치와 데이터 초기화
-        window.vendor.currentSkip = 0;
-        window.vendor.hasMoreData = true;
-        window.vendor.cardData = [];
+        window.brandContact.currentSkip = 0;
+        window.brandContact.hasMoreData = true;
+        window.brandContact.cardData = [];
         
         // 중앙 패널 초기화
-        const dataList = document.getElementById('vendor-data-list');
+        const dataList = document.getElementById('brand-contact-data-list');
         dataList.innerHTML = '<p>데이터를 불러오는 중...</p>';
         
         // 우측 패널 초기화
-        const rightPanel = document.querySelector('.vendor-right');
+        const rightPanel = document.querySelector('.brand-contact-right');
         rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
         
         // 필터링된 데이터 로드
@@ -391,7 +391,7 @@ export class VendorFilter {
             nextSteps: this.selectedNextSteps
         };
         
-        await window.vendor.loadVendorData(true, filters);
+        await window.brandContact.loadBrandContactData(true, filters);
         
         // 필터링 완료 후 결과 토스트 메시지 표시
         const cards = document.querySelectorAll('.card');
@@ -460,5 +460,5 @@ export class VendorFilter {
 }
 
 // 클래스를 전역 스코프에 노출
-//window.VendorFilter = VendorFilter; 
+//window.BrandContactFilter = BrandContactFilter; 
 

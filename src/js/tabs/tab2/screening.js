@@ -7,15 +7,17 @@
 import { ScreeningManager } from '../../classes/tab2/screening.js';
 
 // 인스턴스 생성
-const screeningManager = new ScreeningManager();
+if (!window.screeningManager) {
+    window.screeningManager = new ScreeningManager();
+}
 //const sellerAnalysisFilter = new SellerAnalysisFilter();
 
 export function initPage() {
     console.log('initPage SellerAnalysis');
 
     // 매니저 초기화
-    if (screeningManager && typeof screeningManager.init === 'function') {
-        screeningManager.init();
+    if (window.screeningManager && typeof window.screeningManager.init === 'function') {
+        window.screeningManager.init();
     } else {
         console.error('screeningManager가 초기화되지 않았거나 init 메서드가 없습니다.');
     }

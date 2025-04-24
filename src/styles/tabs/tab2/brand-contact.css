@@ -1,5 +1,5 @@
 /* 벤더 컨테이너 레이아웃 */
-.vendor-container {
+.brand-contact-container {
     display: grid;
     grid-template-columns: 1fr 1fr 300px;
     gap: 15px;
@@ -27,7 +27,7 @@
 }
 */
 
-.vendor-left {
+.brand-contact-left {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -36,7 +36,7 @@
     height: 100%;
 }
 
-.vendor-left::before {
+.brand-contact-left::before {
     content: "데이터를 불러오는 중입니다. 기다려주세요.";
     position: absolute;
     top: 20px;
@@ -46,17 +46,17 @@
     white-space: nowrap;
 }
 
-.vendor-left .vendor-data-list {
+.brand-contact-left .brand-contact-data-list {
     opacity: 0;
     transition: opacity 0.3s ease;
     height: 100%;
 }
 
-.vendor-left .vendor-data-list.loaded {
+.brand-contact-left .brand-contact-data-list.loaded {
     opacity: 1;
 }
 
-.vendor-right {
+.brand-contact-right {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -64,7 +64,7 @@
     padding: 20px;
 }
 
-.vendor-extra {
+.brand-contact-extra {
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -2,7 +2,7 @@
  * 통화기록 관리 클래스
  * 통화기록 조회 및 수기 입력 기능 제공
  */
-export class VendorCallHistory {
+export class BrandContactCallHistory {
     constructor() {
         this.mongo = window.mongo;
         this.currentBrandName = '';
@@ -520,4 +520,4 @@ export class VendorCallHistory {
 }
 
 // 전역 인스턴스 생성
-//window.vendorCallHistory = new VendorCallHistory(); 
+//window.brandContactCallHistory = new BrandContactCallHistory(); 

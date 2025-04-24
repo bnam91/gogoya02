@@ -4,40 +4,40 @@
  */
 
 // 필요한 클래스 import
-import { VendorCallHistory, VendorCallManager, VendorFilter, VendorInfoEditor } from '../../classes/tab2/index.js';
+import { BrandContactCallHistory, BrandContactCallManager, BrandContactFilter, BrandContactInfoEditor } from '../../classes/tab2/index.js';
 
 // 인스턴스 생성
-const vendorCallManager = new VendorCallManager();
-const vendorFilter = new VendorFilter();
-const vendorInfoEditor = new VendorInfoEditor();
-const vendorCallHistory = new VendorCallHistory();
+const brandContactCallManager = new BrandContactCallManager();
+const brandContactFilter = new BrandContactFilter();
+const brandContactInfoEditor = new BrandContactInfoEditor();
+const brandContactCallHistory = new BrandContactCallHistory();
 
 export function initPage() {
-    console.log('initPage Vendor');
+    console.log('initPage BrandContact');
     // 데이터 초기화
     currentSkip = 0;
     hasMoreData = true;
     selectedCardIndex = -1;
     cardData = []; // 데이터 초기화
-    loadVendorData(true);
+    loadBrandContactData(true);
     
-    const vendorLeft = document.querySelector('.vendor-left');
-    console.log('vendorLeft', vendorLeft);
-    vendorLeft.addEventListener('scroll', handleScroll);
+    const brandContactLeft = document.querySelector('.brand-contact-left');
+    console.log('brandContactLeft', brandContactLeft);
+    brandContactLeft.addEventListener('scroll', handleScroll);
     
     // 우측 패널 초기화
-    const rightPanel = document.querySelector('.vendor-right');
+    const rightPanel = document.querySelector('.brand-contact-right');
     rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
 
     // 필터 초기화
     /*
-    if (window.vendorFilter && typeof window.vendorFilter.init === 'function') {
-        window.vendorFilter.init();
+    if (window.brandContactFilter && typeof window.brandContactFilter.init === 'function') {
+        window.brandContactFilter.init();
         */
-    if (vendorFilter && typeof vendorFilter.init === 'function') {
-        vendorFilter.init();
+    if (brandContactFilter && typeof brandContactFilter.init === 'function') {
+        brandContactFilter.init();
     } else {
-        console.error('vendorFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
+        console.error('brandContactFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
     }
 }
 
@@ -48,23 +48,23 @@ let selectedCardIndex = -1;
 let cardData = []; // 카드 데이터를 저장할 배열
 let currentBrandData = null;
 
-// 전역 변수들을 window.vendor 객체에 노출
-window.vendor = {
+// 전역 변수들을 window.brandContact 객체에 노출
+window.brandContact = {
     get currentSkip() { return currentSkip; },
     set currentSkip(value) { currentSkip = value; },
     get hasMoreData() { return hasMoreData; },
     set hasMoreData(value) { hasMoreData = value; },
     get cardData() { return cardData; },
     set cardData(value) { cardData = value; },
-    loadVendorData
+    loadBrandContactData
 };
 
 function updateCallDuration() {
     console.log('updateCallDuration');
-    if (!vendorCallManager.callStartTime || !vendorCallManager.isCalling) return;
+    if (!brandContactCallManager.callStartTime || !brandContactCallManager.isCalling) return;
     
     const now = new Date();
-    const duration = Math.floor((now - vendorCallManager.callStartTime) / 1000);
+    const duration = Math.floor((now - brandContactCallManager.callStartTime) / 1000);
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration % 3600) / 60);
     const seconds = duration % 60;
@@ -78,8 +78,8 @@ function updateCallDuration() {
 async function handleCall(phoneNumber) {
     console.log('handleCall');
     try {
-        if (vendorCallManager.isCalling) {
-            await vendorCallManager.endCall();
+        if (brandContactCallManager.isCalling) {
+            await brandContactCallManager.endCall();
         } else {
             // 모달창 표시
             const modal = document.getElementById('call-confirm-modal');
@@ -98,8 +98,8 @@ async function handleCall(phoneNumber) {
                     modal.style.display = 'none';
                     
                     try {
-                        vendorCallManager.setCurrentBrandData(currentBrandData);
-                        await vendorCallManager.startCall(phoneNumber);
+                        brandContactCallManager.setCurrentBrandData(currentBrandData);
+                        await brandContactCallManager.startCall(phoneNumber);
                         
                         // 통화 상태 폼 표시
                         const callForm = document.createElement('div');
@@ -152,7 +152,7 @@ async function handleCall(phoneNumber) {
                         // 통화 종료 버튼 이벤트 리스너
                         const endCallButton = callForm.querySelector('.end-call-button');
                         endCallButton.onclick = async () => {
-                            const duration = await vendorCallManager.endCall();
+                            const duration = await brandContactCallManager.endCall();
                             if (duration) {
                                 // 버튼 상태 업데이트
                                 const callButton = document.querySelector('.call-button');
@@ -237,16 +237,16 @@ async function handleCall(phoneNumber) {
 async function updateCallHistory(brandName) {
     console.log('updateCallHistory');
     try {
-        // vendorCallHistory 모듈을 사용하여 통화 기록 렌더링
+        // brandContactCallHistory 모듈을 사용하여 통화 기록 렌더링
         /*
-        if (window.vendorCallHistory) {
-            await window.vendorCallHistory.renderCallHistory(brandName);
+        if (window.brandContactCallHistory) {
+            await window.brandContactCallHistory.renderCallHistory(brandName);
         */
-        if (vendorCallHistory) {
-                await vendorCallHistory.renderCallHistory(brandName);
+        if (brandContactCallHistory) {
+            await brandContactCallHistory.renderCallHistory(brandName);
         } else {
-            console.error('vendorCallHistory 모듈을 찾을 수 없습니다.');
-            throw new Error('vendorCallHistory 모듈을 찾을 수 없습니다.');
+            console.error('brandContactCallHistory 모듈을 찾을 수 없습니다.');
+            throw new Error('brandContactCallHistory 모듈을 찾을 수 없습니다.');
         }
     } catch (error) {
         console.error('통화 기록 조회 중 오류:', error);
@@ -262,18 +262,18 @@ async function updateCallHistory(brandName) {
 async function updateCardCallStatus(recordId, newNextStep) {
     console.log('updateCardCallStatus');
     try {
-        // 일반적으로 vendorCallHistory 모듈을 사용하지만, 
+        // 일반적으로 brandContactCallHistory 모듈을 사용하지만, 
         // 호환성을 위해 기존 코드도 유지합니다.
         /*
-        if (window.vendorCallHistory) {
-            // vendorCallHistory 모듈의 메서드 호출
-            await window.vendorCallHistory.updateCardNextStep(recordId, newNextStep);
+        if (window.brandContactCallHistory) {
+            // brandContactCallHistory 모듈의 메서드 호출
+            await window.brandContactCallHistory.updateCardNextStep(recordId, newNextStep);
             return;
         }
         */
-        if (vendorCallHistory) {
-            // vendorCallHistory 모듈의 메서드 호출
-            await vendorCallHistory.updateCardNextStep(recordId, newNextStep);
+        if (brandContactCallHistory) {
+            // brandContactCallHistory 모듈의 메서드 호출
+            await brandContactCallHistory.updateCardNextStep(recordId, newNextStep);
             return;
         }
         
@@ -314,7 +314,7 @@ async function updateCardCallStatus(recordId, newNextStep) {
 //async function updateRightPanel(item) {
 async function updateBrandInfoPanel(item) {
     console.log('updateRightPanel');
-    const rightPanel = document.querySelector('.vendor-right');
+    const rightPanel = document.querySelector('.brand-contact-right');
     const extraContent = document.querySelector('.extra-content');
     
     if (!item) {
@@ -342,8 +342,8 @@ async function updateBrandInfoPanel(item) {
             contact_person: brandPhoneData.contact_person
         };
 
-        // vendorInfoEditor에 현재 브랜드 데이터 설정
-        vendorInfoEditor.setCurrentBrandData(currentBrandData);
+        // brandContactInfoEditor에 현재 브랜드 데이터 설정
+        brandContactInfoEditor.setCurrentBrandData(currentBrandData);
         
         if (!brandPhoneData) {
             rightPanel.innerHTML = `
@@ -406,8 +406,8 @@ async function updateBrandInfoPanel(item) {
                                         ${brandPhoneData.customer_service_number || '-'}
                                     </span>
                                     ${brandPhoneData.customer_service_number ? `
-                                        <button class="call-button ${vendorCallManager.isCalling ? 'end-call' : ''}" data-phone="${brandPhoneData.customer_service_number}">
-                                            ${vendorCallManager.isCalling ? '통화종료' : '통화하기'}
+                                        <button class="call-button ${brandContactCallManager.isCalling ? 'end-call' : ''}" data-phone="${brandPhoneData.customer_service_number}">
+                                            ${brandContactCallManager.isCalling ? '통화종료' : '통화하기'}
                                         </button>
                                     ` : ''}
                                 </div>
@@ -473,8 +473,8 @@ async function updateBrandInfoPanel(item) {
                 if (phoneNumber) {
                     await handleCall(phoneNumber);
                     // 버튼 텍스트와 스타일 업데이트
-                    callButton.textContent = vendorCallManager.isCalling ? '통화종료' : '통화하기';
-                    if (vendorCallManager.isCalling) {
+                    callButton.textContent = brandContactCallManager.isCalling ? '통화종료' : '통화하기';
+                    if (brandContactCallManager.isCalling) {
                         callButton.classList.add('end-call');
                     } else {
                         callButton.classList.remove('end-call');
@@ -561,7 +561,7 @@ async function updateBrandInfoPanel(item) {
 async function selectCard(index) {
     console.log('selectCard');
     // 통화 중일 때는 카드 선택 방지
-    if (vendorCallManager.isCalling) {
+    if (brandContactCallManager.isCalling) {
         alert('통화 중에는 다른 카드를 선택할 수 없습니다.');
         return;
     }
@@ -610,11 +610,11 @@ document.addEventListener('keydown', async (event) => {
         if (callButton) {
             const phoneNumber = callButton.dataset.phone;
             if (phoneNumber) {
-                if (vendorCallManager.isCalling) {
+                if (brandContactCallManager.isCalling) {
                     await handleCall(phoneNumber);
                     // 버튼 텍스트와 스타일 업데이트
-                    callButton.textContent = vendorCallManager.isCalling ? '통화종료' : '통화하기';
-                    if (vendorCallManager.isCalling) {
+                    callButton.textContent = brandContactCallManager.isCalling ? '통화종료' : '통화하기';
+                    if (brandContactCallManager.isCalling) {
                         callButton.classList.add('end-call');
                     } else {
                         callButton.classList.remove('end-call');
@@ -623,8 +623,8 @@ document.addEventListener('keydown', async (event) => {
                     const result = await handleCall(phoneNumber);
                     if (result) {
                         // 버튼 텍스트와 스타일 업데이트
-                        callButton.textContent = vendorCallManager.isCalling ? '통화종료' : '통화하기';
-                        if (vendorCallManager.isCalling) {
+                        callButton.textContent = brandContactCallManager.isCalling ? '통화종료' : '통화하기';
+                        if (brandContactCallManager.isCalling) {
                             callButton.classList.add('end-call');
                         } else {
                             callButton.classList.remove('end-call');
@@ -638,7 +638,7 @@ document.addEventListener('keydown', async (event) => {
 
 async function handleKeyDown(e) {
     console.log('handleKeyDown');
-    if (!document.getElementById('vendor-content').classList.contains('active')) {
+    if (!document.getElementById('brand-contact-content').classList.contains('active')) {
         return;
     }
 
@@ -649,7 +649,7 @@ async function handleKeyDown(e) {
     
     if (visibleCards.length === 0) return;
 
-    const dataList = document.getElementById('vendor-data-list');
+    const dataList = document.getElementById('brand-contact-data-list');
     const cardHeight = visibleCards[0].offsetHeight;
     const containerHeight = dataList.clientHeight;
 
@@ -844,8 +844,8 @@ async function createCard(item, index, startIndex) {
     return card;
 }
 
-async function loadVendorData(isInitialLoad = true, filters = {}) {
-    console.log('loadVendorData');
+async function loadBrandContactData(isInitialLoad = true, filters = {}) {
+    console.log('loadBrandContactData');
     if (isLoading || (!isInitialLoad && !hasMoreData)) return;
     
     try {
@@ -854,16 +854,16 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
         // 필터가 전달되지 않은 경우 현재 필터 상태를 가져옴
         if (Object.keys(filters).length === 0) {
             filters = {
-                searchQuery: vendorFilter.searchQuery,
-                categories: vendorFilter.selectedCategories,
-                grades: vendorFilter.selectedGrades,
-                hasBrandInfo: vendorFilter.hasBrandInfo,
-                verificationStatus: vendorFilter.selectedVerificationStatus
+                searchQuery: brandContactFilter.searchQuery,
+                categories: brandContactFilter.selectedCategories,
+                grades: brandContactFilter.selectedGrades,
+                hasBrandInfo: brandContactFilter.hasBrandInfo,
+                verificationStatus: brandContactFilter.selectedVerificationStatus
             };
         }
         
-        //const result = await mongo.getVendorData(currentSkip, 20, filters);
-        const result = await window.api.fetchVendorData({
+        //const result = await mongo.getBrandContactData(currentSkip, 20, filters);
+        const result = await window.api.fetchBrandContactData({
             ...filters,
             skip: currentSkip,
             limit: 20
@@ -872,7 +872,7 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
           
         hasMoreData = hasMore;
         
-        const dataList = document.getElementById('vendor-data-list');
+        const dataList = document.getElementById('brand-contact-data-list');
         if (isInitialLoad) {
             dataList.innerHTML = '';
             selectedCardIndex = -1;
@@ -910,7 +910,7 @@ async function loadVendorData(isInitialLoad = true, filters = {}) {
         }
     } catch (error) {
         console.error('벤더 데이터 로드 중 오류 발생:', error);
-        const dataList = document.getElementById('vendor-data-list');
+        const dataList = document.getElementById('brand-contact-data-list');
         if (isInitialLoad) {
             dataList.innerHTML = '<p>데이터 로드 중 오류가 발생했습니다.</p>';
         }
@@ -923,36 +923,36 @@ function handleScroll(e) {
     console.log('handleScroll');
     const element = e.target;
     if (element.scrollHeight - element.scrollTop <= element.clientHeight + 100) {
-        loadVendorData(false);
+        loadBrandContactData(false);
     }
 }
 
-async function initVendor() {
-    console.log('initVendor');
+async function initBrandContact() {
+    console.log('initBrandContact');
     // 데이터 초기화
     currentSkip = 0;
     hasMoreData = true;
     selectedCardIndex = -1;
     cardData = []; // 데이터 초기화
-    loadVendorData(true);
+    loadBrandContactData(true);
     
-    const dataList = document.getElementById('vendor-data-list');
+    const dataList = document.getElementById('brand-contact-data-list');
     dataList.addEventListener('scroll', handleScroll);
     
     // 우측 패널 초기화
-    const rightPanel = document.querySelector('.vendor-right');
+    const rightPanel = document.querySelector('.brand-contact-right');
     rightPanel.innerHTML = '<p>카드를 선택하면 브랜드 정보가 표시됩니다.</p>';
 
     // 필터 초기화
     /*
-    if (window.vendorFilter && typeof window.vendorFilter.init === 'function') {
-        window.vendorFilter.init();
+    if (window.brandContactFilter && typeof window.brandContactFilter.init === 'function') {
+        window.brandContactFilter.init();
     } 
     */
-    if (vendorFilter && typeof vendorFilter.init === 'function') {
-        vendorFilter.init();
+    if (brandContactFilter && typeof brandContactFilter.init === 'function') {
+        brandContactFilter.init();
     } else {
-        console.error('vendorFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
+        console.error('brandContactFilter가 초기화되지 않았거나 init 메서드가 없습니다.');
     }
 }
 
@@ -962,7 +962,7 @@ async function saveCallRecord() {
         const callStatus = document.getElementById('call-status').value;
         const nextStep = document.getElementById('next-step').value;
         const notes = document.getElementById('call-notes').value;
-        const callDuration = Math.floor((Date.now() - vendorCallManager.callStartTime) / 1000);
+        const callDuration = Math.floor((Date.now() - brandContactCallManager.callStartTime) / 1000);
 
         // 현재 선택된 카드의 데이터 확인
         if (!currentBrandData || !currentBrandData._id) {
@@ -991,13 +991,13 @@ async function saveCallRecord() {
         const modal = document.getElementById('call-confirm-modal');
         modal.style.display = 'none';
         
-        // vendorCallHistory 모듈을 사용하여 통화 기록 업데이트
+        // brandContactCallHistory 모듈을 사용하여 통화 기록 업데이트
         /*
-        if (window.vendorCallHistory) {
-            await window.vendorCallHistory.renderCallHistory(currentBrandData.brand_name);
+        if (window.brandContactCallHistory) {
+            await window.brandContactCallHistory.renderCallHistory(currentBrandData.brand_name);
         */
-        if (vendorCallHistory) {
-            await vendorCallHistory.renderCallHistory(currentBrandData.brand_name);
+        if (brandContactCallHistory) {
+            await brandContactCallHistory.renderCallHistory(currentBrandData.brand_name);
         } else {
             // 이전 방식으로 통화 기록 업데이트
             await updateCallHistory(currentBrandData.brand_name);

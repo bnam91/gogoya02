@@ -1,4 +1,4 @@
-export class VendorInfoEditor {
+export class BrandContactInfoEditor {
     constructor() {
         this.currentBrandData = null;
         this.setupEventListeners();
@@ -92,6 +92,6 @@ export class VendorInfoEditor {
 }
 
 // 전역 인스턴스 생성
-//const vendorInfoEditor = new VendorInfoEditor();
+//const brandContactInfoEditor = new BrandContactInfoEditor();
 
-//module.exports = VendorInfoEditor;  // 클래스 자체를 내보냄 
+//module.exports = BrandContactInfoEditor;  // 클래스 자체를 내보냄 

@@ -72,7 +72,7 @@ export async function getMongoData() {
     }
 }
 
-export async function getVendorData(skip = 0, limit = 20, filters = {}) {
+export async function getBrandContactData(skip = 0, limit = 20, filters = {}) {
     return withRetry(async () => {
         const client = await getMongoClient();
         const db = client.db(config.database.name);

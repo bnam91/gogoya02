@@ -1,5 +1,3 @@
-
-
 // window.mongo 사용
 export class ScreeningManager {
     constructor() {
@@ -25,9 +23,9 @@ export class ScreeningManager {
 
     init = async () => {
         console.log("스크리닝 초기화 시작");
-        console.log("MongoDB 객체:", this.mongo);
-
+        //console.log("MongoDB 객체:", this.mongo);
         try {
+            console.log("요소들 렌더링 시작");
             await this.loadScreeningData();
             this.setupEventListeners();
             this.setupViewModeButtons();

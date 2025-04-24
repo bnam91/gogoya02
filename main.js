@@ -7,7 +7,7 @@ import ReleaseUpdater from './release_updater.js';
 import path from 'path';
 const { autoUpdater } = updater;
 import {
-    getVendorData, getBrandPhoneData, saveCallRecord,
+    getBrandContactData, getBrandPhoneData, saveCallRecord,
     getCallRecords, getLatestCallRecordByCardId, updateBrandInfo,
     updateCallRecord, getCallRecordById, getMongoClient, updateNextStep
 } from './src/js/databases/mongo.js'; // Electron Main 프로세스에서 연결
@@ -16,11 +16,11 @@ import { makeCall, endCall } from './src/js/utils/phone.js';
 //const fs = require('fs');
 import fs from 'fs';
 import { config } from './src/js/config/config.js';
-import { getGmailCredentials } from './src/gmailAuth.js';
 import os from 'os';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
-
+import { getGmailAuthUrl } from './src/gmailAuth.js';
+let authInstance; // 전역에 저장
 // 인코딩 설정
 process.env.CHARSET = 'UTF-8';
 process.env.LANG = 'ko_KR.UTF-8';
@@ -53,17 +53,17 @@ const __dirname = path.dirname(__filename);
 
 // ===========================================
 // ipcMain 핸들러 등록
-// 렌더러 프로세스가 'vendor-data-request'라는 채널로 요청할 때
+// 렌더러 프로세스가 'brand-contact-data-request'라는 채널로 요청할 때
 // MongoDB 데이터 조회 후 응답을 돌려준다
 // ===========================================
-ipcMain.handle('vendor-data-request', async (event, filters) => {
-    console.log('📦 vendor-data-request 호출', filters);
+ipcMain.handle('brand-contact-data-request', async (event, filters) => {
+    console.log('📦 brand-contact-data-request 호출', filters);
     try {
         const { skip = 0, limit = 20, ...otherFilters } = filters;
-        const result = await getVendorData(skip, limit, otherFilters);
+        const result = await getBrandContactData(skip, limit, otherFilters);
         return result;
     } catch (error) {
-        console.error('vendor-data-request 처리 중 오류 발생:', error);
+        console.error('brand-contact-data-request 처리 중 오류 발생:', error);
         throw error;
     }
 });
@@ -164,19 +164,6 @@ ipcMain.handle('update-nextstep-request', async (event, brandName, newStatus) =>
         return result;
     } catch (error) {
         console.error('updateNextStep 에러:', error);
-        throw error;
-    }
-});
-
-// Gmail 메일 보내기 IPC 핸들러
-ipcMain.handle('send-gmail', async (event, { accountId, credentialsPath, mailOptions }) => {
-    try {
-        const auth = await getGmailCredentials(accountId, credentialsPath);
-        const response = await sendGmail(auth, mailOptions);
-
-        return { success: true, id: response.id };
-    } catch (error) {
-        console.error('Gmail 전송 실패:', error);
         throw error;
     }
 });
@@ -456,6 +443,38 @@ ipcMain.handle('fetch-influencer-views', async (event, cleanNameList) => {
         .toArray();
 
     return data;
+});
+
+// Gmail 메일 보내기 IPC 핸들러
+ipcMain.handle('send-gmail', async (event, { mailOptions }) => {
+    try {
+        if (!authInstance) throw new Error('Gmail 인증이 완료되지 않았습니다.');
+
+        const response = await sendGmail(authInstance, mailOptions);
+        return { success: true, id: response.id };
+    } catch (error) {
+        console.error('Gmail 전송 실패:', error);
+        throw error;
+    }
+});
+
+ipcMain.handle('start-gmail-auth', async (event, { accountId, credentialsPath }) => {
+    const { auth, authUrl } = await getGmailAuthUrl(accountId, credentialsPath);
+    authInstance = auth;
+
+    // 브라우저에서 인증 링크 열기
+    shell.openExternal(authUrl);
+    return true;
+});
+
+ipcMain.handle('send-auth-code', async (event, code) => {
+    const { tokens } = await authInstance.getToken(code);
+    authInstance.setCredentials(tokens);
+
+    // 인증을 요청했던 accountId를 기억해야 경로 지정 가능
+    const tokenPath = getTokenPath(authInstance.accountId); // 또는 따로 저장해 둬야 함
+    fs.writeFileSync(tokenPath, JSON.stringify(tokens));
+    return true;
 });
 
 // ===========================================

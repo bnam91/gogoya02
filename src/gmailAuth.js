@@ -27,72 +27,25 @@ export function getTokenPath(accountId) {
     return path.join(tokenDir, `gmail_token_${accountId}.json`);
 }
 
-export async function getGmailCredentials(accountId, credentialsPath) {
-    const tokenPath = getTokenPath(accountId);
-    let credentials;
-
-    if (fs.existsSync(tokenPath)) {
-        credentials = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
-    }
+export async function getGmailAuthUrl(accountId, credentialsPath) {
+    const credentialsFile = await import(`file://${path.resolve(credentialsPath)}`);
+    const { installed } = credentialsFile.default;
+    const { client_id, client_secret, redirect_uris } = installed;
 
     const auth = new google.auth.OAuth2(
-        credentials?.client_id,
-        credentials?.client_secret,
-        'http://localhost'
+        client_id,
+        client_secret,
+        redirect_uris[0] // usually http://localhost
     );
 
-    if (credentials?.refresh_token) {
-        auth.setCredentials(credentials);
-    } else {
-        /*
-        const credentialsFile = require(credentialsPath);
-        const { client_id, client_secret, redirect_uris } = credentialsFile.installed;
-        */
-        const credentialsFile = await import(`file://${path.resolve(credentialsPath)}`);
-        const { installed } = credentialsFile.default;
-        const { client_id, client_secret, redirect_uris } = installed;
-        
-        auth.setCredentials({
-            client_id,
-            client_secret,
-            redirect_uris
-        });
+    const authUrl = auth.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES
+    });
 
-        const authUrl = auth.generateAuthUrl({
-            access_type: 'offline',
-            scope: SCOPES
-        });
-
-        console.log('다음 URL을 브라우저에서 열어 인증을 완료하세요:', authUrl);
-        
-        // 크롬 브라우저로 URL 열기
-        if (process.platform === 'win32') {
-            exec(`start chrome "${authUrl}"`);
-        } else if (process.platform === 'darwin') {
-            exec(`open -a "Google Chrome" "${authUrl}"`);
-        } else {
-            exec(`google-chrome "${authUrl}"`);
-        }
-        
-        const code = await new Promise((resolve) => {
-            const readline = require('readline').createInterface({
-                input: process.stdin,
-                output: process.stdout
-            });
-            readline.question('인증 코드를 입력하세요: ', (code) => {
-                readline.close();
-                resolve(code);
-            });
-        });
-
-        const { tokens } = await auth.getToken(code);
-        auth.setCredentials(tokens);
-        
-        fs.writeFileSync(tokenPath, JSON.stringify(tokens));
-    }
-
-    return auth;
+    return { auth, authUrl };
 }
+
 /**
  * Gmail을 통해 이메일 전송
  * @param {Object} auth - 인증된 OAuth2 클라이언트
