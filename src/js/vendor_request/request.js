@@ -758,7 +758,7 @@ class RequestManager {
                                 console.log('메일 전송 옵션:', mailOptions);
                                 
                                 // credentials 파일 경로 설정 부분 수정
-                                const credentialsPath = path.join(process.cwd(), 'token', `credentials_${accountId}.js`);
+                                const credentialsPath = path.join('token', `credentials_${accountId}.js`);
                                 console.log('자격 증명 경로:', credentialsPath);
                                 
                                 // Gmail 인증 정보 가져오기
