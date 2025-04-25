@@ -47,7 +47,48 @@ class ScreeningManager {
                 const itemName = dataItem.dataset.item;
                 this.showDetailInfo(brandName, itemName);
             }
+
+            // 브랜드 카드 클릭 이벤트
+            const brandCard = e.target.closest('.brand-card');
+            if (brandCard) {
+                // 클릭된 카드의 브랜드명 선택 상태 토글
+                const brandName = brandCard.querySelector('.brand-name');
+                if (brandName) {
+                    brandName.classList.toggle('selected');
+                    // 브랜드명 가져오기
+                    const brand = brandName.textContent.trim();
+                    // is_verified 필드 업데이트
+                    const isSelected = brandName.classList.contains('selected');
+                    this.updateBrandVerification(brand, isSelected);
+                }
+                // 카드의 선택 상태 토글
+                brandCard.classList.toggle('selected');
+            }
         });
+    }
+
+    // 브랜드 검증 상태 업데이트 함수
+    async updateBrandVerification(brandName, isSelected) {
+        try {
+            const client = await this.mongo.getMongoClient();
+            const db = client.db("insta09_database");
+            const collection = db.collection("gogoya_vendor_brand_info");
+            
+            // 선택 상태에 따라 is_verified 필드 업데이트
+            const verificationStatus = isSelected ? "pick" : "yet";
+            const result = await collection.updateOne(
+                { brand_name: brandName },
+                { $set: { is_verified: verificationStatus } }
+            );
+
+            if (result.matchedCount === 0) {
+                console.log(`브랜드 '${brandName}'에 대한 정보를 찾을 수 없습니다.`);
+            } else {
+                console.log(`브랜드 '${brandName}'의 검증 상태가 '${verificationStatus}'로 업데이트되었습니다.`);
+            }
+        } catch (error) {
+            console.error('브랜드 검증 상태 업데이트 중 오류:', error);
+        }
     }
 
     setupViewModeButtons() {
@@ -390,7 +431,7 @@ class ScreeningManager {
                     
                     // 20일 전 날짜 계산 (날짜변경)
                     const twentyDaysAgo = new Date();
-                    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 25);
+                    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
                     
                     // 최근 20일 데이터 조회 (브랜드명이 '확인필요'가 아닌 데이터만)
                     const data = await collection.find({
@@ -687,6 +728,7 @@ class ScreeningManager {
             const client = await this.mongo.getMongoClient();
             const db = client.db("insta09_database");
             const influencerCollection = db.collection("02_main_influencer_data");
+            const brandInfoCollection = db.collection("gogoya_vendor_brand_info");
 
             // 각 인플루언서의 reels_views(15)와 grade 값을 가져와서 정렬
             const sortedInfluencers = await Promise.all(
@@ -707,6 +749,18 @@ class ScreeningManager {
 
             // reels_views(15) 기준으로 내림차순 정렬
             sortedInfluencers.sort((a, b) => b.reelsViews - a.reelsViews);
+
+            // 모든 브랜드의 is_verified 상태를 한 번에 가져오기
+            const allBrands = [...new Set(Object.values(groupedByInfluencer).flat().map(item => item.brand))];
+            const brandInfos = await brandInfoCollection.find(
+                { brand_name: { $in: allBrands } },
+                { projection: { brand_name: 1, is_verified: 1 } }
+            ).toArray();
+            
+            // 브랜드별 is_verified 상태를 Map으로 변환
+            const brandVerificationMap = new Map(
+                brandInfos.map(info => [info.brand_name, info.is_verified])
+            );
 
             return `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -735,10 +789,12 @@ class ScreeningManager {
                                 </span>
                             </div>
                             <div class="overflow-y-auto max-h-64">
-                                ${groupedByInfluencer[influencer].map(promo => `
-                                    <div class="mb-3 pb-2 border-b border-gray-100 last:border-0">
+                                ${groupedByInfluencer[influencer].map(promo => {
+                                    const isSelected = brandVerificationMap.get(promo.brand) === "pick";
+                                    return `
+                                    <div class="mb-3 pb-2 border-b border-gray-100 last:border-0 brand-card ${isSelected ? 'selected' : ''}">
                                         <div class="flex items-center">
-                                            <p class="text-sm font-medium">${promo.brand}</p>
+                                            <p class="text-sm font-medium brand-name ${isSelected ? 'selected' : ''}" style="cursor: pointer;">${promo.brand}</p>
                                         </div>
                                         <div class="flex items-center mt-1">
                                             <p class="text-sm text-gray-600">${promo.item}</p>
@@ -755,7 +811,7 @@ class ScreeningManager {
                                             ${this.formatDate(promo.crawl_date)}
                                         </p>
                                     </div>
-                                `).join('')}
+                                `}).join('')}
                             </div>
                         </div>
                     `).join('')}
