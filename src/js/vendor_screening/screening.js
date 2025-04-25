@@ -431,7 +431,7 @@ class ScreeningManager {
                     
                     // 20일 전 날짜 계산 (날짜변경)
                     const twentyDaysAgo = new Date();
-                    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 25);
+                    twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
                     
                     // 최근 20일 데이터 조회 (브랜드명이 '확인필요'가 아닌 데이터만)
                     const data = await collection.find({
