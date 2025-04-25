@@ -57,7 +57,7 @@ const __dirname = path.dirname(__filename);
 // MongoDB 데이터 조회 후 응답을 돌려준다
 // ===========================================
 ipcMain.handle('brand-contact-data-request', async (event, filters) => {
-    console.log('📦 brand-contact-data-request 호출', filters);
+    
     try {
         const { skip = 0, limit = 20, ...otherFilters } = filters;
         const result = await getBrandContactData(skip, limit, otherFilters);
@@ -68,37 +68,30 @@ ipcMain.handle('brand-contact-data-request', async (event, filters) => {
     }
 });
 ipcMain.handle('brand-phone-data-request', async (event, brandName) => {
-    console.log('📦 brand-phone-data-request 호출', brandName);
     return await getBrandPhoneData(brandName);
 });
 
 ipcMain.handle('latest-call-record-request', async (event, cardId) => {
-    console.log('📦 latest-call-record-request 호출', cardId);
     return await getLatestCallRecordByCardId(cardId);
 });
 
 ipcMain.handle('call-record-by-id-request', async (event, recordId) => {
-    console.log('📦 call-record-by-id-request 호출', recordId);
     return await getCallRecordById(recordId);
 });
 
 ipcMain.handle('save-call-record-request', async (event, callRecord) => {
-    console.log('📦 save-call-record-request 호출', callRecord);
     return await saveCallRecord(callRecord);
 });
 
 ipcMain.handle('update-brand-info-request', async (event, brandName, updateData) => {
-    console.log('📦 update-brand-info-request 호출', brandName, updateData);
     return await updateBrandInfo(brandName, updateData);
 });
 
 ipcMain.handle('update-card-next-step-request', async (event, recordId, newNextStep) => {
-    console.log('📦 update-card-next-step-request 호출', recordId, newNextStep);
     return await updateCardNextStep(recordId, newNextStep);
 });
 
 ipcMain.handle('update-call-record-request', async (event, recordId, updateData) => {
-    console.log('📦 update-call-record-request 호출', recordId, updateData);
 
     if (!recordId) {
         throw new Error('❌ recordId가 없습니다!');
@@ -108,14 +101,12 @@ ipcMain.handle('update-call-record-request', async (event, recordId, updateData)
 });
 
 ipcMain.handle('fetch-call-records-request', async (event, brandName) => {
-    console.log('📦 fetch-call-records-request 호출', brandName);
     return await getCallRecords(brandName);
 });
 
 
 ipcMain.handle('call-phone-request', async (event, phoneNumber) => {
     try {
-        console.log('📞 전화 연결 시도:', phoneNumber);
         const result = await makeCall(phoneNumber);
         return result;
     } catch (error) {
@@ -126,7 +117,6 @@ ipcMain.handle('call-phone-request', async (event, phoneNumber) => {
 
 ipcMain.handle('end-call-request', async (event) => {
     try {
-        console.log('📞 전화 종료 시도');
         const result = await endCall();
         return result;
     } catch (error) {
@@ -159,7 +149,6 @@ ipcMain.handle('fetch-brand-email-request', async (event, brandName) => {
 
 ipcMain.handle('update-nextstep-request', async (event, brandName, newStatus) => {
     try {
-        console.log(`📦 update-nextstep-request 호출 ${brandName} -> ${newStatus}`);
         const result = await updateNextStep(brandName, newStatus);
         return result;
     } catch (error) {
@@ -475,6 +464,47 @@ ipcMain.handle('send-auth-code', async (event, code) => {
     const tokenPath = getTokenPath(authInstance.accountId); // 또는 따로 저장해 둬야 함
     fs.writeFileSync(tokenPath, JSON.stringify(tokens));
     return true;
+});
+
+ipcMain.handle('fetch-brand-verification-status', async (event, allBrands) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const brandInfoCollection = db.collection(config.database.collections.brandInfoCollection);
+    const brandInfos = await brandInfoCollection.find(
+        { brand_name: { $in: allBrands } },
+        { projection: { brand_name: 1, is_verified: 1 } }
+    ).toArray();
+    
+    // 브랜드별 is_verified 상태를 Map으로 변환
+    const brandVerificationMap = new Map(
+        brandInfos.map(info => [info.brand_name, info.is_verified])
+    );
+
+    return brandVerificationMap;
+}); 
+
+ipcMain.handle('update-brand-verification', async (event, { brandName, verificationStatus }) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.brandInfoCollection);
+
+    return await collection.updateOne(
+        { brand_name: brandName },
+        { $set: { is_verified: verificationStatus } }
+    );
+});
+
+ipcMain.handle('fetch-influencer-data-many', async (event, cleanNameList) => {
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.influencerData);   
+
+    const data = await collection
+        .find({ clean_name: { $in: cleanNameList } })
+        .project({ "clean_name": 1, "reels_views(15)": 1, grade: 1 })
+        .toArray();
+
+    return data;
 });
 
 // ===========================================

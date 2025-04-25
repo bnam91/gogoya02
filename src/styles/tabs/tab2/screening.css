@@ -741,3 +741,7 @@
 .brand-card.selected .text-gray-500 {
     color: #2563eb;
 } 
+
+.influencer-card:hover{
+    cursor: pointer;
+}

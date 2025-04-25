@@ -25,7 +25,10 @@ contextBridge.exposeInMainWorld('api', {
   fetchScreeningData: () => ipcRenderer.invoke('fetch-screening-data'),
   fetchInfluencerData: (cleanName) => ipcRenderer.invoke('fetch-influencer-data', cleanName),
   fetchItemDetails: (brandName, itemName) => ipcRenderer.invoke('fetch-item-details', { brandName, itemName }),
-  fetchInfluencerViews: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-views', cleanNameList)
+  fetchInfluencerViews: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-views', cleanNameList),
+  updateBrandVerification: (brandName, verificationStatus) => ipcRenderer.invoke('update-brand-verification', { brandName, verificationStatus }),
+  fetchInfluencerDataMany: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-data-many', cleanNameList),
+  fetchBrandVerificationStatus: (allBrands) => ipcRenderer.invoke('fetch-brand-verification-status', allBrands)
 });
 
 contextBridge.exposeInMainWorld('googleSheetApi', {
