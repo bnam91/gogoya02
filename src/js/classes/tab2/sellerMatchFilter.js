@@ -1,4 +1,4 @@
-class SellerMatchFilter {
+export class SellerMatchFilter {
     constructor() {
         this.container = null;
         this.categoryFilter = null;
@@ -123,4 +123,4 @@ class SellerMatchFilter {
 }
 
 // 전역 인스턴스 생성
-window.sellerMatchFilter = new SellerMatchFilter(); 
+//window.sellerMatchFilter = new SellerMatchFilter(); 

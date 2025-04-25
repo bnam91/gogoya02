@@ -814,7 +814,14 @@ export class ProposalManage {
                             await window.gmailAuthAPI.startAuth(accountId, credentialsPath);
 
                             // 2. 인증 코드 사용자에게 입력받기
-                            const code = prompt('브라우저에서 인증 후 받은 코드를 입력하세요');
+                            // 인증 코드 받기
+                            const codeInput = document.getElementById('auth-code-input');
+                            const code = codeInput?.value.trim();
+
+                            if (!code) {
+                                alert('인증 코드를 입력해주세요.');
+                                return;
+                            }
 
                             // 3. 코드 제출하여 토큰 저장
                             await window.gmailAuthAPI.sendAuthCode(code, accountId);
@@ -1027,6 +1034,10 @@ function createMailModal() {
                                         <span class="preview-label">내용:</span>
                                         <div class="preview-value" id="preview-content"></div>
                                     </div>
+                                </div>
+                                <div class="auth-code-section">
+                                <label for="auth-code-input" style="display:block; margin: 10px 0 4px;">인증 코드</label>
+                                <input id="auth-code-input" type="text" placeholder="📩 이메일 인증 코드를 입력하세요" style="width:100%; padding: 8px;" />
                                 </div>
                             </div>
                             <div class="modal-footer">

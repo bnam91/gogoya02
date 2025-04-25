@@ -655,53 +655,25 @@ export class ScreeningManager {
     // 상품별 뷰 렌더링
     renderItemView = async (groupedByItem) => {
         try {
-            /*
-            const client = await this.mongo.getMongoClient();
-            const db = client.db("insta09_database");
-            const influencerCollection = db.collection("02_main_influencer_data");
-
-            // 각 아이템의 인플루언서 정보 가져오기
-            const itemsWithInfluencerInfo = await Promise.all(
-                Object.keys(groupedByItem).map(async (item) => {
-                    const products = await Promise.all(
-                        groupedByItem[item].map(async (product) => {
-                            const cleanName = product.clean_name || product.author;
-                            const influencerData = await influencerCollection.findOne(
-                                { clean_name: cleanName },
-                                { projection: { "reels_views(15)": 1, grade: 1 } }
-                            );
-                            return {
-                                ...product,
-                                reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
-                                grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
-                            };
-                        })
-                    );
-                    return { item, products };
-                })
-            );
-            */
-
             // 각 브랜드별 아이템 처리
             const itemsWithInfluencerInfo = await Promise.all(
                 Object.keys(groupedByItem).map(async (item) => {
-                    const items = await Promise.all(
-                        groupedByItem[item].map(async (product) => {
-                            const cleanName = product.clean_name || product.author;
+                  const products = await Promise.all(
+                    groupedByItem[item].map(async (product) => {
+                      const cleanName = product.clean_name || product.author;
+                      const influencerData = await window.api.fetchInfluencerData(cleanName);
+              
+                      return {
+                        ...product,
+                        reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
+                        grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
+                      };
+                    })
+                  );
 
-                            // ✅ IPC를 통해 메인 프로세스에서 인플루언서 데이터 가져오기
-                            const influencerData = await window.api.fetchInfluencerData(cleanName);
-
-                            return {
-                                ...product,
-                                reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
-                                grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
-                            };
-                        })
-                    );
-                    return { item, products };
+                  return { item, products };
                 })
-            );
+              );
 
             return `
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -757,48 +729,32 @@ export class ScreeningManager {
     // 인플루언서별 뷰 렌더링
     renderInfluencerView = async (groupedByInfluencer) => {
         try {
-            /*
-            const client = await this.mongo.getMongoClient();
-            const db = client.db("insta09_database");
-            const influencerCollection = db.collection("02_main_influencer_data");
 
-            // 각 인플루언서의 reels_views(15)와 grade 값을 가져와서 정렬
-            const sortedInfluencers = await Promise.all(
-                Object.keys(groupedByInfluencer).map(async (influencer) => {
-                    const cleanName = groupedByInfluencer[influencer][0].clean_name || influencer;
-                    const influencerData = await influencerCollection.findOne(
-                        { clean_name: cleanName },
-                        { projection: { "reels_views(15)": 1, grade: 1 } }
-                    );
-                    return {
-                        influencer,
-                        cleanName,
-                        reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
-                        grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
-                    };
-                })
-            );
-            */
             // 각 브랜드별 아이템 처리
             const sortedInfluencers = await Promise.all(
                 Object.keys(groupedByInfluencer).map(async (influencer) => {
-                    const items = await Promise.all(
-                        groupedByInfluencer[influencer].map(async (item) => {
-                            const cleanName = item.clean_name || item.author;
-
-                            // ✅ IPC를 통해 메인 프로세스에서 인플루언서 데이터 가져오기
-                            const influencerData = await window.api.fetchInfluencerData(cleanName);
-
-                            return {
-                                ...item,
-                                reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
-                                grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
-                            };
-                        })
-                    );
-                    return { influencer, items };
+                  const items = await Promise.all(
+                    groupedByInfluencer[influencer].map(async (item) => {
+                      const cleanName = item.clean_name || item.author;
+                      const influencerData = await window.api.fetchInfluencerData(cleanName);
+              
+                      return {
+                        ...item,
+                        reelsViews: influencerData ? influencerData["reels_views(15)"] || 0 : 0,
+                        grade: influencerData ? influencerData.grade || 'N/A' : 'N/A'
+                      };
+                    })
+                  );
+              
+                  return {
+                    influencer,
+                    items,
+                    cleanName: items[0]?.clean_name || influencer,
+                    reelsViews: items[0]?.reelsViews || 0,
+                    grade: items[0]?.grade || 'N/A'
+                  };
                 })
-            );
+              );
 
             // reels_views(15) 기준으로 내림차순 정렬
             sortedInfluencers.sort((a, b) => b.reelsViews - a.reelsViews);
@@ -916,17 +872,7 @@ export class ScreeningManager {
     // 상세 정보 표시
     showDetailInfo = async (brandName, itemName) => {
         try {
-            /*
-            const client = await this.mongo.getMongoClient();
-            const db = client.db("insta09_database");
-            const collection = db.collection("04_main_item_today_data");
-            
-            // 해당 브랜드와 아이템의 모든 데이터 조회
-            const data = await collection.find({
-                brand: brandName,
-                item: itemName
-            }).toArray();
-            */
+
             const data = await window.api.fetchItemDetails(brandName, itemName);
             // 상세 정보 표시
             const detailInfo = document.querySelector('.detail-info');

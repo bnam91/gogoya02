@@ -1,6 +1,7 @@
 import { BrandRecordsManager } from './brandRecords.js';
 import { DmRecordsManager } from './dmRecords.js';
 import { DmModal } from './dmModal.js';
+import { SellerMatchFilter } from './sellerMatchFilter.js';
 
 export class SellerMatchManager {
     constructor() {
@@ -14,6 +15,7 @@ export class SellerMatchManager {
         this.brandRecordsManager = new BrandRecordsManager();
         this.dmRecordsManager = new DmRecordsManager();
         this.dmModal = new DmModal();
+        this.sellerMatchFilter = new SellerMatchFilter();
     }
 
     init = async () => {
@@ -231,6 +233,7 @@ export class SellerMatchManager {
             this.leftContent.innerHTML = tableHTML;
 
             // 필터 초기화
+            /*
             if (window.sellerMatchFilter) {
                 window.sellerMatchFilter.container = this.leftContent.querySelector('.seller-match-filters');
                 window.sellerMatchFilter.init();
@@ -239,7 +242,15 @@ export class SellerMatchManager {
                     this.renderInfluencerTable(filteredInfluencers);
                 });
             }
-
+            */
+            if (this.sellerMatchFilter) {
+                this.sellerMatchFilter.container = this.leftContent.querySelector('.seller-match-filters');
+                this.sellerMatchFilter.init();
+                this.sellerMatchFilter.setOnFilterChange(() => {
+                    const filteredInfluencers = this.sellerMatchFilter.filterInfluencers(this.influencers);
+                    this.renderInfluencerTable(filteredInfluencers);
+                });
+            }
             // 체크박스 이벤트 리스너 추가
             this.addCheckboxEventListeners();
 

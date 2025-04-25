@@ -28,19 +28,21 @@ export class BrandContactFilter {
 
     init() {
         // 모든 필터 컨테이너 제거
-        document.querySelectorAll('.filter-container').forEach(filter => {
-            filter.remove();
-        });
-        
+        //document.querySelectorAll('.filter-container').forEach(filter => {
+          //  filter.remove();
+        //});
+        console.log('BrandContactFilter init');
         // 현재 페이지가 브랜드 컨택 페이지인 경우에만 필터 생성
-        const currentPage = document.querySelector('.content-section.active').id;
-        if (currentPage === 'brand-contact-content') {
-            const breadcrumb = document.querySelector('#brand-contact-content .breadcrumb');
-            if (breadcrumb) {
-                this.createFilterUI(breadcrumb);
-                this.setupEventListeners();
-            }
+        //
+        //console.log('currentPage >> ', currentPage);
+        //if (currentPage === 'brand-contact-content') {
+        console.log('currentPage is brand-contact-content');
+        const breadcrumb = document.querySelector('#brand-contact-content .breadcrumb');
+        if (breadcrumb) {
+            this.createFilterUI(breadcrumb);
+            this.setupEventListeners();
         }
+        //}
     }
 
     createFilterUI(breadcrumb) {
@@ -391,6 +393,7 @@ export class BrandContactFilter {
             nextSteps: this.selectedNextSteps
         };
         
+        //await window.vendor.loadVendorData(true, filters);
         await window.brandContact.loadBrandContactData(true, filters);
         
         // 필터링 완료 후 결과 토스트 메시지 표시
@@ -460,5 +463,5 @@ export class BrandContactFilter {
 }
 
 // 클래스를 전역 스코프에 노출
-//window.BrandContactFilter = BrandContactFilter; 
+//window.VendorFilter = VendorFilter; 
 
