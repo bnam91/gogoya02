@@ -22,7 +22,8 @@ class VendorFilter {
             { value: 'true', label: '인증완료' },
             { value: 'yet', label: '대기중' },
             { value: 'false', label: '미인증' },
-            { value: 'skip', label: '스킵' }
+            { value: 'skip', label: '스킵' },
+            { value: 'pick', label: '후보컨택' }
         ];
     }
 

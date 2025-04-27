@@ -28,14 +28,27 @@ class ScreeningManager {
         console.log("MongoDB 객체:", this.mongo);
         
         try {
-            await this.loadScreeningData();
             this.setupEventListeners();
             this.setupViewModeButtons();
             this.setupFilters();
+            this.showInitialScreen();
         } catch (error) {
             console.error("스크리닝 초기화 중 오류:", error);
-            this.loadFallbackData();
         }
+    }
+
+    showInitialScreen() {
+        const contentContainer = document.getElementById('screening-content-container');
+        if (!contentContainer) return;
+
+        contentContainer.innerHTML = `
+            <div class="initial-screen">
+                <div class="initial-message">
+                    <h3>필터를 선택하고 확인 버튼을 눌러주세요</h3>
+                    <p>원하는 카테고리와 릴스뷰 범위를 선택한 후 확인 버튼을 클릭하면 데이터가 로드됩니다.</p>
+                </div>
+            </div>
+        `;
     }
 
     setupEventListeners() {
@@ -85,6 +98,21 @@ class ScreeningManager {
                 console.log(`브랜드 '${brandName}'에 대한 정보를 찾을 수 없습니다.`);
             } else {
                 console.log(`브랜드 '${brandName}'의 검증 상태가 '${verificationStatus}'로 업데이트되었습니다.`);
+                
+                // UI 즉시 갱신
+                const brandCards = document.querySelectorAll('.brand-card');
+                brandCards.forEach(card => {
+                    const brandNameElement = card.querySelector('.brand-name');
+                    if (brandNameElement && brandNameElement.textContent.trim() === brandName) {
+                        if (isSelected) {
+                            card.classList.add('selected');
+                            brandNameElement.classList.add('selected');
+                        } else {
+                            card.classList.remove('selected');
+                            brandNameElement.classList.remove('selected');
+                        }
+                    }
+                });
             }
         } catch (error) {
             console.error('브랜드 검증 상태 업데이트 중 오류:', error);
@@ -221,23 +249,28 @@ class ScreeningManager {
         document.body.appendChild(toast);
         
         try {
-        let result = this.data;
-        
-        // 카테고리 필터
+            // 데이터가 없으면 먼저 로드
+            if (this.data.length === 0) {
+                await this.loadScreeningData();
+            }
+            
+            let result = this.data;
+            
+            // 카테고리 필터
             if (this.selectedCategories.length > 0) {
                 result = result.filter(item => this.selectedCategories.includes(item.item_category));
-        }
-        
-        // 검색어 필터
-        if (this.searchTerm) {
-            const term = this.searchTerm.toLowerCase();
-            result = result.filter(item => 
-                item.brand.toLowerCase().includes(term) ||
-                item.item.toLowerCase().includes(term) ||
-                item.author.toLowerCase().includes(term) ||
-                (item.clean_name && item.clean_name.toLowerCase().includes(term))
-            );
-        }
+            }
+            
+            // 검색어 필터
+            if (this.searchTerm) {
+                const term = this.searchTerm.toLowerCase();
+                result = result.filter(item => 
+                    item.brand.toLowerCase().includes(term) ||
+                    item.item.toLowerCase().includes(term) ||
+                    item.author.toLowerCase().includes(term) ||
+                    (item.clean_name && item.clean_name.toLowerCase().includes(term))
+                );
+            }
 
             // 릴스뷰 필터
             if (this.selectedViews) {
@@ -276,9 +309,9 @@ class ScreeningManager {
                         return views >= min && views < max;
                     }
                 });
-        }
-        
-        this.filteredData = result;
+            }
+            
+            this.filteredData = result;
             
             // 필터링 결과 카운트 업데이트
             const totalCount = document.getElementById('screening-total-count');
@@ -304,6 +337,7 @@ class ScreeningManager {
                 <span class="toast-icon">✕</span>
                 <span class="toast-text">필터 적용 중 오류가 발생했습니다.</span>
             `;
+            console.error('필터 적용 중 오류:', error);
         } finally {
             // 3초 후 토스트 메시지 제거
             setTimeout(() => {

@@ -332,6 +332,7 @@ async function updateRightPanel(item) {
                                     brandPhoneData.is_verified === 'false' ? '<span class="status-badge unverified">미인증</span>' :
                                     brandPhoneData.is_verified === 'yet' ? '<span class="status-badge pending">대기중</span>' :
                                     brandPhoneData.is_verified === 'skip' ? '<span class="status-badge skip">스킵</span>' :
+                                    brandPhoneData.is_verified === 'pick' ? '<span class="status-badge pick">후보컨택</span>' :
                                     '<span class="status-badge unknown">알 수 없음</span>'
                                 }</span>
                             </div>
@@ -435,13 +436,15 @@ async function updateRightPanel(item) {
                 const currentStatus = brandPhoneData.is_verified;
                 let newStatus;
                 
-                // 상태 순환: 'yet' -> 'true' -> 'false' -> 'skip' -> 'yet'
+                // 상태 순환: 'yet' -> 'true' -> 'false' -> 'skip' -> 'pick' -> 'yet'
                 if (currentStatus === 'yet') {
                     newStatus = 'true';
                 } else if (currentStatus === 'true') {
                     newStatus = 'false';
                 } else if (currentStatus === 'false') {
                     newStatus = 'skip';
+                } else if (currentStatus === 'skip') {
+                    newStatus = 'pick';
                 } else {
                     newStatus = 'yet';
                 }
@@ -460,6 +463,7 @@ async function updateRightPanel(item) {
                         newStatus === 'false' ? '<span class="status-badge unverified">미인증</span>' :
                         newStatus === 'yet' ? '<span class="status-badge pending">대기중</span>' :
                         newStatus === 'skip' ? '<span class="status-badge skip">스킵</span>' :
+                        newStatus === 'pick' ? '<span class="status-badge pick">후보컨택</span>' :
                         '<span class="status-badge unknown">알 수 없음</span>';
                     
                     // 성공 메시지 표시

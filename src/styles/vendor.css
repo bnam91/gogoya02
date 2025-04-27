@@ -1432,4 +1432,24 @@
     border-radius: 4px;
     font-size: 0.8em;
     margin-left: 8px;
+}
+
+.status-badge.pick {
+    background-color: #9c27b0;
+    color: white;
+}
+
+.status-badge.pick:hover {
+    background-color: #7b1fa2;
+}
+
+.verification-label.pick {
+    color: #9c27b0;
+    background-color: #f3e5f5;
+}
+
+.filter-option[data-verification="pick"] input:checked + label {
+    background-color: #9c27b0;
+    color: white;
+    font-weight: 500;
 } 
