@@ -6,13 +6,18 @@ export class BrandRecordsManager {
 
     async getBrandRecords(username) {
         try {
+            
+            /*
             const client = await window.mongo.getMongoClient();
             const db = client.db('insta09_database');
             const collection = db.collection('02_main_influencer_data');
             
             console.log('브랜드 기록 조회 - username:', username);
             const influencer = await collection.findOne({ username: username });
-            
+            */
+
+            const influencer = await window.api.getInfluencerInfo(username);
+
             if (!influencer) {
                 console.log('인플루언서를 찾을 수 없습니다:', username);
                 return [];

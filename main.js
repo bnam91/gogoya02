@@ -507,6 +507,22 @@ ipcMain.handle('fetch-influencer-data-many', async (event, cleanNameList) => {
     return data;
 });
 
+ipcMain.handle('get-dm-records', async (event, cleanName) => {
+
+    const client = await getMongoClient();
+    const db = client.db(config.database.name);
+    const collection = db.collection(config.database.collections.dmRecords);
+
+    const records = await collection.find({
+        influencer_name: cleanName,
+        status: { $ne: 'failed' }
+    })
+    .sort({ dm_date: -1 }) // 최신순 정렬
+    .toArray();
+
+    return records;
+});
+
 // ===========================================
 // Electron 앱 윈도우 생성
 // ===========================================

@@ -28,12 +28,12 @@ contextBridge.exposeInMainWorld('api', {
   fetchInfluencerViews: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-views', cleanNameList),
   updateBrandVerification: (brandName, verificationStatus) => ipcRenderer.invoke('update-brand-verification', { brandName, verificationStatus }),
   fetchInfluencerDataMany: (cleanNameList) => ipcRenderer.invoke('fetch-influencer-data-many', cleanNameList),
-  fetchBrandVerificationStatus: (allBrands) => ipcRenderer.invoke('fetch-brand-verification-status', allBrands)
+  fetchBrandVerificationStatus: (allBrands) => ipcRenderer.invoke('fetch-brand-verification-status', allBrands),
+  getDmRecords : (cleanName) => ipcRenderer.invoke('get-dm-records', cleanName)
 });
 
 contextBridge.exposeInMainWorld('googleSheetApi', {
-  uploadInfluencerData: (uploadPayload) =>
-    ipcRenderer.invoke('upload-influencer-data', uploadPayload)
+  uploadInfluencerData: (uploadPayload) => ipcRenderer.invoke('upload-influencer-data', uploadPayload)
 });
 
 contextBridge.exposeInMainWorld('gmailAuthAPI', {

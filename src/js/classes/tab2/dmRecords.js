@@ -5,6 +5,7 @@ export class DmRecordsManager {
 
     async getDmRecords(cleanName) {
         try {
+            /*
             const client = await window.mongo.getMongoClient();
             const db = client.db('insta09_database');
             const collection = db.collection('gogoya_DmRecords');
@@ -18,7 +19,9 @@ export class DmRecordsManager {
             .toArray();
 
             this.records = records;
-            return records;
+            */
+            this.records = await window.api.getDmRecords(cleanName);
+            return this.records;
         } catch (error) {
             console.error('DM 기록 조회 중 오류 발생:', error);
             return [];

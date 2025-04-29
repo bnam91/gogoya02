@@ -435,7 +435,7 @@ export class SellerMatchManager {
                         return `
                             <tr data-influencer-id="${influencerId}" data-clean-name="${name}">
                                 <td class="exclude-col">
-                                    <button class="exclude-button" onclick="window.sellerMatchManager.excludeInfluencer('${influencerId}')">
+                                    <button class="exclude-button" data-influencer-id="${influencerId}">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </td>
@@ -454,6 +454,17 @@ export class SellerMatchManager {
             </table>
         `;
         centerPanel.innerHTML = selectedInfluencersHTML;
+
+        // 제외 버튼 클릭 이벤트 추가
+        document.addEventListener('click', (e) => {
+            const excludeBtn = e.target.closest('.exclude-button');
+            if (excludeBtn) {
+                const influencerId = excludeBtn.dataset.influencerId;
+                if (influencerId) {
+                    this.excludeInfluencer(influencerId);
+                }
+            }
+        });
 
         // 전체 제외 버튼 클릭 이벤트 추가
         centerPanel.querySelector('.exclude-all-button').addEventListener('click', this.excludeAllInfluencers);
