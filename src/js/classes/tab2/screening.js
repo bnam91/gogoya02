@@ -53,6 +53,7 @@ export class ScreeningManager {
         document.addEventListener('click', (e) => {
             const dataItem = e.target.closest('.data-item');
             if (dataItem) {
+                console.log('brand card');
                 const brandName = dataItem.dataset.brand;
                 const itemName = dataItem.dataset.item;
                 this.showDetailInfo(brandName, itemName);
@@ -60,6 +61,7 @@ export class ScreeningManager {
     
             const brandCard = e.target.closest('.brand-card');
             if (brandCard) {
+                console.log('brand card');
                 const brandName = brandCard.querySelector('.brand-name');
                 if (brandName) {
                     brandName.classList.toggle('selected');
@@ -656,7 +658,7 @@ export class ScreeningManager {
                     </div>
                     <div class="overflow-y-auto max-h-64">
                         ${items.map(item => `
-                            <div class="mb-3 pb-2 border-b border-gray-100 last:border-0">
+                            <div class="mb-3 pb-2 border-b border-gray-100 last:border-0 ">
                                 <div class="flex items-center">
                                     <p class="text-sm font-medium">${item.item}</p>
                                 </div>
@@ -754,7 +756,7 @@ export class ScreeningManager {
                 </div>
                 <div class="overflow-y-auto max-h-64">
                     ${products.map(product => `
-                        <div class="mb-3 pb-2 border-b border-gray-100 last:border-0">
+                        <div class="mb-3 pb-2 border-b border-gray-100 last:border-0 ">
                             <div class="flex items-center">
                                 <p class="text-sm font-medium">${product.brand}</p>
                             </div>
@@ -883,7 +885,7 @@ export class ScreeningManager {
                         ${
                             Array.isArray(items) && items.length > 0
                             ? items.map(product => `
-                                <div class="mb-3 pb-2 border-b border-gray-100 last:border-0">
+                                <div class="mb-3 pb-2 border-b border-gray-100 last:border-0 brand-card" >
                                     <div class="text-sm font-medium text-gray-900">${product.brand || '-'}</div>
                                     <div class="flex items-center mt-1">
                                         <p class="text-sm text-gray-600">${product.clean_name || product.author || '-'}</p>
