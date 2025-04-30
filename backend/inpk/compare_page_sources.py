@@ -6,6 +6,7 @@ def get_page_source(url):
     try:
         response = requests.get(url)
         response.raise_for_status()
+        
         return response.text
     except requests.RequestException as e:
         print(f"에러 발생: {e}")
